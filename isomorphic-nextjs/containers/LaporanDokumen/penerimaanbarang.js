@@ -1,10 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { SearchOutlined } from '@ant-design/icons';
 import LayoutContentWrapper from '@iso/components/utility/layoutWrapper';
 import LayoutContent from '@iso/components/utility/layoutContent';
 import React from "react";
 import { Path } from "../../components/Path/path";
 import { DatePicker, Form, Space } from 'antd';
-import { Button, Row, Col, Table, Select } from 'antd';
+import { Button, Row, Col, Table, Select, Input } from 'antd';
+import moment from "moment";
+import Highlighter from 'react-highlight-words';
+
 import { exportToCSV, exportToPDF } from "../../components/utility/ExportDoc";
 // import { useReactTable } from '@tanstack/react-table'
 // import { useTable, Table, HeaderRow, BodyRow, Cell } from '@table-library/react-table-library';
@@ -16,12 +20,118 @@ const handleChange = (value) => {
 
 const TableComponent = () => {
   const [tableData, setTableData] = useState([]);
+  const [selectedDateRange, setSelectedDateRange] = useState(null);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 5,
     total: 0,
   });
-
+  const [searchText, setSearchText] = useState('');
+  const [searchedColumn, setSearchedColumn] = useState('');
+  const searchInput = useRef(null);
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+  };
+  const handleReset = (clearFilters) => {
+    clearFilters();
+    setSearchText('');
+  };
+  const getColumnSearchProps = (dataIndex) => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+      <div
+        style={{
+          padding: 8,
+        }}
+        onKeyDown={(e) => e.stopPropagation()}
+      >
+        <Input
+          ref={searchInput}
+          placeholder={`Search ${dataIndex}`}
+          value={selectedKeys[0]}
+          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+          style={{
+            marginBottom: 8,
+            display: 'block',
+          }}
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+            icon={<SearchOutlined />}
+            size="small"
+            style={{
+              width: 90,
+            }}
+          >
+            Search
+          </Button>
+          <Button
+            onClick={() => clearFilters && handleReset(clearFilters)}
+            size="small"
+            style={{
+              width: 90,
+            }}
+          >
+            Reset
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              confirm({
+                closeDropdown: false,
+              });
+              setSearchText(selectedKeys[0]);
+              setSearchedColumn(dataIndex);
+            }}
+          >
+            Filter
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              close();
+            }}
+          >
+            close
+          </Button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered) => (
+      <SearchOutlined
+        style={{
+          color: filtered ? '#1677ff' : undefined,
+        }}
+      />
+    ),
+    onFilter: (value, record) =>
+      record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
+    onFilterDropdownOpenChange: (visible) => {
+      if (visible) {
+        setTimeout(() => searchInput.current?.select(), 100);
+      }
+    },
+    render: (text) =>
+      searchedColumn === dataIndex ? (
+        <Highlighter
+          highlightStyle={{
+            backgroundColor: '#ffc069',
+            padding: 0,
+          }}
+          searchWords={[searchText]}
+          autoEscape
+          textToHighlight={text ? text.toString() : ''}
+        />
+      ) : (
+        text
+      ),
+  });
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -32,7 +142,7 @@ const TableComponent = () => {
           ...prevPagination,
           total: data.length,
         }));
-        console.log(data)
+        console.log(data)        
       } catch (error) {
         console.error('Error fetching table data:', error);
       }
@@ -45,17 +155,42 @@ const TableComponent = () => {
   };
   const handleExport = (format) => {
     if (format === 'csv') {
-      exportToCSV(TableComponent); // Helper function to export data to CSV
+      exportToCSV(tableData); // Helper function to export data to CSV
     } else if (TableComponent) {
       exportToPDF(tableData); // Helper function to export data to PDF
     }
   };
+  const dateRangeSorter = (a, b) => {
+    const dateA = moment(a.date);
+    const dateB = moment(b.date);
+
+    if (dateA.isBefore(selectedDateRange[0])) {
+      return -1;
+    }
+
+    if (dateA.isAfter(selectedDateRange[1])) {
+      return 1;
+    }
+
+    if (dateB.isBefore(selectedDateRange[0])) {
+      return 1;
+    }
+
+    if (dateB.isAfter(selectedDateRange[1])) {
+      return -1;
+    }
+
+    return 0;
+  };
+
   const columns = [
     {
       title: 'No',
       dataIndex: 'WIPIN_NO',
       key: 'WIPIN_NO',
       resizable: true,
+      ...getColumnSearchProps('WIPIN_NO'),
+
     },
     {
       title: 'Kode Barang',
@@ -99,7 +234,7 @@ const TableComponent = () => {
         dataIndex: 'Cost_HPP',
         key: 'Cost_HPP',
         resizable: true,
-        sorter: (a, b) => a.Cost_HPP - b.Cost_HPP,
+        ...getColumnSearchProps('Cost_HPP'),
 
       },
       {
@@ -128,10 +263,19 @@ const TableComponent = () => {
       },
   ];
   
-
+console.log("apa ini", setSelectedDateRange)
   return (
     <>
-    <Table
+
+            <div style={{display: "flex", justifyContent: "center", width: "100%",minWidth: "90%", marginBottom: "2em"}}>
+            <Space wrap>        
+            <DatePicker.RangePicker onChange={setSelectedDateRange} />
+                <Button style={{backgroundColor: "#1f2431", color: "#efefef"}}>SUBMIT</Button>
+                <Button disabled>TRACE</Button>
+
+            </Space>
+            </div>
+            <Table
       columns={columns}
       dataSource={tableData}
       bordered
@@ -151,6 +295,8 @@ const TableComponent = () => {
         { value: 'csv', label: 'CSV' },
       ]}
     />
+
+ 
     </>
   );
 };
@@ -270,20 +416,11 @@ export default function PengeluaranBarang(){
     const { RangePicker } = DatePicker;
     return <>
 <Path parent="Laporan Dokumen BC" children="REPORT PEMASUKAN BARANG DOK PABEAN"/>
-         <LayoutContentWrapper style={{ height: '100%' }}>
+<LayoutContentWrapper style={{ height: '100%' }}>
         <LayoutContent>
-            <div style={{display: "flex", justifyContent: "center", width: "100%",minWidth: "90%", marginBottom: "2em"}}>
-            <Space wrap>        
-                <RangePicker />
-                <Button style={{backgroundColor: "#1f2431", color: "#efefef"}}>SUBMIT</Button>
-                <Button disabled>TRACE</Button>
-
-            </Space>
-            </div>
             <Row justify="center"><Col sm={22} md={22}><TableComponent/>
       </Col></Row>
-
-        </LayoutContent>
+      </LayoutContent>
       </LayoutContentWrapper>
     </>
 }

@@ -15,7 +15,7 @@ export default function DashboardIKB(){
  
     </Col></Row> */}
     <LayoutWrapper><Row justify="center" style={rowStyle} gutter={0}>
-          <Col lg={11} md={12} sm={24} xs={24} style={colStyle}>
+          <Col lg={8} md={12} sm={24} xs={24} style={colStyle}>
 <div style={{height: "14em", width: "100%", backgroundColor: "#1f2431", borderRadius: "10px", display: "flex", flexDirection: "column"}}>
     <h1 style={{margin: "2px 0 0 15px", height: "50%", color: "#efefef"}}>Total Barang Masuk Bulan Ini</h1>
     <div style={{display: "flex", alignItems: "end", width: "100%", height: '50%'}}><div style={{width: "50%"}}></div><div style={{width: "50%",}}><h1 style={{margin: "0 20px 15px 0", float:"right", fontSize: "44px", color: "#efefef"}}>4000</h1></div></div>
@@ -23,7 +23,7 @@ export default function DashboardIKB(){
           </Col>
           <Col lg={1} md={24} sm={24} xs={24} style={colStyle}>
           </Col>
-          <Col lg={11} md={12} sm={24} xs={24} style={colStyle}>
+          <Col lg={8} md={12} sm={24} xs={24} style={colStyle}>
           <div style={{height: "14em", width: "100%", backgroundColor: "#9aa1b0", borderRadius: "10px", display: "flex", flexDirection: "column"}}>
     <h1 style={{margin: "2px 0 0 15px", height: "50%", color: "#1f2431"}}>Total Barang Keluar Bulan Ini</h1>
     <div style={{display: "flex", alignItems: "end", width: "100%", height: '50%'}}><div style={{width: "50%"}}></div><div style={{width: "50%",}}><h1 style={{margin: "0 20px 15px 0", float:"right", fontSize: "44px", color: "#1f2431"}}>1000</h1></div></div>
