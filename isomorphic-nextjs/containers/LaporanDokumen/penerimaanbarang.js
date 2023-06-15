@@ -5,8 +5,7 @@ import React from "react";
 import { Path } from "../../components/Path/path";
 import { DatePicker, Form, Space } from 'antd';
 import { Button, Row, Col, Table, Select } from 'antd';
-import { CSVLink } from 'react-csv';
-import jsPDF from 'jspdf';
+import { exportToCSV, exportToPDF } from "../../components/utility/ExportDoc";
 // import { useReactTable } from '@tanstack/react-table'
 // import { useTable, Table, HeaderRow, BodyRow, Cell } from '@table-library/react-table-library';
 // import '@table-library/react-table-library/table';
@@ -44,23 +43,13 @@ const TableComponent = () => {
   const handleTableChange = (pagination, filters, sorter) => {
     setPagination(pagination);
   };
-  const handleExportToCSV = () => {
-    const headers = [
-      { label: 'Name', key: 'name' },
-      { label: 'Age', key: 'age' },
-      // Add more headers as needed
-    ];
-
-    const csvData = [...headers, ...tableData];
-    setTableData(csvData);
+  const handleExport = (format) => {
+    if (format === 'csv') {
+      exportToCSV(TableComponent); // Helper function to export data to CSV
+    } else if (TableComponent) {
+      exportToPDF(tableData); // Helper function to export data to PDF
+    }
   };
-
-  const handleExportToPDF = () => {
-    const doc = new jsPDF();
-    doc.autoTable({ html: '#my-table' });
-    doc.save('table.pdf');
-  };
-
   const columns = [
     {
       title: 'No',
@@ -90,6 +79,8 @@ const TableComponent = () => {
         dataIndex: 'Gudang_Code',
         key: 'Gudang_Code',
         resizable: true,
+        sorter: (a, b) => a.Gudang_Code - b.Gudang_Code,
+
       },
       {
         title: 'Pemasukan',
@@ -108,6 +99,8 @@ const TableComponent = () => {
         dataIndex: 'Cost_HPP',
         key: 'Cost_HPP',
         resizable: true,
+        sorter: (a, b) => a.Cost_HPP - b.Cost_HPP,
+
       },
       {
         title: 'Saldo',
@@ -144,8 +137,20 @@ const TableComponent = () => {
       bordered
       pagination={pagination}
       onChange={handleTableChange}
+      scroll={{
+        y: 1300,
+        x: 1300,
+      }}
     />
-
+                <Select
+      defaultValue="Ekspor To"
+      style={{ width: 120 }}
+      onChange={handleExport}
+      options={[
+        { value: 'pdf', label: 'PDF' },
+        { value: 'csv', label: 'CSV' },
+      ]}
+    />
     </>
   );
 };
@@ -213,6 +218,7 @@ const dataSource = [
         dataIndex: 'Gudang_Code',
         key: 'Gudang_Code',
         resizable: true,
+
       },
       {
         title: 'Pemasukan',
@@ -264,22 +270,14 @@ export default function PengeluaranBarang(){
     const { RangePicker } = DatePicker;
     return <>
 <Path parent="Laporan Dokumen BC" children="REPORT PEMASUKAN BARANG DOK PABEAN"/>
-         <LayoutContentWrapper style={{ height: '100vh' }}>
+         <LayoutContentWrapper style={{ height: '100%' }}>
         <LayoutContent>
             <div style={{display: "flex", justifyContent: "center", width: "100%",minWidth: "90%", marginBottom: "2em"}}>
             <Space wrap>        
                 <RangePicker />
                 <Button style={{backgroundColor: "#1f2431", color: "#efefef"}}>SUBMIT</Button>
                 <Button disabled>TRACE</Button>
-                <Select
-      defaultValue="Ekspor To"
-      style={{ width: 120 }}
-      onChange={handleChange}
-      options={[
-        { value: 'pdf', label: 'PDF' },
-        { value: 'csv', label: 'CSV' },
-      ]}
-    />
+
             </Space>
             </div>
             <Row justify="center"><Col sm={22} md={22}><TableComponent/>
