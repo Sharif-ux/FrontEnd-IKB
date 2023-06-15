@@ -78,10 +78,10 @@ export default function SignInPage(props) {
             </div>
 
             <p className="isoHelperText">
-              <IntlMessages id="page.signInPreview" />
+              Tidak Memiliki Akun Untuk Login ? <span style={{marginLeft: "12px"}}><Link href="/signup">Buat Akun</Link></span>
             </p>
 
-            <div className="isoInputWrapper isoOtherLogin">
+            {/* <div className="isoInputWrapper isoOtherLogin">
               <Button
                 onClick={handleLogin}
                 type="primary"
@@ -121,7 +121,7 @@ export default function SignInPage(props) {
                   <IntlMessages id="page.signInCreateAccount" />
                 </a>
               </Link>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

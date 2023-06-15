@@ -116,7 +116,7 @@ export default function SignInPage(props) {
                   login={token => dispatch(login(token))}
                 />
               </div>
-              <div className="isoCenterComponent isoHelperWrapper">
+              {/* <div className="isoCenterComponent isoHelperWrapper">
                 <Link href="/forgotpassword">
                   <div className="isoForgotPass">
                     <IntlMessages id="page.signInForgotPass" />
@@ -127,7 +127,7 @@ export default function SignInPage(props) {
                     <IntlMessages id="page.signInCreateAccount" />
                   </a>
                 </Link>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

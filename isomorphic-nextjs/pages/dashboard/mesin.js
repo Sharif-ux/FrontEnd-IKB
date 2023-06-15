@@ -1,14 +1,14 @@
 import Head from 'next/head';
-import BlankPage from '@iso/containers/BlankPage';
+import Mesin from '../../containers/LaporanMutasi/mesin';
 import { withAuthSync } from '../../authentication/auth.utils';
 import DashboardLayout from '../../containers/DashboardLayout/DashboardLayout';
 export default withAuthSync(() => (
   <>
     <Head>
-      <title>Blank Page</title>
+      <title>Mesin dan Peralatan Kantor</title>
     </Head> 
     <DashboardLayout>
-      <BlankPage />
+      <Mesin />
     </DashboardLayout>
   </>
 ));

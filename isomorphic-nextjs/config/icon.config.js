@@ -53,8 +53,12 @@ import {
   IoMdMic,
   IoIosSquare,
   IoMdCreate,
+  IoIosCreate,
+  IoIosDownload,
+  IoIosCompass,
+  IoIosGrid,
+  IoMdBuild
 } from 'react-icons/io';
-
 // TopBar Icons
 export const TopbarMenuIcon = IoMdMenu; // Menu icon
 export const TopbarSearchIcon = IoIosSearch; // Search icon
@@ -65,7 +69,13 @@ export const TopbarCartIcon = IoMdCart; // Cart icon
 
 // SideBar Icons
 export const SidebarEmailIcon = IoMdMail; // Email icon
+export const SidebarDashboard = IoIosGrid; // Dashboard icon
+export const SidebarLaporanDokumenBC = IoIosCreate; // Dokumen BC icon
+export const SidebarLaporanMutasi = IoIosCopy; // Laporan Mutasi icon
+export const SidebarMaterialMasuk = IoIosDownload; // Material Masuk icon
+export const SidebarDeliveryOrder = IoIosCompass; // Delivery order icon
 export const SidebarChatIcon = IoIosChatbubbles; // Chat icon
+export const SidebarSystemLog = IoMdBuild; // Delivery order icon
 export const SidebarEcommerceIcon = IoMdBasket; // E-commerce icon
 export const SidebarMapsIcon = IoMdMap; // Map icon
 export const SidebarProfileIcon = IoIosPerson; // Profile icon

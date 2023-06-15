@@ -9,11 +9,12 @@ const SignUpStyleWrapper = styled.div`
   min-height: 100vh;
 
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   align-items: center;
   position: relative;
   background: url(${bgImage}) no-repeat center center;
   background-size: cover;
+
 
   &:before {
     content: '';
@@ -34,6 +35,7 @@ const SignUpStyleWrapper = styled.div`
     overflow-y: auto;
     z-index: 10;
     position: relative;
+    border-radius: 18px;
   }
 
   .isoSignUpContent {

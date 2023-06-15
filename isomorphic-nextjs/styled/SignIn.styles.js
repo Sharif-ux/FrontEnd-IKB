@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { palette } from 'styled-theme';
 import WithDirection from '@iso/lib/helpers/rtl';
 
-import bgImage from '@iso/assets/images/sign.jpg';
+import bgImage from '@iso/assets/images/inventory2.jpg';
 
 const SignInStyleWrapper = styled.div`
   width: 100%;
@@ -39,7 +39,7 @@ const SignInStyleWrapper = styled.div`
   }
 
   .isoLoginContent {
-    min-height: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     padding: 70px 50px;
@@ -56,6 +56,7 @@ const SignInStyleWrapper = styled.div`
       display: flex;
       margin-bottom: 50px;
       justify-content: center;
+      align-items: center;
       flex-shrink: 0;
 
       a,

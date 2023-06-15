@@ -8,7 +8,7 @@ const SignUpStyleWrapper = styled.div`
   min-height: 100vh;
   height: 100vh;
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   align-items: center;
   position: relative;
   background: url(${bgImage}) no-repeat center center;

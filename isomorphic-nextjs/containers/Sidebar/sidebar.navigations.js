@@ -21,6 +21,12 @@ import {
 	SidebarPagesIcon,
 	SidebarGithubIcon,
 	SidebarBlankIcon,
+	SidebarLaporanDokumenBC,
+	SidebarLaporanMutasi,
+	SidebarMaterialMasuk,
+	SidebarDeliveryOrder,
+	SidebarDashboard,
+	SidebarSystemLog
 } from '@iso/config/icon.config';
 
 export default [
@@ -34,6 +40,67 @@ export default [
 		key: 'chat',
 		label: 'sidebar.chat',
 		leftIcon: <SidebarChatIcon size={19} />,
+	},
+	{
+		key: 'dashboard',
+		label: 'Dashboard',
+		leftIcon: <SidebarDashboard size={19} />,
+	},
+	{
+		key: 'dokumenbc',
+		label: 'Laporan Dokumen BC',
+		leftIcon: <SidebarLaporanDokumenBC size={19} />,
+		children: [
+			{
+				key: 'penerimaanbarang',
+				label: 'Penerimaan Barang',
+			},
+			{
+				key: 'pengeluaranbarang',
+				label: 'Pengeluaran Barang',
+			},
+		],
+	},
+	{
+		key: 'mutasi',
+		label: 'Laporan Mutasi',
+		leftIcon: <SidebarLaporanMutasi size={19} />,
+		children: [
+			{
+				key: 'bahanbaku',
+				label: 'Bahan Baku & Pembantu',
+			},
+			{
+				key: 'mesin',
+				label: 'Mesin & Peralatan Kantor',
+			},			{
+				key: 'barangjadi',
+				label: 'Barang Jadi',
+			},
+			{
+				key: 'barangsisa',
+				label: 'Barang Sisa & Scrap',
+			},			
+			{
+				key: 'wip',
+				label: 'Barang Dalam Proses (WIP)',
+			},
+		],
+	},
+	{
+		key: 'materialmasuk',
+		label: 'Material Masuk',
+		leftIcon: <SidebarMaterialMasuk size={19} />,
+	},
+	{
+		key: 'deliveryorder',
+		label: 'Delivery Order',
+		leftIcon: <SidebarDeliveryOrder size={19} />,
+	},
+	{
+		key: 'systemlog',
+		label: 'System Log',
+		leftIcon: <SidebarSystemLog size={19} />,
 	},
 	{
 		key: 'ecommerce',

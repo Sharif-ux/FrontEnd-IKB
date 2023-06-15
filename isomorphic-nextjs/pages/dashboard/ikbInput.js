@@ -5,7 +5,7 @@ import DashboardLayout from '../../containers/DashboardLayout/DashboardLayout';
 export default withAuthSync(() => (
   <>
     <Head>
-      <title>Blank Page</title>
+      <title>IKB Input</title>
     </Head> 
     <DashboardLayout>
       <BlankPage />
