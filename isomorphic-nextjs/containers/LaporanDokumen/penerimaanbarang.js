@@ -20,6 +20,11 @@ const handleChange = (value) => {
 const TableComponent = () => {
   const [tableData, setTableData] = useState([]);
   const [selectedDateRange, setSelectedDateRange] = useState(null);
+  const [filterDateRange, setFilterDateRange] = useState(null);
+
+  const handleDateRangeFilterChange = (dates) => {
+    setFilterDateRange(dates);
+  };
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 5,
@@ -134,7 +139,7 @@ const TableComponent = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:3000/user');
+        const response = await fetch('http://localhost:3000/penerimaanbarang');
         const data = await response.json();
         setTableData(data);
         setPagination(prevPagination => ({
@@ -159,6 +164,9 @@ const TableComponent = () => {
       exportToPDF(tableData); // Helper function to export data to PDF
     }
   };
+  const handleDateRangeChange = (dates) => {
+    setSelectedDateRange(dates);
+  };
   const dateRangeSorter = (a, b) => {
     const dateA = moment(a.date);
     const dateB = moment(b.date);
@@ -181,7 +189,9 @@ const TableComponent = () => {
 
     return 0;
   };
-
+  const handleDateRangeFilterChange2 = (dates) => {
+    setFilterDateRange(dates);
+  };
   const columns = [
     {
       title: 'No',
@@ -193,8 +203,37 @@ const TableComponent = () => {
     },
     {
       title: 'Kode Barang',
-      dataIndex: 'Kd_Brg',
-      key: 'Kd_Brg',
+      dataIndex: 'TanggalTransaksi',
+      key: 'TanggalTransaksi',
+      render: (text, record, index)=> {
+        const date = new Date(text).toLocaleDateString('id-ID')
+        return (<>{date}</>)
+      },
+      filterDropdown: ({ setSelectedKeys, confirm, clearFilters }) => (
+        <div style={{ padding: 8 }}>
+          <DatePicker.RangePicker onChange={handleDateRangeFilterChange2} />
+          <div style={{ marginTop: 8 }}>
+            <Button
+              type="primary"
+              onClick={() => confirm()}
+              size="small"
+              style={{ marginRight: 8 }}
+            >
+              OK
+            </Button>
+            <Button onClick={() => clearFilters()} size="small">
+              Reset
+            </Button>
+          </div>
+        </div>
+      ),
+      onFilter: (value, record) => {
+        const startDate = moment(value[0]).startOf('day');
+        const endDate = moment(value[1]).endOf('day');
+        const recordDate = moment(record.dateRange);
+
+        return recordDate.isBetween(startDate, endDate, null, '[]');
+      },
     },
     {
       title: 'Nama Barang',
@@ -262,7 +301,6 @@ const TableComponent = () => {
       },
   ];
   
-console.log("apa ini", setSelectedDateRange)
   return (
     <>
 
@@ -271,7 +309,6 @@ console.log("apa ini", setSelectedDateRange)
             <DatePicker.RangePicker onChange={setSelectedDateRange} />
                 <Button style={{backgroundColor: "#1f2431", color: "#efefef"}}>SUBMIT</Button>
                 <Button disabled>TRACE</Button>
-
             </Space>
             </div>
             <Table
@@ -298,6 +335,7 @@ console.log("apa ini", setSelectedDateRange)
  
     </>
   );
+  console.log(selectedDateRange)
 };
 
 

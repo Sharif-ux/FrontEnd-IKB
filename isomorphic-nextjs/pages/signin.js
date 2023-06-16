@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Head from 'next/head';
 import { useDispatch } from 'react-redux';
 import { useRouter } from 'next/router';
+import { useState } from 'react';
 import Input from '@iso/components/uielements/input';
 import Checkbox from '@iso/components/uielements/checkbox';
 import Button from '@iso/components/uielements/button';
@@ -14,11 +15,43 @@ import authActions from '../authentication/actions';
 import SignInStyleWrapper from '../styled/SignIn.styles';
 const { login } = authActions;
 export default function SignInPage(props) {
+  const [User_id, setUser_id] = useState('');
+  const [Password, setPassword] = useState('');
+
+  const handleLogin2 = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ User_id, Password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        const { token } = data;
+
+        // Store the token in local storage or state for later use
+        localStorage.setItem('token', token);
+
+        // Redirect to the desired page or perform other actions
+      } else {
+        console.error('Login failed:', data.error);
+        // Handle login failure, show error messages, etc.
+      }
+    } catch (error) {
+      console.error('Login failed:', error);
+      // Handle login failure, show error messages, etc.
+    }
+  };
   const dispatch = useDispatch();
   const router = useRouter();
 
   const handleLogin = e => {
     e.preventDefault();
+
     dispatch(login(true));
   };
 
@@ -54,20 +87,17 @@ export default function SignInPage(props) {
             <div className="isoSignInForm">
               <div className="isoInputWrapper">
                 <Input
-                  id="inputUserName"
-                  size="large"
-                  placeholder="Username"
-                  defaultValue="demo@gmail.com"
+                  placeholder="User ID"
+                  value={User_id}
+                  onChange={(e) => setUser_id(e.target.value)}
                 />
               </div>
 
               <div className="isoInputWrapper">
                 <Input
-                  id="inpuPassword"
-                  size="large"
-                  type="password"
-                  placeholder="Password"
-                  defaultValue="demodemo"
+ placeholder="Password"
+ value={Password}
+ onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
 
@@ -77,7 +107,7 @@ export default function SignInPage(props) {
                 </Checkbox>
                 <Button
                   type="primary"
-                  onClick={jwtConfig.enabled ? handleJWTLogin : handleLogin}
+                  onClick={handleLogin2}
                 >
                   <IntlMessages id="page.signInButton" />
                 </Button>

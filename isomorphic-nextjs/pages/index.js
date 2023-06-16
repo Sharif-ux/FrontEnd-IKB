@@ -18,8 +18,8 @@ export default function SignInPage(props) {
   const handleLogin = e => {
     e.preventDefault();
     dispatch(login(true));
-  };
 
+  };
   const handleJWTLogin = () => {
     const { jwtLogin, history } = props;
     const userInfo = {
