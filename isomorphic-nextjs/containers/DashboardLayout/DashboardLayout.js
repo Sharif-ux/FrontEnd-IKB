@@ -57,7 +57,7 @@ export default function DashboardLayout({ children }) {
             </Footer>
           </Layout>
         </Layout>
-        <ThemeSwitcher />
+        {/* <ThemeSwitcher /> */}
       </Layout>
     </AppHolder>
   );

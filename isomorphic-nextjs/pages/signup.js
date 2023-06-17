@@ -35,7 +35,7 @@ export default function SignUp() {
         <div className="isoSignUpContent">
           <div className="isoLogoWrapper">
             <Link href="/dashboard">
-              <IntlMessages id="page.signUpTitle" />
+              INVENTORY IKB
             </Link>
           </div>
 
@@ -109,7 +109,7 @@ export default function SignUp() {
             </div>
             <div className="isoInputWrapper isoCenterComponent isoHelperWrapper">
               <Link href="/signin">
-                <IntlMessages id="page.signUpAlreadyAccount" />
+               Sudah Punya Akun? Sign In
               </Link>
             </div>
           </div>

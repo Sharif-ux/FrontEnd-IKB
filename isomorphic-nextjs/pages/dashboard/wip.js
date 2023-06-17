@@ -1,14 +1,14 @@
 import Head from 'next/head';
-import BlankPage from '@iso/containers/BlankPage';
+import Wip from '../../containers/LaporanMutasi/wip';
 import { withAuthSync } from '../../authentication/auth.utils';
 import DashboardLayout from '../../containers/DashboardLayout/DashboardLayout';
 export default withAuthSync(() => (
   <>
     <Head>
-      <title>Blank Page</title>
+      <title>Barang Dalam Proses (WIP)</title>
     </Head> 
     <DashboardLayout>
-      <BlankPage />
+      <Wip />
     </DashboardLayout>
   </>
 ));

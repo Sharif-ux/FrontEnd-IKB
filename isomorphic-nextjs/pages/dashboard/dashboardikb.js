@@ -1,14 +1,15 @@
 import Head from 'next/head';
-import BlankPage from '@iso/containers/BlankPage';
+import DeliveryOrder from '../../containers/DeliveryOrder';
 import { withAuthSync } from '../../authentication/auth.utils';
+import DashboardIKB from '../../containers/DashboardIKB';
 import DashboardLayout from '../../containers/DashboardLayout/DashboardLayout';
 export default withAuthSync(() => (
   <>
     <Head>
-      <title>Blank Page</title>
+      <title>Dashboard IKB</title>
     </Head> 
     <DashboardLayout>
-      <BlankPage />
+      <DashboardIKB />
     </DashboardLayout>
   </>
 ));

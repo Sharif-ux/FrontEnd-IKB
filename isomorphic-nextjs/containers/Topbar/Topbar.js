@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { Layout } from 'antd';
 import appActions from '@iso/redux/app/actions';
@@ -12,7 +12,34 @@ import { TopbarMenuIcon } from '@iso/config/icon.config';
 
 const { Header } = Layout;
 const { toggleCollapsed } = appActions;
+//fungsi buat jam
+function Clock() {
+  const [time, setTime] = useState('');
+  const [date, setDate] = useState('');
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      const currentTime = `${hours}:${minutes}:${seconds}`;
+      setTime(currentTime);
+      setDate(now.toDateString());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div style={{display: "flex", gap: "12px"}}>
+      <h1>{time}</h1>
+      <p>/</p>
+      <p>{date}</p>
+    </div>
+  );
+}
+//
 class Topbar extends Component {
   render() {
     const { toggleCollapsed, url, customizedTheme, locale } = this.props;
@@ -44,7 +71,7 @@ class Topbar extends Component {
           </div>
 
           <ul className="isoRight">
-            <li className="isoSearch">
+            {/* <li className="isoSearch">
               <TopbarSearch locale={locale} />
             </li>
 
@@ -66,8 +93,10 @@ class Topbar extends Component {
               className="isoCart"
             >
               <TopbarAddtoCart url={url} locale={locale} />
-            </li>
-
+            </li> */}
+            <div style={{marginRight: "12px"}}>
+            <Clock/>
+            </div>
             <li
               onClick={() => this.setState({ selectedItem: 'user' })}
               className="isoUser"

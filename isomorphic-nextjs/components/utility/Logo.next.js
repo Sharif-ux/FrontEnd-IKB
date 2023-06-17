@@ -19,7 +19,7 @@ export default function LogoNext({ collapsed }) {
       ) : (
         <h3>
           <Link href="/dashboard">
-            <a>{siteConfig.siteName}</a>
+            <a>I K B</a>
           </Link>
         </h3>
       )}
