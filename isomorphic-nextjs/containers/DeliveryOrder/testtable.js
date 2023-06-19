@@ -10,8 +10,6 @@ import ExcelJS from 'exceljs'; // Add this import statement
 import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
-import LayoutContentWrapper from '@iso/components/utility/layoutWrapper';
-import LayoutContent from '@iso/components/utility/layoutContent';
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
@@ -39,7 +37,7 @@ const columns = [
   },
 ];
 
-const BahanBaku = () => {
+const TableForm = () => {
   const [data, setData] = useState([]);
   const [dateRange, setDateRange] = useState(null);
   const [filteredData, setFilteredData] = useState([]);
@@ -197,10 +195,8 @@ const BahanBaku = () => {
 //   };
   
   return (
-    <LayoutContentWrapper style={{ height: '100%' }}>
-    <LayoutContent>
     <div>
-    <div style={{ marginBottom: 16,  display: "flex", width: "100%", justifyContent: "center"}}>
+      <div style={{ marginBottom: 16 }}>
         <RangePicker onChange={handleDateChange} />
         <Select
           defaultValue="Export Type"
@@ -224,7 +220,6 @@ const BahanBaku = () => {
             Export {exportType.toUpperCase()}
           </Button>
         )}
-              <Button style={{marginLeft: 16,  backgroundColor: "#1f2431", color: "#efefef", borderRadius: "5px"}}>Kartu Stock</Button>
       </div>
       {filteredData.length > 0 ? (
         <Table id="table-ref" columns={columns} dataSource={filteredData} />
@@ -232,9 +227,7 @@ const BahanBaku = () => {
         <p>No data available</p>
       )}
     </div>
-    </LayoutContent>
-      </LayoutContentWrapper>
   );
 };
 
-export default BahanBaku;
+export default TableForm;

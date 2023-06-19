@@ -2,8 +2,11 @@ import React from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
 import { useDispatch } from 'react-redux';
+import Router from 'next/router';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
+import nextCookie from 'next-cookies';
+import cookie from 'js-cookie';
 import Input from '@iso/components/uielements/input';
 import Checkbox from '@iso/components/uielements/checkbox';
 import Button from '@iso/components/uielements/button';
@@ -17,57 +20,98 @@ const { login } = authActions;
 export default function SignInPage(props) {
   const [User_id, setUser_id] = useState('');
   const [Password, setPassword] = useState('');
+  const [token, setToken] = useState('');
 
-  const handleLogin2 = async () => {
+  // const handleLogin2 = async () => {
+  //   try {
+  //     const response = await fetch('http://localhost:3000/login', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({ User_id, Password }),
+  //     });
+
+  //     if (response.ok) {
+  //       // Handle successful login
+  //       console.log("Berhasil Login")
+  //       // ...
+  //     } else {
+  //       // Handle login failure
+  //       // ...
+  //     }
+  //   } catch (error) {
+  //     console.error('Login failed:', error);
+  //   }
+  // };
+
+  // const dispatch = useDispatch();
+  // const router = useRouter();
+
+  // const handleLogin = e => {
+  //   e.preventDefault();
+
+  //   dispatch(login(true));
+  // };
+
+  // const handleJWTLogin = () => {
+  //   const { jwtLogin, history } = props;
+  //   const userInfo = {
+  //     username:
+  //       (process.browser && document.getElementById('inputUserName').value) ||
+  //       '',
+  //     password:
+  //       (process.browser && document.getElementById('inputPassword').value) ||
+  //       '',
+  //   };
+  //   jwtLogin(history, userInfo);
+  // };
+
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+  
+    // Prepare the request payload
+    const payload = {
+      User_id,
+      Password,
+    };
+  console.log(payload)
     try {
-      const response = await fetch('http://localhost:3000/login', {
+      // Send a POST request to the login API
+      const response = await fetch('http://localhost:3000/api/login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ User_id, Password }),
+        body: JSON.stringify(payload)
       });
-
-      const data = await response.json();
-
+  
+      // Check if the request was successful
       if (response.ok) {
-        const { token } = data;
+        // Parse the response body
+        const data = await response.json();
+  
+        // Check if the token is available in the response data
+        if (data.hasOwnProperty('token')) {
+          // Extract the token from the response data
+          const { token } = data;
+  
+          // Display the token in the browser console
+          cookie.set('token', token, { expires: 1 });
+          Router.push('/dashboard/dashboardikb');
+        } else {
+          alert('Token not found in response');
 
-        // Store the token in local storage or state for later use
-        localStorage.setItem('token', token);
-
-        // Redirect to the desired page or perform other actions
+        }
       } else {
-        console.error('Login failed:', data.error);
-        // Handle login failure, show error messages, etc.
+        // Handle authentication error
+        alert('Login failed');
       }
     } catch (error) {
-      console.error('Login failed:', error);
-      // Handle login failure, show error messages, etc.
+      console.error('Error occurred:', error);
     }
   };
-  const dispatch = useDispatch();
-  const router = useRouter();
-
-  const handleLogin = e => {
-    e.preventDefault();
-
-    dispatch(login(true));
-  };
-
-  const handleJWTLogin = () => {
-    const { jwtLogin, history } = props;
-    const userInfo = {
-      username:
-        (process.browser && document.getElementById('inputUserName').value) ||
-        '',
-      password:
-        (process.browser && document.getElementById('inpuPassword').value) ||
-        '',
-    };
-    // jwtLogin(history, userInfo);
-  };
-
   return (
     <>
       <Head>
@@ -86,19 +130,42 @@ export default function SignInPage(props) {
 
             <div className="isoSignInForm">
               <div className="isoInputWrapper">
-                <Input
+                {/* <Input
                   placeholder="User ID"
                   value={User_id}
                   onChange={(e) => setUser_id(e.target.value)}
-                />
+                /> */}
+                              {/* <Input
+                id="inputUserName"
+                size="large"
+                placeholder="Username"
+                defaultValue="demo@gmail.com"
+              /> */}
+                <Input
+            type="text"
+            value={User_id}
+            onChange={(e) => setUser_id(e.target.value)}
+          />
               </div>
 
               <div className="isoInputWrapper">
-                <Input
+                {/* <Input
  placeholder="Password"
  value={Password}
- onChange={(e) => setPassword(e.target.value)}
-                />
+ onChange={(e) => setPassword(e.target.value) } 
+                /> */}
+                             {/* <Input
+                id="inpuPassword"
+                size="large"
+                type="password"
+                placeholder="Password"
+                defaultValue="demodemo"
+              /> */}
+              <Input
+            type="password"
+            value={Password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
               </div>
 
               <div className="isoInputWrapper isoLeftRightComponent">
@@ -107,13 +174,13 @@ export default function SignInPage(props) {
                 </Checkbox>
                 <Button
                   type="primary"
-                  onClick={handleLogin2}
+                  onClick={handleSubmit}
                 >
                   <IntlMessages id="page.signInButton" />
                 </Button>
               </div>
 
-              <p className="isoHelperText">
+              {/* <p className="isoHelperText">
                 <IntlMessages id="page.signInPreview" />
               </p>
 
@@ -145,7 +212,7 @@ export default function SignInPage(props) {
                   history={router}
                   login={token => dispatch(login(token))}
                 />
-              </div>
+              </div> */}
               {/* <div className="isoCenterComponent isoHelperWrapper">
                 <Link href="/forgotpassword">
                   <div className="isoForgotPass">

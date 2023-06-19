@@ -1,5 +1,5 @@
 export default {
   enabled: false,
-  fetchUrl: "http://localhost:5000/login",
+  fetchUrl: "http://localhost:3000/api/login",
   secretKey: "secretKey"
 };

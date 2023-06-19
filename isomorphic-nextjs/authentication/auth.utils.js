@@ -44,7 +44,7 @@ const getCookieFromServer = (key, req) => {
 
 export const login = ({ token }) => {
   cookie.set('token', token, { expires: 1 });
-  Router.push('/dashboard');
+  Router.push('/dashboard/dashboardikb');
 };
 
 export const auth = ctx => {
