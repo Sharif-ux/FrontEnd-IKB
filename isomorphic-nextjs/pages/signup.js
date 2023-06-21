@@ -35,7 +35,7 @@ export default function SignUp() {
         <div className="isoSignUpContent">
           <div className="isoLogoWrapper">
             <Link href="/dashboard">
-              INVENTORY IKB
+            INVENTORY KAWASAN BERIKAT
             </Link>
           </div>
 

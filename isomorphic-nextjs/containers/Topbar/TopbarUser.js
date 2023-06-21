@@ -5,7 +5,7 @@ import authAction from '../../authentication/actions';
 import TopbarDropdownWrapper from './TopbarDropdown.styles';
 
 const { logout } = authAction;
-import userpic from '@iso/assets/images/user1.png';
+import userpic from '@iso/assets/images/user.png';
 
 export default function TopbarUser() {
   const [visible, setVisibility] = React.useState(false);

@@ -11,6 +11,7 @@ import Input from '@iso/components/uielements/input';
 import Checkbox from '@iso/components/uielements/checkbox';
 import Button from '@iso/components/uielements/button';
 import IntlMessages from '@iso/components/utility/intlMessages';
+import { Alert, Space } from 'antd';
 import jwtConfig from '@iso/config/jwt.config';
 import Auth0 from '../authentication/Auth0';
 import FirebaseLogin from '@iso/containers/FirebaseForm/FirebaseForm';
@@ -96,7 +97,12 @@ export default function SignInPage(props) {
         if (data.hasOwnProperty('token')) {
           // Extract the token from the response data
           const { token } = data;
-  
+          <Alert
+          message="Berhasil Login"
+          description="Selamat datang di website Inventory Kawasan"
+          type="success"
+          showIcon
+        />
           // Display the token in the browser console
           cookie.set('token', token, { expires: 1 });
           Router.push('/dashboard/dashboardikb');

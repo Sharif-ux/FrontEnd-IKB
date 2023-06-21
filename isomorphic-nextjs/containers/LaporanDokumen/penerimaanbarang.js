@@ -1,50 +1,199 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef} from 'react';
 import { Table, DatePicker, Select, Button } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
+import { Input, Space,  } from 'antd';
+import Highlighter from 'react-highlight-words';
 import moment from 'moment';
 import axios from 'axios';
 import { saveAs } from 'file-saver';
-import { exportToPDF } from '../../components/utility/ExportDoc';
+// import { exportToPDF } from '../../components/utility/ExportDoc';
 import { ExportToCsv } from 'export-to-csv';
 import html2canvas from 'html2canvas';
 import ExcelJS from 'exceljs'; // Add this import statement
 import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
+import { PDFViewer, Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
 import 'jspdf-autotable';
 import LayoutContentWrapper from '@iso/components/utility/layoutWrapper';
 import LayoutContent from '@iso/components/utility/layoutContent';
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
-const columns = [
-  {
-    title: 'Code',
-    dataIndex: 'code',
-    key: 'code',
-  },
-  {
-    title: 'Description',
-    dataIndex: 'description',
-    key: 'description',
-  },
-  {
-    title: 'Category',
-    dataIndex: 'category',
-    key: 'category',
-  },
-  {
-    title: 'Tanggal Transaksi',
-    dataIndex: 'TanggalTransaksi',
-    key: 'TanggalTransaksi',
-    render: (text) => <span>{moment(text).format('YYYY-MM-DD')}</span>,
-  },
-];
 
 const TableForm = () => {
   const [data, setData] = useState([]);
   const [dateRange, setDateRange] = useState(null);
   const [filteredData, setFilteredData] = useState([]);
   const [exportType, setExportType] = useState(null);
+  const [searchText, setSearchText] = useState('');
+  const [searchedColumn, setSearchedColumn] = useState('');
+  const searchInput = useRef(null);
+  const tableRef = useRef(null);
 
+  const getColumnSearchProps = (dataIndex) => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+      <div style={{ padding: 8 }}>
+        <Input
+          placeholder={`Search ${dataIndex}`}
+          value={selectedKeys[0]}
+          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+          style={{ width: 188, marginBottom: 8, display: 'block' }}
+        />
+        <Space>
+          <button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
+            Search
+          </button>
+          <button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>
+            Reset
+          </button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered) => <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />,
+    onFilter: (value, record) =>
+      record[dataIndex] ? record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()) : '',
+    })
+  
+    // filterIcon: (filtered) => (
+    //   <SearchOutlined
+    //     style={{
+    //       color: filtered ? '#1677ff' : undefined,
+    //     }}
+    //   />
+    // ),
+    // onFilter: (value, record) =>
+    //   record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
+    // onFilterDropdownOpenChange: (visible) => {
+    //   if (visible) {
+    //     setTimeout(() => searchInput.current?.select(), 100);
+    //   }
+    // },
+  
+    const handleSearch = (selectedKeys, confirm, dataIndex) => {
+      confirm();
+      setSearchText(selectedKeys[0]);
+      setSearchedColumn(dataIndex);
+    };
+  
+    const handleReset = (clearFilters) => {
+      clearFilters();
+      setSearchText('');
+    };
+    render: (text) =>
+      searchedColumn === dataIndex ? (
+        <Highlighter
+          highlightStyle={{
+            backgroundColor: '#ffc069',
+            padding: 0,
+          }}
+          searchWords={[searchText]}
+          autoEscape
+          textToHighlight={text ? text.toString() : ''}
+        />
+      ) : (
+        text
+      )
+  const columns = [
+    {
+      title: 'Jenis Dokumen',
+      dataIndex: 'DOC_Type',
+      key: 'DOC_Type',
+      ...getColumnSearchProps('DOC_Type'),
+    },
+    {
+      title: 'No Aju',
+      dataIndex: 'NO_REG',
+      key: 'NO_REG',
+      ...getColumnSearchProps('NO_REG'),
+    },
+    {
+      title: 'No. Pabean',
+      dataIndex: 'DOC_NO',
+      key: 'DOC_NO',
+      ...getColumnSearchProps('DOC_NO'),
+    },
+    {
+      title: 'Tgl. Pabean',
+      dataIndex: 'DOC_Date',
+      key: 'DOC_Date',
+      render: (text) => {
+        const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
+        const convertedDate = new Date(text).toLocaleDateString('id-ID', options);
+        return <span>{convertedDate}</span>;
+      },             
+      ...getColumnSearchProps('DOC_Date')
+
+    },
+    {
+      title: 'No. Penerimaan Barang',
+      dataIndex: 'NO_BUKTI',
+      key: 'NO_BUKTI',
+      ...getColumnSearchProps('NO_BUKTI'),
+  
+    },
+    {
+      title: 'Tgl. Penerimaan Barang',
+      dataIndex: 'Date_Transaction',
+      key: 'Date_Transaction',
+      render: (text) => {
+        const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
+        const convertedDate = new Date(text).toLocaleDateString('id-ID', options);
+        return <span>{convertedDate}</span>;
+      }, 
+      ...getColumnSearchProps('Date_Transaction')
+  
+    },
+    {
+      title: 'Pemasok/Pengirim',
+      dataIndex: 'Ship_Name',
+      key: 'Ship_Name',
+      ...getColumnSearchProps('Ship_Name'),
+  
+    },
+    {
+      title: 'Kode Barang',
+      dataIndex: 'Kd_Brg',
+      key: 'Kd_Brg',
+      ...getColumnSearchProps('Kd_Brg'),
+  
+    },
+    {
+      title: 'Nama Barang',
+      dataIndex: 'Nm_Brg',
+      key: 'Nm_Brg',
+      ...getColumnSearchProps('Nm_Brg'),
+  
+    },
+    {
+      title: 'Satuan',
+      dataIndex: 'Unit_Code',
+      key: 'Unit_Code',
+      ...getColumnSearchProps('Unit_Code'),
+  
+    },
+    {
+      title: 'Jumlah',
+      dataIndex: 'Item_Qty',
+      key: 'Item_Qty',
+      ...getColumnSearchProps('Item_Qty'),
+  
+    },
+    {
+      title: 'Harga',
+      dataIndex: 'Sub_Total',
+      key: 'Sub_Total',
+      ...getColumnSearchProps('Sub_Total'),
+  
+    },
+    // {
+    //   title: 'Tanggal Transaksi',
+    //   dataIndex: 'TanggalTransaksi',
+    //   key: 'TanggalTransaksi',
+    //   render: (text) => <span>{moment(text).format('YYYY-MM-DD')}</span>,
+    // },
+  ];
+  
   useEffect(() => {
     fetchData();
   }, []);
@@ -80,7 +229,7 @@ const TableForm = () => {
       return;
     }
     const filtered = data.filter((item) => {
-      const itemDate = moment(item.TanggalTransaksi, 'YYYY-MM-DD');
+      const itemDate = moment(item.DOC_Date, 'YYYY-MM-DD');
       return (
         itemDate.isSameOrAfter(dateRange[0], 'day') &&
         itemDate.isSameOrBefore(dateRange[1], 'day')
@@ -95,16 +244,25 @@ const TableForm = () => {
       quoteStrings: '"',
       decimalSeparator: '.',
       showLabels: true,
-      showTitle: false,
+      showTitle: true,
       useTextFile: false,
       useBom: true,
     });
 
     const exportedData = filteredData.map((item) => ({
-      Code: item.code,
-      Description: item.description,
-      Category: item.category,
-      'Tanggal Transaksi': moment(item.TanggalTransaksi).format('YYYY-MM-DD'),
+     "DOC_Type": item.DOC_Type,
+     "No Aju": item.NO_REG,
+     "No. Pabean": item.DOC_NO,
+     "Tgl. Pabean": item.DOC_Date,
+     "No. Penerimaan Barang": item.NO_BUKTI,
+     "Tgl. Penerimaan Barang": item.Date_Transaction,
+     "Pemasok/Pengirim": item.Ship_Name,
+     "Kode Barang": item.Kd_Brg,
+     "Nama Barang": item.Nm_Brg,
+     "Satuan": item.Unit_Code,
+     "Jumlah": item.Item_Qty,
+      "Harga": item.Sub_Total,
+      // 'Tanggal Transaksi': moment(item.TanggalTransaksi).format('YYYY-MM-DD'),
     }));
 
     csvExporter.generateCsv(exportedData);
@@ -113,7 +271,7 @@ const TableForm = () => {
   const exportToExcel = () => {
     const exportedData = filteredData.map((item) => ({
       Code: item.code,
-      Description: item.description,
+      Description: item.NO_REG,
       Category: item.category,
       'Tanggal Transaksi': moment(item.TanggalTransaksi).format('YYYY-MM-DD'),
     }));
@@ -132,70 +290,118 @@ const TableForm = () => {
     link.click();
   };
 
-//   const exportToPDF = () => {
-//     const tableRef = React.useRef(null);
-//     const tableNode = tableRef.current;
+  // const exportToPDF = () => {
+  //   const tableNode = tableRef.current;
   
-//     html2canvas(tableNode).then((canvas) => {
-//       const contentWidth = canvas.width;
-//       const contentHeight = canvas.height;
-//       const pageHeight = (contentWidth / 592.28) * 841.89;
-//       const leftHeight = contentHeight;
-//       let position = 0;
+  //   html2canvas(tableNode).then((canvas) => {
+  //     const contentWidth = canvas.width;
+  //     const contentHeight = canvas.height;
+  //     const pageHeight = (contentWidth / 592.28) * 841.89;
+  //     const leftHeight = contentHeight;
+  //     let position = 0;
   
-//       const imgWidth = 595.28;
-//       const imgHeight = (592.28 / contentWidth) * contentHeight;
+  //     const imgWidth = 595.28;
+  //     const imgHeight = (592.28 / contentWidth) * contentHeight;
   
-//       const pdf = new jsPDF('p', 'pt', 'a4');
-//       const pageData = canvas.toDataURL('image/jpeg', 1.0);
-//       pdf.addImage(pageData, 'JPEG', 0, 0, imgWidth, imgHeight);
+  //     const pdf = new jsPDF('p', 'pt', 'a4');
+  //     const pageData = canvas.toDataURL('image/jpeg', 1.0);
+  //     pdf.addImage(pageData, 'JPEG', 0, 0, imgWidth, imgHeight);
   
-//       leftHeight -= pageHeight;
-//       while (leftHeight > 0) {
-//         position = leftHeight - contentHeight;
+  //     leftHeight -= pageHeight;
+  //     while (leftHeight > 0) {
+  //       position = leftHeight - contentHeight;
   
-//         html2canvas(tableNode, {
-//           y: position,
-//         }).then((newCanvas) => {
-//           const newPageData = newCanvas.toDataURL('image/jpeg', 1.0);
-//           pdf.addPage();
-//           pdf.addImage(newPageData, 'JPEG', 0, 0, imgWidth, imgHeight);
-//           leftHeight -= pageHeight;
+  //       html2canvas(tableNode, {
+  //         y: position,
+  //       }).then((newCanvas) => {
+  //         const newPageData = newCanvas.toDataURL('image/jpeg', 1.0);
+  //         pdf.addPage();
+  //         pdf.addImage(newPageData, 'JPEG', 0, 0, imgWidth, imgHeight);
+  //         leftHeight -= pageHeight;
   
-//           if (leftHeight > 0) {
-//             pdf.setPage(pdf.internal.getNumberOfPages() + 1); // Increment the page number using getPageCount() + 1
-//           }
-//         });
-//       }
+  //         if (leftHeight > 0) {
+  //           pdf.setPage(pdf.internal.getNumberOfPages() + 1); // Increment the page number using getPageCount() + 1
+  //         }
+  //       });
+  //     }
   
-//       pdf.save('data.pdf');
-//     });
-//   };
+  //     pdf.save('data.pdf');
+  //   });
+  // };
+  // const exportToPDF = async  ()  => {
+  //   const MyDocument = () => (
+  //     <Document>
+  //       <Page style={styles.page}>
+  //         <View style={styles.section}>
+  //           <Text style={styles.header}>Data Table</Text>
+  //           <View style={styles.table}>
+  //             <View style={styles.tableRow}>
+  //               <View style={styles.tableColHeader}>
+  //                 <Text style={styles.tableCellHeader}>Jenis Dokumen</Text>
+  //               </View>
+  //               <View style={styles.tableColHeader}>
+  //                 <Text style={styles.tableCellHeader}>No Aju</Text>
+  //               </View>
+  //               <View style={styles.tableColHeader}>
+  //                 <Text style={styles.tableCellHeader}>No. Pabean</Text>
+  //               </View>
+  //             </View>
+  //             {data.map((item, index) => (
+  //               <View style={styles.tableRow} key={index}>
+  //                 <View style={styles.tableCol}>
+  //                   <Text style={styles.tableCell}>{item.DOC_Type}</Text>
+  //                 </View>
+  //                 <View style={styles.tableCol}>
+  //                   <Text style={styles.tableCell}>{item.NO_REG}</Text>
+  //                 </View>
+  //                 <View style={styles.tableCol}>
+  //                   <Text style={styles.tableCell}>{item.DOC_NO}</Text>
+  //                 </View>
+  //               </View>
+  //             ))}
+  //           </View>
+  //         </View>
+  //       </Page>
+  //     </Document>
+  //   );
+
+  //   const pdfBlob = PDFViewer.render(<MyDocument />).toBlob();
+  //   const url = URL.createObjectURL(pdfBlob);
+  //   const link = document.createElement('a');
+  //   link.href = url;
+  //   link.download = 'data.pdf';
+  //   link.click();
+  //   URL.revokeObjectURL(url);
+  // };
+
+
+const exportToPDF = () => {
+  const tableRef = document.getElementById('table-ref');
+
+  html2canvas(tableRef).then((canvas) => {
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'pt', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    pdf.addImage(imgData, 'PNG', 30, 30, pageWidth - 60, pageHeight - 60);
+    pdf.save('data.pdf');
+  });
+};
 // const exportToPDF = () => {
-//     const exportedData = filteredData.map((item) => ({
-//       Code: item.code,
-//       Description: item.description,
-//       Category: item.category,
-//       'Tanggal Transaksi': moment(item.TanggalTransaksi).format('YYYY-MM-DD'),
-//     }));
-  
-//     const columns = [
-//       { header: 'Code', dataKey: 'Code' },
-//       { header: 'Description', dataKey: 'Description' },
-//       { header: 'Category', dataKey: 'Category' },
-//       { header: 'Tanggal Transaksi', dataKey: 'Tanggal Transaksi' },
-//     ];
-  
-//     const doc = new jsPDF();
-//     doc.autoTable({
-//       head: [columns.map((column) => column.header)],
-//       body: exportedData,
-//       columns: columns.map((column) => column.dataKey),
-//     });
-  
-//     doc.save('data.pdf');
-//   };
-  
+//   const doc = new jsPDF();
+//   doc.setFontSize(8);
+//   doc.text('Penerimaan Barang', 5, 5);
+
+//   let yPos = 10;
+//   data.forEach((item, index) => {
+//     doc.text(item.DOC_Type, 10, yPos);
+//     doc.text(item.NO_REG.toString(), 60, yPos);
+//     doc.text(item.DOC_NO.toString(), 40, yPos);
+//     yPos += 10;
+//   });
+
+//   doc.save('data.pdf');
+// };
   return (
     <LayoutContentWrapper style={{ height: '100%' }}>
     <LayoutContent>
@@ -226,7 +432,7 @@ const TableForm = () => {
         )}
       </div>
       {filteredData.length > 0 ? (
-        <Table id="table-ref" columns={columns} dataSource={filteredData} />
+        <Table id="table-ref" columns={columns} dataSource={filteredData} scroll={{ x: 400 }} ref={tableRef}/>
       ) : (
         <p>No data available</p>
       )}
