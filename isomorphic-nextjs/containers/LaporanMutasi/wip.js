@@ -11,6 +11,7 @@ import { ExportToCsv } from 'export-to-csv';
 import html2canvas from 'html2canvas';
 import ExcelJS from 'exceljs'; // Add this import statement
 import * as XLSX from 'xlsx';
+import { exportToPDF } from '../../components/utility/ExportDoc';
 import { jsPDF } from 'jspdf';
 import { PDFViewer, Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
 import 'jspdf-autotable';
@@ -232,18 +233,17 @@ const Wip = () => {
     });
 
     const exportedData = filteredData.map((item) => ({
-     "KodeBarang": item.KodeBarang,
-     "No Aju": item.Nm_Brg,
-     "No. Pabean": item.DOC_NO,
-     "Tgl. Pabean": item.DOC_Date,
-     "No. Penerimaan Barang": item.NO_BUKTI,
-     "Tgl. Penerimaan Barang": item.Date_Transaction,
-     "Pemasok/Pengirim": item.Ship_Name,
-     "Kode Barang": item.Kd_Brg,
-     "Nama Barang": item.Nm_Brg,
-     "Satuan": item.Unit_Code,
-     "Jumlah": item.Item_Qty,
-      "Harga": item.Sub_Total,
+      "Kode Barang": item.KodeBarang,
+      "Nama Barang": item.Nm_Brg,
+      "Satuan": item.Unit_Desc,
+      "Saldo Awal": item.Saldo_Awal,
+      "Pemasukan": item.IN_Brg,
+      "Pengeluaran": item.OUT_Brg,
+      "Penyesuaian": item.Adjust_Brg,
+      "Stock Opname": item.Qty_Fisik,
+      "Nama Barang": item.Nm_Brg,
+      "Saldo Akhir": item.Qty_System,
+      "Selisih": item.selisih,
       // 'Tanggal Transaksi': moment(item.TanggalTransaksi).format('YYYY-MM-DD'),
     }));
 
@@ -252,10 +252,17 @@ const Wip = () => {
 
   const exportToExcel = () => {
     const exportedData = filteredData.map((item) => ({
-      Code: item.code,
-      Description: item.Nm_Brg,
-      Category: item.category,
-      'Tanggal Transaksi': moment(item.TanggalTransaksi).format('YYYY-MM-DD'),
+      "Kode Barang": item.KodeBarang,
+      "Nama Barang": item.Nm_Brg,
+      "Satuan": item.Unit_Desc,
+      "Saldo Awal": item.Saldo_Awal,
+      "Pemasukan": item.IN_Brg,
+      "Pengeluaran": item.OUT_Brg,
+      "Penyesuaian": item.Adjust_Brg,
+      "Stock Opname": item.Qty_Fisik,
+      "Nama Barang": item.Nm_Brg,
+      "Saldo Akhir": item.Qty_System,
+      "Selisih": item.selisih,
     }));
   
     const worksheet = XLSX.utils.json_to_sheet(exportedData);
@@ -357,18 +364,18 @@ const Wip = () => {
   // };
 
 
-const exportToPDF = () => {
-  const tableRef = document.getElementById('table-ref');
+// const exportToPDF = () => {
+//   const tableRef = document.getElementById('table-ref');
 
-  html2canvas(tableRef).then((canvas) => {
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'pt', 'a4');
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    pdf.addImage(imgData, 'PNG', 30, 30, pageWidth - 60, pageHeight - 60);
-    pdf.save('data.pdf');
-  });
-};
+//   html2canvas(tableRef).then((canvas) => {
+//     const imgData = canvas.toDataURL('image/png');
+//     const pdf = new jsPDF('p', 'pt', 'a4');
+//     const pageWidth = pdf.internal.pageSize.getWidth();
+//     const pageHeight = pdf.internal.pageSize.getHeight();
+//     pdf.addImage(imgData, 'PNG', 30, 30, pageWidth - 60, pageHeight - 60);
+//     pdf.save('data.pdf');
+//   });
+// };
 // const exportToPDF = () => {
 //   const doc = new jsPDF();
 //   doc.setFontSize(8);
