@@ -102,9 +102,9 @@ const BahanBaku = () => {
     },
     {
       title: 'Kode Barang',
-      dataIndex: 'Kd_Brg',
-      key: 'Kd_Brg',
-      ...getColumnSearchProps('Kd_Brg'),
+      dataIndex: 'KodeBarang',
+      key: 'KodeBarang',
+      ...getColumnSearchProps('KodeBarang'),
     },
     {
       title: 'Nama Barang',
@@ -114,81 +114,58 @@ const BahanBaku = () => {
     },
     {
       title: 'Satuan',
-      dataIndex: 'DOC_NO',
-      key: 'DOC_NO',
-      ...getColumnSearchProps('DOC_NO'),
+      dataIndex: 'Unit_Desc',
+      key: 'Unit_Desc',
+      ...getColumnSearchProps('Unit_Desc'),
     },
     {
-      title: 'Tgl. Pabean',
-      dataIndex: 'DOC_Date',
-      key: 'DOC_Date',
-      render: (text) => {
-        const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
-        const convertedDate = new Date(text).toLocaleDateString('id-ID', options);
-        return <span>{convertedDate}</span>;
-      },             
-      ...getColumnSearchProps('DOC_Date')
+      title: 'Saldo Awal',
+      dataIndex: 'Saldo_Awal',
+      key: 'Saldo_Awal',           
+      ...getColumnSearchProps('Saldo_Awal')
 
     },
     {
-      title: 'No. Penerimaan Barang',
-      dataIndex: 'NO_BUKTI',
-      key: 'NO_BUKTI',
-      ...getColumnSearchProps('NO_BUKTI'),
+      title: 'Pemasukan',
+      dataIndex: 'IN_Brg',
+      key: 'IN_Brg',
+      ...getColumnSearchProps('IN_Brg'),
   
     },
     {
-      title: 'Tgl. Penerimaan Barang',
-      dataIndex: 'Date_Transaction',
-      key: 'Date_Transaction',
-      render: (text) => {
-        const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
-        const convertedDate = new Date(text).toLocaleDateString('id-ID', options);
-        return <span>{convertedDate}</span>;
-      }, 
-      ...getColumnSearchProps('Date_Transaction')
+      title: 'Pengeluaran',
+      dataIndex: 'OUT_Brg',
+      key: 'OUT_Brg',
+
+      ...getColumnSearchProps('OUT_Brg')
   
     },
     {
-      title: 'Pemasok/Pengirim',
-      dataIndex: 'Ship_Name',
-      key: 'Ship_Name',
-      ...getColumnSearchProps('Ship_Name'),
+      title: 'Penyusaian',
+      dataIndex: 'Adjust_Brg',
+      key: 'Adjust_Brg',
+      ...getColumnSearchProps('Adjust_Brg'),
   
     },
     {
-      title: 'Kode Barang',
-      dataIndex: 'Kd_Brg',
-      key: 'Kd_Brg',
-      ...getColumnSearchProps('Kd_Brg'),
+      title: 'Stock Opname',
+      dataIndex: 'Qty_Fisik',
+      key: 'Qty_Fisik',
+      ...getColumnSearchProps('Qty_Fisik'),
   
     },
     {
-      title: 'Nama Barang',
-      dataIndex: 'Nm_Brg',
-      key: 'Nm_Brg',
-      ...getColumnSearchProps('Nm_Brg'),
+      title: 'Saldo Akhir',
+      dataIndex: 'Qty_System',
+      key: 'Qty_System',
+      ...getColumnSearchProps('Qty_System'),
   
     },
     {
-      title: 'Satuan',
-      dataIndex: 'Unit_Code',
-      key: 'Unit_Code',
-      ...getColumnSearchProps('Unit_Code'),
-  
-    },
-    {
-      title: 'Jumlah',
-      dataIndex: 'Item_Qty',
-      key: 'Item_Qty',
-      ...getColumnSearchProps('Item_Qty'),
-  
-    },
-    {
-      title: 'Harga',
-      dataIndex: 'Sub_Total',
-      key: 'Sub_Total',
-      ...getColumnSearchProps('Sub_Total'),
+      title: 'Selisih',
+      dataIndex: 'selisih',
+      key: 'selisih',
+      ...getColumnSearchProps('selisih'),
   
     },
     // {
@@ -255,7 +232,7 @@ const BahanBaku = () => {
     });
 
     const exportedData = filteredData.map((item) => ({
-     "Kd_Brg": item.Kd_Brg,
+     "KodeBarang": item.KodeBarang,
      "No Aju": item.Nm_Brg,
      "No. Pabean": item.DOC_NO,
      "Tgl. Pabean": item.DOC_Date,

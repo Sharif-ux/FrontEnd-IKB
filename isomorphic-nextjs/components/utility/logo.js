@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import siteConfig from '@iso/config/site.config';
-import { IoIosFlash } from 'react-icons/io';
+import { IoIosFlash , IoMdCube} from 'react-icons/io';
 
 const Logo = ({ collapsed }) => {
   return (
@@ -10,7 +10,7 @@ const Logo = ({ collapsed }) => {
         <div>
           <h3>
             <Link to="/dashboard">
-              <IoIosFlash size={27} />
+              <IoMdCube size={27} />
             </Link>
           </h3>
         </div>

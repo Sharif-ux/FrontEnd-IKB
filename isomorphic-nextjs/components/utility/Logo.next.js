@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import siteConfig from '@iso/config/site.config';
-import { IoIosFlash } from 'react-icons/io';
+import { IoIosFlash, IoMdCube } from 'react-icons/io';
 
 export default function LogoNext({ collapsed }) {
   return (
@@ -11,7 +11,7 @@ export default function LogoNext({ collapsed }) {
           <h3>
             <Link href="/dashboard">
               <a>
-                <IoIosFlash size={27} />
+                <IoMdCube size={27} />
               </a>
             </Link>
           </h3>

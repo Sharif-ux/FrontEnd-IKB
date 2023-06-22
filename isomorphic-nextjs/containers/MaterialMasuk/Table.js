@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { SearchOutlined } from '@ant-design/icons';
-import { Table, DatePicker, Select, Button, Space } from 'antd';
+import { Table, DatePicker, Select, Button, Space, Modal } from 'antd';
 import { Input } from 'antd';
 import Highlighter from 'react-highlight-words';
 import moment from 'moment';
@@ -13,8 +13,10 @@ import ExcelJS from 'exceljs'; // Add this import statement
 import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
+import { IoMdCreate, IoIosTrash, IoMdAdd, IoIosCopy } from "react-icons/io";
 import LayoutContentWrapper from '@iso/components/utility/layoutWrapper';
 import LayoutContent from '@iso/components/utility/layoutContent';
+import ModalComponent from './addMaterial';
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
@@ -28,94 +30,66 @@ const TableMaterial = () => {
   const [searchText, setSearchText] = useState('');
   const [searchedColumn, setSearchedColumn] = useState('');
   const searchInput = useRef(null);
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
-  };
-  const handleReset = (clearFilters) => {
-    clearFilters();
-    setSearchText('');
-  };
+  const [modalVisible, setModalVisible] = useState(false);
+  // const handleSearch = (selectedKeys, confirm, dataIndex) => {
+  //   confirm();
+  //   setSearchText(selectedKeys[0]);
+  //   setSearchedColumn(dataIndex);
+  // };
+  // const handleReset = (clearFilters) => {
+  //   clearFilters();
+  //   setSearchText('');
+  // };
   const getColumnSearchProps = (dataIndex) => ({
-    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
-      <div
-        style={{
-          padding: 8,
-        }}
-        onKeyDown={(e) => e.stopPropagation()}
-      >
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+      <div style={{ padding: 8 }}>
         <Input
-          ref={searchInput}
           placeholder={`Search ${dataIndex}`}
           value={selectedKeys[0]}
           onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
           onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
-          style={{
-            marginBottom: 8,
-            display: 'block',
-          }}
+          style={{ width: 188, marginBottom: 8, display: 'block' }}
         />
         <Space>
-          <Button
-            type="primary"
-            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
-            icon={<SearchOutlined />}
-            size="small"
-            style={{
-              width: 90,
-            }}
-          >
+          <button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
             Search
-          </Button>
-          <Button
-            onClick={() => clearFilters && handleReset(clearFilters)}
-            size="small"
-            style={{
-              width: 90,
-            }}
-          >
+          </button>
+          <button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>
             Reset
-          </Button>
-          <Button
-            type="link"
-            size="small"
-            onClick={() => {
-              confirm({
-                closeDropdown: false,
-              });
-              setSearchText(selectedKeys[0]);
-              setSearchedColumn(dataIndex);
-            }}
-          >
-            Filter
-          </Button>
-          <Button
-            type="link"
-            size="small"
-            onClick={() => {
-              close();
-            }}
-          >
-            close
-          </Button>
+          </button>
         </Space>
       </div>
     ),
-    filterIcon: (filtered) => (
-      <SearchOutlined
-        style={{
-          color: filtered ? '#1677ff' : undefined,
-        }}
-      />
-    ),
+    filterIcon: (filtered) => <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />,
     onFilter: (value, record) =>
-      record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
-    onFilterDropdownOpenChange: (visible) => {
-      if (visible) {
-        setTimeout(() => searchInput.current?.select(), 100);
-      }
-    },
+      record[dataIndex] ? record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()) : '',
+    })
+  
+    // filterIcon: (filtered) => (
+    //   <SearchOutlined
+    //     style={{
+    //       color: filtered ? '#1677ff' : undefined,
+    //     }}
+    //   />
+    // ),
+    // onFilter: (value, record) =>
+    //   record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
+    // onFilterDropdownOpenChange: (visible) => {
+    //   if (visible) {
+    //     setTimeout(() => searchInput.current?.select(), 100);
+    //   }
+    // },
+  
+    const handleSearch = (selectedKeys, confirm, dataIndex) => {
+      confirm();
+      setSearchText(selectedKeys[0]);
+      setSearchedColumn(dataIndex);
+    };
+  
+    const handleReset = (clearFilters) => {
+      clearFilters();
+      setSearchText('');
+    };
     render: (text) =>
       searchedColumn === dataIndex ? (
         <Highlighter
@@ -129,33 +103,41 @@ const TableMaterial = () => {
         />
       ) : (
         text
-      ),
-  });
+      )
   const columns = [
     {
-      title: 'KONTRAK NO',
-      dataIndex: 'KONTRAK_NO',
-      key: 'KONTRAK_NO',
-      ...getColumnSearchProps('KONTRAK_NO'),
+      title: 'NO',
+      dataIndex: 'no',
+      key: 'no',
+      render: (text, record, index) => index + 1, 
 
     },
     {
-      title: 'Kd Brg',
-      dataIndex: 'Kd_Brg',
-      key: 'Kd_Brg',
-      ...getColumnSearchProps('Kd_Brg'),
-    },
-    {
-      title: 'Item Qty',
-      dataIndex: 'Item_Qty',
-      key: 'Item_Qty',
-      ...getColumnSearchProps('Item_Qty'),
-    },
-    {
-      title: 'Tanggal Transaksi',
-      dataIndex: 'TanggalTransaksi',
-      key: 'TanggalTransaksi',
+      title: 'Tanggal',
+      dataIndex: 'rawin_date',
+      key: 'rawin_date',
       render: (text) => <span>{moment(text).format('YYYY-MM-DD')}</span>,
+      ...getColumnSearchProps('rawin_date'),
+    },
+    {
+      title: 'No Bukti',
+      dataIndex: 'rawin_no',
+      key: 'rawin_no',
+      ...getColumnSearchProps('rawin_no'),
+    },
+    {
+      title: 'Kode Barang',
+      dataIndex: 'kd_brg',
+      key: 'kd_brg',
+      ...getColumnSearchProps('kd_brg'),
+    },
+    {
+      title: 'Action',
+      dataIndex: 'action',
+      key: 'action',
+      render: (text, record, index) => {<>    <Button style={{ backgroundColor: "#efefef", color: "#1f2431", borderRadius: "5px",   display: "inline-flex",
+      alignItems: "center", gap: "5px"}} icon={<IoIosCopy size={17} />}>Hapus</Button></>}, 
+
     },
   ];
   useEffect(() => {
@@ -168,7 +150,7 @@ const TableMaterial = () => {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/pengeluaranbarang');
+      const response = await axios.get('http://localhost:3000/rawin');
       setData(response.data);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -201,7 +183,14 @@ const TableMaterial = () => {
     });
     setFilteredData(filtered);
   };
+ 
+  const openModal = () => {
+    setModalVisible(true);
+  };
 
+  const closeModal = () => {
+    setModalVisible(false);
+  }
   const exportToCSV = () => {
     const csvExporter = new ExportToCsv({
       fieldSeparator: ',',
@@ -312,8 +301,8 @@ const TableMaterial = () => {
   return (
 
     <div>
-    <div style={{ marginBottom: 16,  display: "flex", width: "100%", justifyContent: "center"}}>
-        <RangePicker onChange={handleDateChange} />
+    <div style={{ marginBottom: 16,  display: "flex", width: "100%", justifyContent: "center", gap: "12px"}}>
+        {/* <RangePicker onChange={handleDateChange} />
         <Select
           defaultValue="Export Type"
           style={{ width: 120, marginLeft: 16 }}
@@ -335,10 +324,16 @@ const TableMaterial = () => {
           }}>
             Export {exportType.toUpperCase()}
           </Button>
-        )}
+        )} */}
+         <Button onClick={openModal} style={{ backgroundColor: "#1f2431", color: "#efefef", borderRadius: "5px",   display: "inline-flex",
+  alignItems: "center", gap: "5px"}} icon={<IoMdAdd size={17}  />}>Baru</Button>
+    <Button style={{ backgroundColor: "#efefef", color: "#1f2431", borderRadius: "5px",   display: "inline-flex",
+  alignItems: "center", gap: "5px"}} icon={<IoIosCopy size={17} />}>Impor Excell</Button>
+
+  <ModalComponent visible={modalVisible} closeModal={closeModal}/>
       </div>
       {filteredData.length > 0 ? (
-        <Table id="table-ref" columns={columns} dataSource={filteredData} />
+        <Table id="table-ref" columns={columns} dataSource={filteredData}  rowKey={(record, index) => index}/>
       ) : (
         <p>No data available</p>
       )}

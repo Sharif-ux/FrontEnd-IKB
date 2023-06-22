@@ -92,11 +92,17 @@ export default function SignInPage(props) {
       if (response.ok) {
         // Parse the response body
         const data = await response.json();
-  
+        <Alert
+        message="Berhasil Login"
+        description="Selamat datang di website Inventory Kawasan"
+        type="success"
+        showIcon
+      />
         // Check if the token is available in the response data
         if (data.hasOwnProperty('token')) {
           // Extract the token from the response data
           const { token } = data;
+          console.error('token:', data);
           <Alert
           message="Berhasil Login"
           description="Selamat datang di website Inventory Kawasan"
