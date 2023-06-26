@@ -290,118 +290,82 @@ const TableForm = () => {
     link.click();
   };
 
-  // const exportToPDF = () => {
-  //   const tableNode = tableRef.current;
-  
-  //   html2canvas(tableNode).then((canvas) => {
-  //     const contentWidth = canvas.width;
-  //     const contentHeight = canvas.height;
-  //     const pageHeight = (contentWidth / 592.28) * 841.89;
-  //     const leftHeight = contentHeight;
-  //     let position = 0;
-  
-  //     const imgWidth = 595.28;
-  //     const imgHeight = (592.28 / contentWidth) * contentHeight;
-  
-  //     const pdf = new jsPDF('p', 'pt', 'a4');
-  //     const pageData = canvas.toDataURL('image/jpeg', 1.0);
-  //     pdf.addImage(pageData, 'JPEG', 0, 0, imgWidth, imgHeight);
-  
-  //     leftHeight -= pageHeight;
-  //     while (leftHeight > 0) {
-  //       position = leftHeight - contentHeight;
-  
-  //       html2canvas(tableNode, {
-  //         y: position,
-  //       }).then((newCanvas) => {
-  //         const newPageData = newCanvas.toDataURL('image/jpeg', 1.0);
-  //         pdf.addPage();
-  //         pdf.addImage(newPageData, 'JPEG', 0, 0, imgWidth, imgHeight);
-  //         leftHeight -= pageHeight;
-  
-  //         if (leftHeight > 0) {
-  //           pdf.setPage(pdf.internal.getNumberOfPages() + 1); // Increment the page number using getPageCount() + 1
-  //         }
-  //       });
-  //     }
-  
-  //     pdf.save('data.pdf');
-  //   });
-  // };
-  // const exportToPDF = async  ()  => {
-  //   const MyDocument = () => (
-  //     <Document>
-  //       <Page style={styles.page}>
-  //         <View style={styles.section}>
-  //           <Text style={styles.header}>Data Table</Text>
-  //           <View style={styles.table}>
-  //             <View style={styles.tableRow}>
-  //               <View style={styles.tableColHeader}>
-  //                 <Text style={styles.tableCellHeader}>Jenis Dokumen</Text>
-  //               </View>
-  //               <View style={styles.tableColHeader}>
-  //                 <Text style={styles.tableCellHeader}>No Aju</Text>
-  //               </View>
-  //               <View style={styles.tableColHeader}>
-  //                 <Text style={styles.tableCellHeader}>No. Pabean</Text>
-  //               </View>
-  //             </View>
-  //             {data.map((item, index) => (
-  //               <View style={styles.tableRow} key={index}>
-  //                 <View style={styles.tableCol}>
-  //                   <Text style={styles.tableCell}>{item.DOC_Type}</Text>
-  //                 </View>
-  //                 <View style={styles.tableCol}>
-  //                   <Text style={styles.tableCell}>{item.NO_REG}</Text>
-  //                 </View>
-  //                 <View style={styles.tableCol}>
-  //                   <Text style={styles.tableCell}>{item.DOC_NO}</Text>
-  //                 </View>
-  //               </View>
-  //             ))}
-  //           </View>
-  //         </View>
-  //       </Page>
-  //     </Document>
-  //   );
-
-  //   const pdfBlob = PDFViewer.render(<MyDocument />).toBlob();
-  //   const url = URL.createObjectURL(pdfBlob);
-  //   const link = document.createElement('a');
-  //   link.href = url;
-  //   link.download = 'data.pdf';
-  //   link.click();
-  //   URL.revokeObjectURL(url);
-  // };
 
 
-const exportToPDF = () => {
-  const tableRef = document.getElementById('table-ref');
-
-  html2canvas(tableRef).then((canvas) => {
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'pt', 'a4');
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    pdf.addImage(imgData, 'PNG', 30, 30, pageWidth - 60, pageHeight - 60);
-    pdf.save('data.pdf');
-  });
-};
 // const exportToPDF = () => {
-//   const doc = new jsPDF();
-//   doc.setFontSize(8);
-//   doc.text('Penerimaan Barang', 5, 5);
+//   const tableRef = document.getElementById('table-ref');
 
-//   let yPos = 10;
-//   data.forEach((item, index) => {
-//     doc.text(item.DOC_Type, 10, yPos);
-//     doc.text(item.NO_REG.toString(), 60, yPos);
-//     doc.text(item.DOC_NO.toString(), 40, yPos);
-//     yPos += 10;
+//   html2canvas(tableRef).then((canvas) => {
+//     const imgData = canvas.toDataURL('image/png');
+//     const pdf = new jsPDF('p', 'pt', 'a4');
+//     const pageWidth = pdf.internal.pageSize.getWidth();
+//     const pageHeight = pdf.internal.pageSize.getHeight();
+//     pdf.addImage(imgData, 'PNG', 30, 30, pageWidth - 60, pageHeight - 60);
+//     pdf.save('data.pdf');
+//   });
+// };
+// const exportToPDF = async (data) => {
+//   const doc = new jsPDF();
+//   const tableContent = [];
+//   const columns = Object.keys(data[0]);
+
+//   data.forEach((row) => {
+//     const rowData = Object.values(row);
+//     tableContent.push(rowData);
+//   });
+//   const customHeader = ['No', 'Kode Barang', 'Nama Barang', 'Satuan', 'Saldo Awal', 'Pemasukan', 'Pengeluaran', 'Penyesuaian', 'Stock Opname', 'Saldo Akhir', 'Selisih'];
+//   await doc.autoTable({
+//     head: [customHeader],
+//     body: tableContent,
 //   });
 
-//   doc.save('data.pdf');
+//   doc.save('Barang_Jadi.pdf');
 // };
+const pageSize = 20; // Number of rows per page
+
+const splitDataIntoChunks = (data, pageSize) => {
+  const chunks = [];
+  let index = 0;
+
+  while (index < data.length) {
+    chunks.push(data.slice(index, index + pageSize));
+    index += pageSize;
+  }
+
+  return chunks;
+};
+
+const generatePDFForChunk = (chunk, doc) => {
+  const tableContent = chunk.map((row) => Object.values(row));
+  const customHeader = ['J.Doc', 'No.Aju', 'No.Pabean', 'Tgl.Pabean', 'No.Penerimaan Barang', 'Tgl.Penerimaan Barang', 'Pemasok', 'Kode Barang', 'Nama Barang', 'Satuan', 'Jumlah', 'Harga'];
+
+  doc.autoTable({
+    head: [customHeader],
+    body: tableContent,
+  });
+};
+
+const generatePDF = async () => {
+  try {
+    const response = await axios.get('http://localhost:3000/penerimaanbarang');
+    const tableData = response.data;
+
+    const doc = new jsPDF();
+    const dataChunks = splitDataIntoChunks(tableData, pageSize);
+
+    for (let i = 0; i < dataChunks.length; i++) {
+      if (i > 0) {
+        doc.addPage(); // Add a new page for each chunk after the first one
+      }
+      generatePDFForChunk(dataChunks[i], doc);
+    }
+
+    doc.save('Wip.pdf');
+  } catch (error) {
+    console.error('Error fetching data:', error);
+  }
+};
+
   return (
     <LayoutContentWrapper style={{ height: '100%' }}>
     <LayoutContent>
@@ -424,7 +388,7 @@ const exportToPDF = () => {
             } else if (exportType === 'excel') {
               exportToExcel();
             } else if (exportType === 'pdf') {
-              exportToPDF(data);
+              generatePDF();
             }
           }}>
             Export {exportType.toUpperCase()}

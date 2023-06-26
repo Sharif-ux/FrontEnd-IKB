@@ -77,13 +77,13 @@ export default function SignInPage(props) {
       User_id,
       Password,
     };
-  console.log(payload)
     try {
       // Send a POST request to the login API
       const response = await fetch('http://localhost:3000/api/login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(payload)
       });
@@ -92,23 +92,12 @@ export default function SignInPage(props) {
       if (response.ok) {
         // Parse the response body
         const data = await response.json();
-        <Alert
-        message="Berhasil Login"
-        description="Selamat datang di website Inventory Kawasan"
-        type="success"
-        showIcon
-      />
+
         // Check if the token is available in the response data
         if (data.hasOwnProperty('token')) {
           // Extract the token from the response data
           const { token } = data;
-          console.error('token:', data);
-          <Alert
-          message="Berhasil Login"
-          description="Selamat datang di website Inventory Kawasan"
-          type="success"
-          showIcon
-        />
+          console.log('token:', token);
           // Display the token in the browser console
           cookie.set('token', token, { expires: 1 });
           Router.push('/dashboard/dashboardikb');

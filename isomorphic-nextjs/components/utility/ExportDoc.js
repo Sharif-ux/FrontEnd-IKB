@@ -19,7 +19,24 @@ export const exportToCSV = (data) => {
   saveAs(blob, 'table_data.csv');
 };
 
-export const exportToPDF = (data) => {
+// export const exportToPDF = (data) => {
+//   const doc = new jsPDF();
+//   const tableContent = [];
+//   const columns = Object.keys(data[0]);
+
+//   data.forEach((row) => {
+//     const rowData = Object.values(row);
+//     tableContent.push(rowData);
+//   });
+
+//   doc.autoTable({
+//     head: [columns],
+//     body: tableContent,
+//   });
+
+//   doc.save('table_data.pdf');
+// };
+export const exportToPDF = async (data) => {
   const doc = new jsPDF();
   const tableContent = [];
   const columns = Object.keys(data[0]);
@@ -29,7 +46,7 @@ export const exportToPDF = (data) => {
     tableContent.push(rowData);
   });
 
-  doc.autoTable({
+  await doc.autoTable({
     head: [columns],
     body: tableContent,
   });

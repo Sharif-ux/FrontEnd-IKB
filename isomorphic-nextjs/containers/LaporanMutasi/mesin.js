@@ -6,7 +6,9 @@ import Highlighter from 'react-highlight-words';
 import moment from 'moment';
 import axios from 'axios';
 import { saveAs } from 'file-saver';
-import { exportToPDF } from '../../components/utility/ExportDoc';
+import nextCookie from 'next-cookies';
+import cookie from 'js-cookie';
+// import { exportToPDF } from '../../components/utility/ExportDoc';
 import { ExportToCsv } from 'export-to-csv';
 import html2canvas from 'html2canvas';
 import ExcelJS from 'exceljs'; // Add this import statement
@@ -29,7 +31,6 @@ const Mesin = () => {
   const [searchedColumn, setSearchedColumn] = useState('');
   const searchInput = useRef(null);
   const tableRef = useRef(null);
-
   const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
       <div style={{ padding: 8 }}>
@@ -183,13 +184,39 @@ const Mesin = () => {
   useEffect(() => {
     filterData();
   }, [data, dateRange]);
-
+  useEffect(() => {
+    // Retrieve the token from the cookie
+    const token = cookie.get('token');
+    
+    // Use the token here or send it to another function or API request
+    console.log('Token:', token);
+  }, []);
   const fetchData = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/mesin');
-      setData(response.data);
+      // Retrieve the token from the local storage
+      // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNhIiwiaWF0IjoxNjg3NzQ2MjQ0LCJleHAiOjE2ODc4MzI2NDR9.43cykjUUw80sCbAinLXSLiJlAp7oz-rQVmthToZuh2M8';
+      const token = cookie.get('token');
+
+      // Make the API request with the token included in the headers
+      const response = await fetch('http://localhost:3000/mesin', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (response.ok) {
+        // Handle the successful response
+        const data = await response.json();
+        console.log('Data:', data);
+        setData(data.data)
+      } else {
+        // Handle the error response
+        const errorData = await response.json();
+        console.log('Error:', errorData);
+      }
     } catch (error) {
-      console.error('Error fetching data:', error);
+      // Handle network or server error
+      console.error('Error occurred during API request:', error);
     }
   };
 
@@ -232,17 +259,18 @@ const Mesin = () => {
     });
 
     const exportedData = filteredData.map((item) => ({
-      "Kode Barang": item.KodeBarang,
-      "Nama Barang": item.Nm_Brg,
-      "Satuan": item.Unit_Desc,
-      "Saldo Awal": item.Saldo_Awal,
-      "Pemasukan": item.IN_Brg,
-      "Pengeluaran": item.OUT_Brg,
-      "Penyesuaian": item.Adjust_Brg,
-      "Stock Opname": item.Qty_Fisik,
-      "Nama Barang": item.Nm_Brg,
-      "Saldo Akhir": item.Qty_System,
-      "Selisih": item.selisih,
+     "Kode Barang": item.KodeBarang,
+     "Nama Barang": item.Nm_Brg,
+     "Satuan": item.Unit_Desc,
+     "Saldo Awal": item.Saldo_Awal,
+     "Pemasukan": item.IN_Brg,
+     "Pengeluaran": item.OUT_Brg,
+     "Penyesuaian": item.Adjust_Brg,
+     "Stock Opname": item.Qty_Fisik,
+     "Nama Barang": item.Nm_Brg,
+     "Saldo Akhir": item.Qty_System,
+     "Selisih": item.selisih,
+      // "Harga": item.Sub_Total,
       // 'Tanggal Transaksi': moment(item.TanggalTransaksi).format('YYYY-MM-DD'),
     }));
 
@@ -262,6 +290,7 @@ const Mesin = () => {
       "Nama Barang": item.Nm_Brg,
       "Saldo Akhir": item.Qty_System,
       "Selisih": item.selisih,
+      // 'Tanggal Transaksi': moment(item.TanggalTransaksi).format('YYYY-MM-DD'),
     }));
   
     const worksheet = XLSX.utils.json_to_sheet(exportedData);
@@ -278,118 +307,24 @@ const Mesin = () => {
     link.click();
   };
 
-  // const exportToPDF = () => {
-  //   const tableNode = tableRef.current;
   
-  //   html2canvas(tableNode).then((canvas) => {
-  //     const contentWidth = canvas.width;
-  //     const contentHeight = canvas.height;
-  //     const pageHeight = (contentWidth / 592.28) * 841.89;
-  //     const leftHeight = contentHeight;
-  //     let position = 0;
+  const exportToPDF = async (data) => {
+    const doc = new jsPDF();
+    const tableContent = [];
+    const columns = Object.keys(data[0]);
   
-  //     const imgWidth = 595.28;
-  //     const imgHeight = (592.28 / contentWidth) * contentHeight;
+    data.forEach((row) => {
+      const rowData = Object.values(row);
+      tableContent.push(rowData);
+    });
+    const customHeader = ['No', 'Kode Barang', 'Nama Barang', 'Satuan', 'Saldo Awal', 'Pemasukan', 'Pengeluaran', 'Penyesuaian', 'Stock Opname', 'Saldo Akhir', 'Selisih'];
+    await doc.autoTable({
+      head: [customHeader],
+      body: tableContent,
+    });
   
-  //     const pdf = new jsPDF('p', 'pt', 'a4');
-  //     const pageData = canvas.toDataURL('image/jpeg', 1.0);
-  //     pdf.addImage(pageData, 'JPEG', 0, 0, imgWidth, imgHeight);
-  
-  //     leftHeight -= pageHeight;
-  //     while (leftHeight > 0) {
-  //       position = leftHeight - contentHeight;
-  
-  //       html2canvas(tableNode, {
-  //         y: position,
-  //       }).then((newCanvas) => {
-  //         const newPageData = newCanvas.toDataURL('image/jpeg', 1.0);
-  //         pdf.addPage();
-  //         pdf.addImage(newPageData, 'JPEG', 0, 0, imgWidth, imgHeight);
-  //         leftHeight -= pageHeight;
-  
-  //         if (leftHeight > 0) {
-  //           pdf.setPage(pdf.internal.getNumberOfPages() + 1); // Increment the page number using getPageCount() + 1
-  //         }
-  //       });
-  //     }
-  
-  //     pdf.save('data.pdf');
-  //   });
-  // };
-  // const exportToPDF = async  ()  => {
-  //   const MyDocument = () => (
-  //     <Document>
-  //       <Page style={styles.page}>
-  //         <View style={styles.section}>
-  //           <Text style={styles.header}>Data Table</Text>
-  //           <View style={styles.table}>
-  //             <View style={styles.tableRow}>
-  //               <View style={styles.tableColHeader}>
-  //                 <Text style={styles.tableCellHeader}>Kode barang</Text>
-  //               </View>
-  //               <View style={styles.tableColHeader}>
-  //                 <Text style={styles.tableCellHeader}>No Aju</Text>
-  //               </View>
-  //               <View style={styles.tableColHeader}>
-  //                 <Text style={styles.tableCellHeader}>No. Pabean</Text>
-  //               </View>
-  //             </View>
-  //             {data.map((item, index) => (
-  //               <View style={styles.tableRow} key={index}>
-  //                 <View style={styles.tableCol}>
-  //                   <Text style={styles.tableCell}>{item.Kd_Brg}</Text>
-  //                 </View>
-  //                 <View style={styles.tableCol}>
-  //                   <Text style={styles.tableCell}>{item.Nm_Brg}</Text>
-  //                 </View>
-  //                 <View style={styles.tableCol}>
-  //                   <Text style={styles.tableCell}>{item.DOC_NO}</Text>
-  //                 </View>
-  //               </View>
-  //             ))}
-  //           </View>
-  //         </View>
-  //       </Page>
-  //     </Document>
-  //   );
-
-  //   const pdfBlob = PDFViewer.render(<MyDocument />).toBlob();
-  //   const url = URL.createObjectURL(pdfBlob);
-  //   const link = document.createElement('a');
-  //   link.href = url;
-  //   link.download = 'data.pdf';
-  //   link.click();
-  //   URL.revokeObjectURL(url);
-  // };
-
-
-// const exportToPDF = () => {
-//   const tableRef = document.getElementById('table-ref');
-
-//   html2canvas(tableRef).then((canvas) => {
-//     const imgData = canvas.toDataURL('image/png');
-//     const pdf = new jsPDF('p', 'pt', 'a4');
-//     const pageWidth = pdf.internal.pageSize.getWidth();
-//     const pageHeight = pdf.internal.pageSize.getHeight();
-//     pdf.addImage(imgData, 'PNG', 30, 30, pageWidth - 60, pageHeight - 60);
-//     pdf.save('data.pdf');
-//   });
-// };
-// const exportToPDF = () => {
-//   const doc = new jsPDF();
-//   doc.setFontSize(8);
-//   doc.text('Penerimaan Barang', 5, 5);
-
-//   let yPos = 10;
-//   data.forEach((item, index) => {
-//     doc.text(item.Kd_Brg, 10, yPos);
-//     doc.text(item.Nm_Brg.toString(), 60, yPos);
-//     doc.text(item.DOC_NO.toString(), 40, yPos);
-//     yPos += 10;
-//   });
-
-//   doc.save('data.pdf');
-// };
+    doc.save('Mesin.pdf');
+  };
   return (
     <LayoutContentWrapper style={{ height: '100%' }}>
     <LayoutContent>
