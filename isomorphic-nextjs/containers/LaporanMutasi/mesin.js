@@ -252,31 +252,45 @@ const Mesin = () => {
       fieldSeparator: ',',
       quoteStrings: '"',
       decimalSeparator: '.',
-      showLabels: true,
+      showLabels: true,  // Set to true to include column headers
       showTitle: true,
       useTextFile: false,
       useBom: true,
     });
-
-    const exportedData = filteredData.map((item) => ({
-     "Kode Barang": item.KodeBarang,
-     "Nama Barang": item.Nm_Brg,
-     "Satuan": item.Unit_Desc,
-     "Saldo Awal": item.Saldo_Awal,
-     "Pemasukan": item.IN_Brg,
-     "Pengeluaran": item.OUT_Brg,
-     "Penyesuaian": item.Adjust_Brg,
-     "Stock Opname": item.Qty_Fisik,
-     "Nama Barang": item.Nm_Brg,
-     "Saldo Akhir": item.Qty_System,
-     "Selisih": item.selisih,
-      // "Harga": item.Sub_Total,
-      // 'Tanggal Transaksi': moment(item.TanggalTransaksi).format('YYYY-MM-DD'),
-    }));
-
+  
+    const columnHeaders = {
+      "Kode Barang": "Kode Barang",
+      "Nama Barang": "Nama Barang",
+      "Satuan": "Satuan",
+      "Saldo Awal" : "Saldo Awal",
+      "Pemasukan" : "Pemasukan",
+      "Pengeluaran" : "Pengeluaran",
+      "Penyesuaian" : "Penyesuaian",
+      "Stock Opname" : "Stock Opname",
+      "Nama Barang" : "Nama Barang",
+      "Saldo Akhir" : "Saldo Akhir",
+      "Selisih" : "Selisih"
+    };
+  
+    const exportedData = [
+      columnHeaders,  // Include the column headers as the first row
+      ...filteredData.map((item) => ({
+        "Kode Barang": item.KodeBarang,
+        "Nama Barang": item.Nm_Brg,
+        "Satuan": item.Unit_Desc,
+        "Saldo Awal": item.Saldo_Awal,
+        "Pemasukan": item.IN_Brg,
+        "Pengeluaran": item.OUT_Brg,
+        "Penyesuaian": item.Adjust_Brg,
+        "Stock Opname": item.Qty_Fisik,
+        "Nama Barang": item.Nm_Brg,
+        "Saldo Akhir": item.Qty_System,
+        "Selisih": item.selisih,
+      }))
+    ];
+  
     csvExporter.generateCsv(exportedData);
   };
-
   const exportToExcel = () => {
     const exportedData = filteredData.map((item) => ({
       "Kode Barang": item.KodeBarang,

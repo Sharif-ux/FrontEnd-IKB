@@ -54,7 +54,33 @@ const PengeluaranBarang = () => {
     onFilter: (value, record) =>
       record[dataIndex] ? record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()) : '',
     })
-  
+    const getColumnDateProps = (dataIndex) => ({
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        <div style={{ padding: 8 }}>
+          <DatePicker
+            style={{ marginBottom: 8, display: 'block' }}
+            value={selectedKeys[0]}
+            onChange={(date) => setSelectedKeys(date ? [date] : [])}
+            onPressEnter={() => {
+              confirm();
+              setSearchText(selectedKeys[0]);
+              setSearchedColumn(dataIndex);
+            }}
+          />
+          <Space>
+            <button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
+              Search
+            </button>
+            <button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>
+              Reset
+            </button>
+          </Space>
+        </div>
+      ),
+      filterIcon: (filtered) => <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />,
+      onFilter: (value, record) =>
+        record[dataIndex] ? moment(record[dataIndex]).isSame(value, 'day') : false,
+    });
     // filterIcon: (filtered) => (
     //   <SearchOutlined
     //     style={{
@@ -127,21 +153,20 @@ const PengeluaranBarang = () => {
         const convertedDate = new Date(text).toLocaleDateString('id-ID', options);
         return <span>{convertedDate}</span>;
       },      
-      ...getColumnSearchProps('DOC_Date'),
+      ...getColumnDateProps('DOC_Date'),
     },
     {
       title: 'No. PO',
       dataIndex: 'DO_NO',
       key: 'DO_NO',
       ...getColumnSearchProps('DO_NO'),
-  
     },
     {
       title: 'Tgl. Pengeluaran',
       dataIndex: 'DO_Date',
       key: 'DO_Date',
       render: (text) => <span>{moment(text).format('YYYY-MM-DD')}</span>,
-      ...getColumnSearchProps('DO_Date'),
+      ...getColumnDateProps('DO_Date'),
 
     },
     {
@@ -250,33 +275,52 @@ const PengeluaranBarang = () => {
       fieldSeparator: ',',
       quoteStrings: '"',
       decimalSeparator: '.',
-      showLabels: true,
+      showLabels: true,  // Set to true to include column headers
       showTitle: true,
       useTextFile: false,
       useBom: true,
     });
-
-    const exportedData = filteredData.map((item) => ({
-     "Jenis Dokumen": item.DOC_Type,
-     "No Aju": item.NO_REG,
-     "No. Pabean": item.DOC_NO,
-     "Tgl. Pabean": item.DOC_Date,
-     "No. PO": item.DO_NO,
-     "Tgl. Pengeluaran": item.DO_Date,
-     "Penerima Barang": item.Buyer_Name,
-     "Kode Barang": item.Kd_Brg,
-     "Nama Barang": item.Nm_Brg,
-     "Satuan": item.Unit_Code,
-     "Jumlah": item.Item_Qty,
-     "Harga": item.Sub_Total,
-     "Harga CMT": item.CM_Price_Tot,
-     "Harga FOB": item.FOB_Price_Tot,
-
-      // 'Tanggal Transaksi': moment(item.TanggalTransaksi).format('YYYY-MM-DD'),
-    }));
-
+  
+    const columnHeaders = {
+      "Jenis Dokumen": "Jenis Dokumen",
+      "No Aju": "No Aju",
+      "No. Pabean": "No. Pabean",
+      "Tgl. Pabean": "Tgl. Pabean",
+      "No. PO": "No. PO",
+      "Tgl. Pengeluaran": "Tgl. Pengeluaran",
+      "Penerima Barang": "Penerima Barang",
+      "Kode Barang": "Kode Barang",
+      "Nama Barang": "Nama Barang",
+      "Satuan": "Satuan",
+      "Jumlah": "Jumlah",
+      "Harga": "Harga",
+      "Harga CMT": "Harga CMT",
+      "Harga FOB": "Harga FOB",
+    };
+  
+    const exportedData = [
+      columnHeaders,  // Include the column headers as the first row
+      ...filteredData.map((item) => ({
+        "Jenis Dokumen": item.DOC_Type,
+        "No Aju": item.NO_REG,
+        "No. Pabean": item.DOC_NO,
+        "Tgl. Pabean": item.DOC_Date,
+        "No. PO": item.DO_NO,
+        "Tgl. Pengeluaran": item.DO_Date,
+        "Penerima Barang": item.Buyer_Name,
+        "Kode Barang": item.Kd_Brg,
+        "Nama Barang": item.Nm_Brg,
+        "Satuan": item.Unit_Code,
+        "Jumlah": item.Item_Qty,
+        "Harga": item.Sub_Total,
+        "Harga CMT": item.CM_Price_Tot,
+        "Harga FOB": item.FOB_Price_Tot,
+      }))
+    ];
+  
     csvExporter.generateCsv(exportedData);
   };
+  
 
   const exportToExcel = () => {
     const exportedData = filteredData.map((item) => ({
@@ -355,17 +399,163 @@ const PengeluaranBarang = () => {
   
 //     doc.save('data.pdf');
 //   };
-const exportToPDF = () => {
-  const tableRef = document.getElementById('table-ref');
+const pageSize = 20; // Number of rows per page
 
-  html2canvas(tableRef).then((canvas) => {
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'pt', 'a4');
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    pdf.addImage(imgData, 'PNG', 30, 30, pageWidth - 60, pageHeight - 60);
-    pdf.save('data.pdf');
+const splitDataIntoChunks = (data, pageSize) => {
+  const chunks = [];
+  let index = 0;
+
+  while (index < data.length) {
+    chunks.push(data.slice(index, index + pageSize));
+    index += pageSize;
+  }
+
+  return chunks;
+};
+
+const generatePDFForChunk = (chunk, doc, columns) => {
+  const tableContent = chunk.map((row) => columns.map((column) => row[column.dataIndex]));
+  const customHeader = columns.map((column) => column.title);
+
+  doc.autoTable({
+    head: [customHeader],
+    body: tableContent,
+    theme: 'striped', // Apply striped theme for alternating row colors
+    styles: {
+      cellPadding: 1,
+      fontSize: 5,
+    },
+    columnStyles: columns.reduce((styles, column, index) => {
+      styles[index] = { fontStyle: 'light' }; // Apply bold font style to each column
+      return styles;
+    }, {}),
+    columnWidth: 'auto', // Set the initial column width to 'auto'
+    margin: { top: 15 }, // Add top margin to the table
+    didParseCell: (data) => {
+      // Adjust the column width based on the content
+      const col = data.column.index;
+      const headers = customHeader.length;
+      const colWidth = headers > col ? doc.getStringUnitWidth(customHeader[col]) * doc.internal.getFontSize() + 10 : 50;
+      data.cell.width = colWidth;
+    },
   });
+};
+
+const generatePDF = async () => {
+  try {
+    const response = await axios.get('http://localhost:3000/pengeluaranbarang');
+    const tableData = response.data;
+
+    const columns = [
+      // Define your columns here, following the Ant Design (antd) column configuration
+      {
+        title: 'Jenis Dokumen',
+        dataIndex: 'DOC_Type',
+        key: 'DOC_Type',
+        width: '4%'
+      },
+      {
+        title: 'No Aju',
+        dataIndex: 'NO_REG',
+        key: 'NO_REG',
+        width: '6%'
+      },
+      {
+        title: 'No. Pabean',
+        dataIndex: 'DOC_NO',
+        key: 'DOC_NO',
+        width: '6%'
+      },
+      {
+        title: 'Tgl. Pabean',
+        dataIndex: 'DOC_Date',
+        key: 'DOC_Date',
+        render: (text) => {
+          const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
+          const convertedDate = new Date(text).toLocaleDateString('id-ID', options);
+          return <span>{convertedDate}</span>;
+        },      
+        width: '8%'
+      },
+      {
+        title: 'No. PO',
+        dataIndex: 'DO_NO',
+        key: 'DO_NO',
+        width: '5%'
+      },
+      {
+        title: 'Tgl. Pengeluaran',
+        dataIndex: 'DO_Date',
+        key: 'DO_Date',
+        render: (text) => <span>{moment(text).format('YYYY-MM-DD')}</span>,
+        width: '8%'
+
+      },
+      {
+        title: 'Penerima Barang',
+        dataIndex: 'Buyer_Name',
+        key: 'Buyer_Name',
+        width: '8%'
+
+      },
+      {
+        title: 'Kode Barang',
+        dataIndex: 'Kd_Brg',
+        key: 'Kd_Brg',
+        width: '8%'
+      },
+      {
+        title: 'Nama Barang',
+        dataIndex: 'Nm_Brg',
+        key: 'Nm_Brg',
+        width: '5%' 
+    
+      },
+      {
+        title: 'Satuan',
+        dataIndex: 'Unit_Code',
+        key: 'Unit_Code',
+        width: '8%'    
+    
+      },
+      {
+        title: 'Jumlah',
+        dataIndex: 'Item_Qty',
+        key: 'Item_Qty',
+        width: '8%'  
+    
+      },
+      {
+        title: 'Harga CMT',
+        dataIndex: 'CM_Price_Tot',
+        key: 'CM_Price_Tot',
+        width: '8%'
+    
+      },
+      {
+        title: 'Harga FOB',
+        dataIndex: 'FOB_Price_Tot',
+        key: 'FOB_Price_Tot',
+        width: '8%'    
+      },
+      // {
+      // Add more columns as needed
+    ];
+
+    const doc = new jsPDF();
+    const dataChunks = splitDataIntoChunks(tableData, pageSize);
+
+    for (let i = 0; i < dataChunks.length; i++) {
+      if (i > 0) {
+        doc.addPage(); // Add a new page for each chunk after the first one
+      }
+      generatePDFForChunk(dataChunks[i], doc, columns);
+    }
+
+    doc.save('Pengeluaran_Barang.pdf');
+  } catch (error) {
+    console.error('Error fetching data:', error);
+  }
 };
   return (
     <LayoutContentWrapper style={{ height: '100%' }}>
@@ -389,7 +579,7 @@ const exportToPDF = () => {
             } else if (exportType === 'excel') {
               exportToExcel();
             } else if (exportType === 'pdf') {
-              exportToPDF(data);
+              generatePDF();
             }
           }}>
             Export {exportType.toUpperCase()}

@@ -23,6 +23,7 @@ const { Option } = Select;
 const TableForm = () => {
   const [data, setData] = useState([]);
   const [dateRange, setDateRange] = useState(null);
+  const [filteredDate, setFilteredDate] = useState(null);
   const [filteredData, setFilteredData] = useState([]);
   const [exportType, setExportType] = useState(null);
   const [searchText, setSearchText] = useState('');
@@ -54,7 +55,33 @@ const TableForm = () => {
     onFilter: (value, record) =>
       record[dataIndex] ? record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()) : '',
     })
-  
+    const getColumnDateProps = (dataIndex) => ({
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        <div style={{ padding: 8 }}>
+          <DatePicker
+            style={{ marginBottom: 8, display: 'block' }}
+            value={selectedKeys[0]}
+            onChange={(date) => setSelectedKeys(date ? [date] : [])}
+            onPressEnter={() => {
+              confirm();
+              setSearchText(selectedKeys[0]);
+              setSearchedColumn(dataIndex);
+            }}
+          />
+          <Space>
+            <button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
+              Search
+            </button>
+            <button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>
+              Reset
+            </button>
+          </Space>
+        </div>
+      ),
+      filterIcon: (filtered) => <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />,
+      onFilter: (value, record) =>
+        record[dataIndex] ? moment(record[dataIndex]).isSame(value, 'day') : false,
+    });
     // filterIcon: (filtered) => (
     //   <SearchOutlined
     //     style={{
@@ -122,7 +149,7 @@ const TableForm = () => {
         const convertedDate = new Date(text).toLocaleDateString('id-ID', options);
         return <span>{convertedDate}</span>;
       },             
-      ...getColumnSearchProps('DOC_Date')
+      ...getColumnDateProps('DOC_Date')
 
     },
     {
@@ -141,7 +168,7 @@ const TableForm = () => {
         const convertedDate = new Date(text).toLocaleDateString('id-ID', options);
         return <span>{convertedDate}</span>;
       }, 
-      ...getColumnSearchProps('Date_Transaction')
+      ...getColumnDateProps('Date_Transaction')
   
     },
     {
@@ -243,37 +270,63 @@ const TableForm = () => {
       fieldSeparator: ',',
       quoteStrings: '"',
       decimalSeparator: '.',
-      showLabels: true,
+      showLabels: true,  // Set to true to include column headers
       showTitle: true,
       useTextFile: false,
       useBom: true,
     });
-
-    const exportedData = filteredData.map((item) => ({
-     "DOC_Type": item.DOC_Type,
-     "No Aju": item.NO_REG,
-     "No. Pabean": item.DOC_NO,
-     "Tgl. Pabean": item.DOC_Date,
-     "No. Penerimaan Barang": item.NO_BUKTI,
-     "Tgl. Penerimaan Barang": item.Date_Transaction,
-     "Pemasok/Pengirim": item.Ship_Name,
-     "Kode Barang": item.Kd_Brg,
-     "Nama Barang": item.Nm_Brg,
-     "Satuan": item.Unit_Code,
-     "Jumlah": item.Item_Qty,
-      "Harga": item.Sub_Total,
-      // 'Tanggal Transaksi': moment(item.TanggalTransaksi).format('YYYY-MM-DD'),
-    }));
-
+  
+    const columnHeaders = {
+      "DOC Type": "DOC Type",
+      "No Aju": "No Aju",
+      "No. Pabean": "No. Pabean",
+      "Tgl. Pabean": "Tgl. Pabean",
+      "No. Penerimaan Barang": "No. Penerimaan Barang",
+      "Tgl. Penerimaan Barang": "Tgl. Penerimaan Barang",
+      "Pemasok/Pengirim": "Pemasok/Pengirim",
+      "Kode Barang": "Kode Barang",
+      "Nama Barang": "Nama Barang",
+      "Satuan": "Satuan",
+      "Jumlah": "Jumlah",
+      "Harga": "Harga",
+    };
+  
+    const exportedData = [
+      columnHeaders,  // Include the column headers as the first row
+      ...filteredData.map((item) => ({
+        "DOC_Type": item.DOC_Type,
+        "No Aju": item.NO_REG,
+        "No. Pabean": item.DOC_NO,
+        "Tgl. Pabean": item.DOC_Date,
+        "No. Penerimaan Barang": item.NO_BUKTI,
+        "Tgl. Penerimaan Barang": item.Date_Transaction,
+        "Pemasok/Pengirim": item.Ship_Name,
+        "Kode Barang": item.Kd_Brg,
+        "Nama Barang": item.Nm_Brg,
+        "Satuan": item.Unit_Code,
+        "Jumlah": item.Item_Qty,
+         "Harga": item.Sub_Total,
+      }))
+    ];
+  
     csvExporter.generateCsv(exportedData);
   };
+  
 
   const exportToExcel = () => {
     const exportedData = filteredData.map((item) => ({
-      Code: item.code,
-      Description: item.NO_REG,
-      Category: item.category,
-      'Tanggal Transaksi': moment(item.TanggalTransaksi).format('YYYY-MM-DD'),
+      "DOC_Type": item.DOC_Type,
+      "No Aju": item.NO_REG,
+      "No. Pabean": item.DOC_NO,
+      "Tgl. Pabean": item.DOC_Date,
+      "No. Penerimaan Barang": item.NO_BUKTI,
+      "Tgl. Penerimaan Barang": item.Date_Transaction,
+      "Pemasok/Pengirim": item.Ship_Name,
+      "Kode Barang": item.Kd_Brg,
+      "Nama Barang": item.Nm_Brg,
+      "Satuan": item.Unit_Code,
+      "Jumlah": item.Item_Qty,
+       "Harga": item.Sub_Total,
     }));
   
     const worksheet = XLSX.utils.json_to_sheet(exportedData);
@@ -335,13 +388,31 @@ const splitDataIntoChunks = (data, pageSize) => {
   return chunks;
 };
 
-const generatePDFForChunk = (chunk, doc) => {
-  const tableContent = chunk.map((row) => Object.values(row));
-  const customHeader = ['J.Doc', 'No.Aju', 'No.Pabean', 'Tgl.Pabean', 'No.Penerimaan Barang', 'Tgl.Penerimaan Barang', 'Pemasok', 'Kode Barang', 'Nama Barang', 'Satuan', 'Jumlah', 'Harga'];
+const generatePDFForChunk = (chunk, doc, columns) => {
+  const tableContent = chunk.map((row) => columns.map((column) => row[column.dataIndex]));
+  const customHeader = columns.map((column) => column.title);
 
   doc.autoTable({
     head: [customHeader],
     body: tableContent,
+    theme: 'striped', // Apply striped theme for alternating row colors
+    styles: {
+      cellPadding: 1,
+      fontSize: 5,
+    },
+    columnStyles: columns.reduce((styles, column, index) => {
+      styles[index] = { fontStyle: 'light' }; // Apply bold font style to each column
+      return styles;
+    }, {}),
+    columnWidth: 'auto', // Set the initial column width to 'auto'
+    margin: { top: 15 }, // Add top margin to the table
+    didParseCell: (data) => {
+      // Adjust the column width based on the content
+      const col = data.column.index;
+      const headers = customHeader.length;
+      const colWidth = headers > col ? doc.getStringUnitWidth(customHeader[col]) * doc.internal.getFontSize() + 10 : 50;
+      data.cell.width = colWidth;
+    },
   });
 };
 
@@ -350,6 +421,100 @@ const generatePDF = async () => {
     const response = await axios.get('http://localhost:3000/penerimaanbarang');
     const tableData = response.data;
 
+    const columns = [
+      // Define your columns here, following the Ant Design (antd) column configuration
+      {
+        title: 'Jenis Dokumen',
+        dataIndex: 'DOC_Type',
+        key: 'DOC_Type',
+        width: '4%'
+      },
+      {
+        title: 'No Aju',
+        dataIndex: 'NO_REG',
+        key: 'NO_REG',
+        width: '6%'
+      },
+      {
+        title: 'No. Pabean',
+        dataIndex: 'DOC_NO',
+        key: 'DOC_NO',
+        width: '6%'
+      },
+      {
+        title: 'Tgl. Pabean',
+        dataIndex: 'DOC_Date',
+        key: 'DOC_Date',
+        render: (text) => {
+          const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
+          const convertedDate = new Date(text).toLocaleDateString('id-ID', options);
+          return <span>{convertedDate}</span>;
+        },             
+        width: '8%'
+
+      },
+      {
+        title: 'No. Penerimaan Barang',
+        dataIndex: 'NO_BUKTI',
+        key: 'NO_BUKTI',
+        width: '5%'
+
+      },
+      {
+        title: 'Tgl. Penerimaan Barang',
+        dataIndex: 'Date_Transaction',
+        key: 'Date_Transaction',
+        render: (text) => {
+          const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
+          const convertedDate = new Date(text).toLocaleDateString('id-ID', options);
+          return <span>{convertedDate}</span>;
+        }, 
+        width: '8%'
+
+      },
+      {
+        title: 'Pemasok/Pengirim',
+        dataIndex: 'Ship_Name',
+        key: 'Ship_Name',
+        width: '8%'
+
+      },
+      {
+        title: 'Kode Barang',
+        dataIndex: 'Kd_Brg',
+        key: 'Kd_Brg',
+        width: '8%'
+
+      },
+      {
+        title: 'Nama Barang',
+        dataIndex: 'Nm_Brg',
+        key: 'Nm_Brg',   
+        width: '5%' 
+      },
+      {
+        title: 'Satuan',
+        dataIndex: 'Unit_Code',
+        key: 'Unit_Code',
+        width: '8%'    
+      },
+      {
+        title: 'Jumlah',
+        dataIndex: 'Item_Qty',
+        key: 'Item_Qty',  
+        width: '8%'  
+      },
+      {
+        title: 'Harga',
+        dataIndex: 'Sub_Total',
+        key: 'Sub_Total',
+        width: '8%'
+
+      },
+      // {
+      // Add more columns as needed
+    ];
+
     const doc = new jsPDF();
     const dataChunks = splitDataIntoChunks(tableData, pageSize);
 
@@ -357,10 +522,10 @@ const generatePDF = async () => {
       if (i > 0) {
         doc.addPage(); // Add a new page for each chunk after the first one
       }
-      generatePDFForChunk(dataChunks[i], doc);
+      generatePDFForChunk(dataChunks[i], doc, columns);
     }
 
-    doc.save('Wip.pdf');
+    doc.save('Penerimaan_Barang.pdf');
   } catch (error) {
     console.error('Error fetching data:', error);
   }
