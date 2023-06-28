@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef} from 'react';
-import { Table, DatePicker, Select, Button } from 'antd';
+import { Table, DatePicker, Select, Button, } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
-import { Input, Space,  } from 'antd';
+import { Input, Space, Alert } from 'antd';
 import Highlighter from 'react-highlight-words';
 import moment from 'moment';
 import axios from 'axios';
@@ -18,6 +18,7 @@ import LayoutContentWrapper from '@iso/components/utility/layoutWrapper';
 import LayoutContent from '@iso/components/utility/layoutContent';
 const { RangePicker } = DatePicker;
 const { Option } = Select;
+const pageSize = 20; // Number of rows per page
 
 
 const TableForm = () => {
@@ -121,6 +122,22 @@ const TableForm = () => {
       ) : (
         text
       )
+      const generatePDF = async () => {
+        const doc = new jsPDF();
+        const currentPage = tableRef.current?.state.pagination.current || 1;
+        const startIndex = (currentPage - 1) * pageSize;
+    
+        // Retrieve the currently rendered table rows
+        const rows = await tableRef.current?.getRenderedRows();
+    
+        if (rows && rows.length > 0) {
+          const endIndex = Math.min(startIndex + pageSize, rows.length);
+          const visibleData = rows.slice(startIndex, endIndex).map(row => row.props.data);
+    
+          generatePDFForChunk(visibleData, doc, columns);
+          doc.save('Penerimaan_Barang.pdf');
+        }
+      };
   const columns = [
     {
       title: 'Jenis Dokumen',
@@ -416,121 +433,132 @@ const generatePDFForChunk = (chunk, doc, columns) => {
   });
 };
 
-const generatePDF = async () => {
-  try {
-    const response = await axios.get('http://localhost:3000/penerimaanbarang');
-    const tableData = response.data;
+// const generatePDF = async () => {
+//   try {
+//     const response = await axios.get('http://localhost:3000/penerimaanbarang');
+//     const tableData = response.data;
 
-    const columns = [
-      // Define your columns here, following the Ant Design (antd) column configuration
-      {
-        title: 'Jenis Dokumen',
-        dataIndex: 'DOC_Type',
-        key: 'DOC_Type',
-        width: '4%'
-      },
-      {
-        title: 'No Aju',
-        dataIndex: 'NO_REG',
-        key: 'NO_REG',
-        width: '6%'
-      },
-      {
-        title: 'No. Pabean',
-        dataIndex: 'DOC_NO',
-        key: 'DOC_NO',
-        width: '6%'
-      },
-      {
-        title: 'Tgl. Pabean',
-        dataIndex: 'DOC_Date',
-        key: 'DOC_Date',
-        render: (text) => {
-          const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
-          const convertedDate = new Date(text).toLocaleDateString('id-ID', options);
-          return <span>{convertedDate}</span>;
-        },             
-        width: '8%'
+//     const columns = [
+//       // Define your columns here, following the Ant Design (antd) column configuration
+//       {
+//         title: 'Jenis Dokumen',
+//         dataIndex: 'DOC_Type',
+//         key: 'DOC_Type',
+//         width: '4%'
+//       },
+//       {
+//         title: 'No Aju',
+//         dataIndex: 'NO_REG',
+//         key: 'NO_REG',
+//         width: '6%'
+//       },
+//       {
+//         title: 'No. Pabean',
+//         dataIndex: 'DOC_NO',
+//         key: 'DOC_NO',
+//         width: '6%'
+//       },
+//       {
+//         title: 'Tgl. Pabean',
+//         dataIndex: 'DOC_Date',
+//         key: 'DOC_Date',
+//         render: (text) => {
+//           const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
+//           const convertedDate = new Date(text).toLocaleDateString('id-ID', options);
+//           return <span>{convertedDate}</span>;
+//         },             
+//         width: '8%'
 
-      },
-      {
-        title: 'No. Penerimaan Barang',
-        dataIndex: 'NO_BUKTI',
-        key: 'NO_BUKTI',
-        width: '5%'
+//       },
+//       {
+//         title: 'No. Penerimaan Barang',
+//         dataIndex: 'NO_BUKTI',
+//         key: 'NO_BUKTI',
+//         width: '5%'
 
-      },
-      {
-        title: 'Tgl. Penerimaan Barang',
-        dataIndex: 'Date_Transaction',
-        key: 'Date_Transaction',
-        render: (text) => {
-          const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
-          const convertedDate = new Date(text).toLocaleDateString('id-ID', options);
-          return <span>{convertedDate}</span>;
-        }, 
-        width: '8%'
+//       },
+//       {
+//         title: 'Tgl. Penerimaan Barang',
+//         dataIndex: 'Date_Transaction',
+//         key: 'Date_Transaction',
+//         render: (text) => {
+//           const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
+//           const convertedDate = new Date(text).toLocaleDateString('id-ID', options);
+//           return <span>{convertedDate}</span>;
+//         }, 
+//         width: '8%'
 
-      },
-      {
-        title: 'Pemasok/Pengirim',
-        dataIndex: 'Ship_Name',
-        key: 'Ship_Name',
-        width: '8%'
+//       },
+//       {
+//         title: 'Pemasok/Pengirim',
+//         dataIndex: 'Ship_Name',
+//         key: 'Ship_Name',
+//         width: '8%'
 
-      },
-      {
-        title: 'Kode Barang',
-        dataIndex: 'Kd_Brg',
-        key: 'Kd_Brg',
-        width: '8%'
+//       },
+//       {
+//         title: 'Kode Barang',
+//         dataIndex: 'Kd_Brg',
+//         key: 'Kd_Brg',
+//         width: '8%'
 
-      },
-      {
-        title: 'Nama Barang',
-        dataIndex: 'Nm_Brg',
-        key: 'Nm_Brg',   
-        width: '5%' 
-      },
-      {
-        title: 'Satuan',
-        dataIndex: 'Unit_Code',
-        key: 'Unit_Code',
-        width: '8%'    
-      },
-      {
-        title: 'Jumlah',
-        dataIndex: 'Item_Qty',
-        key: 'Item_Qty',  
-        width: '8%'  
-      },
-      {
-        title: 'Harga',
-        dataIndex: 'Sub_Total',
-        key: 'Sub_Total',
-        width: '8%'
+//       },
+//       {
+//         title: 'Nama Barang',
+//         dataIndex: 'Nm_Brg',
+//         key: 'Nm_Brg',   
+//         width: '5%' 
+//       },
+//       {
+//         title: 'Satuan',
+//         dataIndex: 'Unit_Code',
+//         key: 'Unit_Code',
+//         width: '8%'    
+//       },
+//       {
+//         title: 'Jumlah',
+//         dataIndex: 'Item_Qty',
+//         key: 'Item_Qty',  
+//         width: '8%'  
+//       },
+//       {
+//         title: 'Harga',
+//         dataIndex: 'Sub_Total',
+//         key: 'Sub_Total',
+//         width: '8%'
 
-      },
-      // {
-      // Add more columns as needed
-    ];
+//       },
+//       // {
+//       // Add more columns as needed
+//     ];
 
-    const doc = new jsPDF();
-    const dataChunks = splitDataIntoChunks(tableData, pageSize);
+//     const doc = new jsPDF();
+//     const dataChunks = splitDataIntoChunks(tableData, pageSize);
 
-    for (let i = 0; i < dataChunks.length; i++) {
-      if (i > 0) {
-        doc.addPage(); // Add a new page for each chunk after the first one
-      }
-      generatePDFForChunk(dataChunks[i], doc, columns);
-    }
+//     for (let i = 0; i < dataChunks.length; i++) {
+//       if (i > 0) {
+//         doc.addPage(); // Add a new page for each chunk after the first one
+//       }
+//       generatePDFForChunk(dataChunks[i], doc, columns);
+//     }
 
-    doc.save('Penerimaan_Barang.pdf');
-  } catch (error) {
-    console.error('Error fetching data:', error);
-  }
-};
+//     doc.save('Penerimaan_Barang.pdf');
+//   } catch (error) {
+//     console.error('Error fetching data:', error);
+//   }
+// };
 
+// Function to generate PDF from currently visible table data
+// const generatePDF = () => {
+//   const doc = new jsPDF();
+//   const currentPage = tableRef.current?.state.pagination.current || 1;
+//   const startIndex = (currentPage - 1) * pageSize;
+//   const endIndex = startIndex + pageSize;
+//   const visibleData = tableData.slice(startIndex, endIndex);
+
+//   generatePDFForChunk(visibleData, doc, columns);
+//   doc.save('Penerimaan_Barang.pdf');
+// };
   return (
     <LayoutContentWrapper style={{ height: '100%' }}>
     <LayoutContent>
@@ -560,11 +588,18 @@ const generatePDF = async () => {
           </Button>
         )}
       </div>
-      {filteredData.length > 0 ? (
+      
+      {
+      dateRange === null ? <div style={{position: "relative", top: "10", right: "10", display:dateRange === null ? "block" : "none", zIndex: "99"}}>  <Alert
+      message="Catatan Informasi"
+      description="Isi Date Range Sebelum Melihat Data"
+      type="info"
+      showIcon
+    /></div> :
+      filteredData.length > 0 ? (
         <Table id="table-ref" columns={columns} dataSource={filteredData} scroll={{ x: 400 }} ref={tableRef}/>
       ) : (
-        <p>No data available</p>
-      )}
+        <Table id="table-ref" columns={columns}    scroll={{ x: 400 }} ref={tableRef}/>      )}
     </div>
     </LayoutContent>
       </LayoutContentWrapper>
