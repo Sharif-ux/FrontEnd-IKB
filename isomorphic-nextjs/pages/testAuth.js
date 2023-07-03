@@ -1,140 +1,115 @@
-import { useEffect, useRef, useState } from 'react';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
-import { Table } from 'antd';
+import React, { useState } from 'react';
+import { Table, DatePicker, Button } from 'antd';
+import axios from 'axios';
 
-const pageSize = 20; // Number of rows per page
+const { RangePicker } = DatePicker;
 
-const YourComponent = () => {
-  const tableRef = useRef(null); // Create a ref for the Table component
-  const [tableData, setTableData] = useState([]);
+const MyComponent = () => {
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [dt_Awal, setDt_Awal] = useState(null);
+  const [Kd_Brg, setKd_Brg] = useState('');
+  const [dt_Akhir, setDt_Akhir] = useState(null);
 
-  useEffect(() => {
-    fetchTableData();
-  }, []);
-
-  // Function to fetch table data from the API
-  const fetchTableData = async () => {
-    try {
-      const response = await fetch('http://localhost:3000/penerimaanbarang');
-      const data = await response.json();
-      setTableData(data);
-    } catch (error) {
-      console.error('Error fetching data:', error);
+  const handleTableClick = (record) => {
+    setSelectedRowKeys([record.Kd_Brg]);
+  
+    // Find the record with the selected key
+    const selectedRecord = data.find((item) => item.key === record.Kd_Brg);
+  
+    if (selectedRecord) {
+      setKd_Brg(selectedRecord.Kd_Brg);
+      console.log("cek", selectedRecord.Kd_Brg)
+    } else {
+      setKd_Brg('');
     }
   };
 
+  const handleDateRangeChange = (dates) => {
+    // Handle date range picker change event and set dt_Awal and dt_Akhir states
+    setDt_Awal(dates[0]);
+    setDt_Akhir(dates[1]);
+  };
+
+  const callStoredProc = () => {
+    const Kd_Brg = selectedRowKeys[0];
+    const apiUrl = 'http://localhost:3000/storedprocedure'; // Replace with your server URL
+
+    axios
+      .get(apiUrl, {
+        params: {
+          Kd_Brg,
+          dt_Awal: dt_Awal.format('YYYY-MM-DD'),
+          dt_Akhir: dt_Akhir.format('YYYY-MM-DD'),
+        },
+      })
+      .then((response) => {
+        // Handle the response from the server
+        console.log(response.data); // Do something with the data
+      })
+      .catch((error) => {
+        // Handle any errors
+        console.error(error);
+      });
+  };
+
+  // Define the columns for the table
   const columns = [
     {
-      title: 'Jenis Dokumen',
-      dataIndex: 'DOC_Type',
-      key: 'DOC_Type',
-      width: '4%'
-    },
-    {
-      title: 'No Aju',
-      dataIndex: 'NO_REG',
-      key: 'NO_REG',
-      width: '6%'
-    },
-    {
-      title: 'No. Pabean',
-      dataIndex: 'DOC_NO',
-      key: 'DOC_NO',
-      width: '6%'
-    },
-    {
-      title: 'Tgl. Pabean',
-      dataIndex: 'DOC_Date',
-      key: 'DOC_Date',
-      render: (text) => {
-        const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
-        const convertedDate = new Date(text).toLocaleDateString('id-ID', options);
-        return <span>{convertedDate}</span>;
-      },
-      width: '8%'
-    },
-    {
-      title: 'No. Penerimaan Barang',
-      dataIndex: 'NO_BUKTI',
-      key: 'NO_BUKTI',
-      width: '5%'
-    },
-    {
-      title: 'Tgl. Penerimaan Barang',
-      dataIndex: 'Date_Transaction',
-      key: 'Date_Transaction',
-      render: (text) => {
-        const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
-        const convertedDate = new Date(text).toLocaleDateString('id-ID', options);
-        return <span>{convertedDate}</span>;
-      },
-      width: '8%'
-    },
-    {
-      title: 'Pemasok/Pengirim',
-      dataIndex: 'Ship_Name',
-      key: 'Ship_Name',
-      width: '8%'
-    },
-    {
-      title: 'Kode Barang',
+      title: 'Kd_Brg',
       dataIndex: 'Kd_Brg',
       key: 'Kd_Brg',
-      width: '8%'
+      render: (text, record) => (
+        <div
+          style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
+          onClick={() => handleTableClick(record)}
+        >
+          {text}
+        </div>
+      ),
     },
-    {
-      title: 'Nama Barang',
-      dataIndex: 'Nm_Brg',
-      key: 'Nm_Brg',
-      width: '5%'
-    },
-    {
-      title: 'Satuan',
-      dataIndex: 'Unit_Code',
-      key: 'Unit_Code',
-      width: '8%'
-    },
-    {
-      title: 'Jumlah',
-      dataIndex: 'Item_Qty',
-      key: 'Item_Qty',
-      width: '8%'
-    },
-    {
-      title: 'Harga',
-      dataIndex: 'Sub_Total',
-      key: 'Sub_Total',
-      width: '8%'
-    }
-    // Add more columns as needed
+    
+    // ... other columns
   ];
 
-  // Function to generate PDF from currently visible table data
-  const generatePDF = async () => {
-    const doc = new jsPDF();
-    const currentPage = tableRef.current?.state.pagination.current || 1;
-    const startIndex = (currentPage - 1) * pageSize;
+  // Sample data for the table
+  const data = [
+  {
+    key: '1234234235435',
+    Kd_Brg: '23BB-2018',
+    // other properties
+  },
+  {
+    key: '25645634242324',
+    Kd_Brg: '23BB-2017',
+    // other properties
+  },  {
+    key: '34242324',
+    Kd_Brg: '23BB-2017',
+    // other properties
+  },
+    // ... other rows
+  ];
 
-    // Retrieve the currently rendered table rows
-    const rows = await tableRef.current?.getRenderedRows();
-
-    if (rows && rows.length > 0) {
-      const endIndex = Math.min(startIndex + pageSize, rows.length);
-      const visibleData = rows.slice(startIndex, endIndex).map(row => row.props.data);
-
-      generatePDFForChunk(visibleData, doc, columns);
-      doc.save('Penerimaan_Barang.pdf');
-    }
-  };
-
-  // Render your table component here
   return (
-    <>
-      <Table ref={tableRef} dataSource={tableData} columns={columns} />
-      <button onClick={generatePDF}>Generate PDF</button>
-    </>
+    <div>
+      <Table
+        columns={columns}
+        dataSource={data}
+        // rowSelection={{
+        //   type: 'radio',
+        //   selectedRowKeys,
+        //   onChange: (keys) => {setSelectedRowKeys(keys), console.log("isi keys", keys)}
+        
+        // }}
+      />
+
+      <RangePicker onChange={handleDateRangeChange} />
+
+      <Button type="primary" onClick={callStoredProc}>
+        Call Stored Procedure
+      </Button>
+    </div>
   );
 };
 
-export default YourComponent;
+export default MyComponent;

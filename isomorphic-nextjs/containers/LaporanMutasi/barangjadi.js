@@ -29,6 +29,10 @@ const BarangJadi = () => {
   const [exportType, setExportType] = useState(null);
   const [searchText, setSearchText] = useState('');
   const [searchedColumn, setSearchedColumn] = useState('');
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [dt_Awal, setDt_Awal] = useState(null);
+  const [Kd_Brg, setKd_Brg] = useState('');
+  const [dt_Akhir, setDt_Akhir] = useState(null);
   const searchInput = useRef(null);
   const tableRef = useRef(null);
   const getColumnSearchProps = (dataIndex) => ({
@@ -76,7 +80,49 @@ const BarangJadi = () => {
       setSearchText(selectedKeys[0]);
       setSearchedColumn(dataIndex);
     };
+    const handleTableClick = (record) => {
+      setSelectedRowKeys([record.index]);
+    
+      // Find the record with the selected key
+      const selectedRecord = data.find((item) => item.Kd_Brg === record.Kd_Brg);
+      console.log("cek selectedRecord" ,selectedRecord)
+
+      if (selectedRecord) {
+        setKd_Brg(selectedRecord.Kd_Brg);
+        console.log("cek", selectedRecord.KodeBarang)
+      } else {
+        setKd_Brg('');
+      }
+    };  
+
+        const handleDateRangeChange = (dates) => {
+      // Handle date range picker change event and set dt_Awal and dt_Akhir states
+      setDt_Awal(dates[0]);
+      setDt_Akhir(dates[1]);
+    };
   
+    const callStoredProc = () => {
+      const Kd_Brg = selectedRowKeys[0];
+      const apiUrl = 'http://localhost:3000/storedprocedure'; // Replace with your server URL
+  
+      axios
+        .get(apiUrl, {
+          params: {
+            Kd_Brg,
+            dt_Awal: dt_Awal.format('YYYY-MM-DD'),
+            dt_Akhir: dt_Akhir.format('YYYY-MM-DD'),
+          },
+        })
+        .then((response) => {
+          // Handle the response from the server
+          console.log(response.data); // Do something with the data
+        })
+        .catch((error) => {
+          // Handle any errors
+          console.error(error);
+        });
+    };
+    
     const handleReset = (clearFilters) => {
       clearFilters();
       setSearchText('');
@@ -105,6 +151,14 @@ const BarangJadi = () => {
       title: 'Kode Barang',
       dataIndex: 'KodeBarang',
       key: 'KodeBarang',
+      render: (text, record) => (
+        <div
+          style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
+          onClick={() => handleTableClick(record)}
+        >
+          {text}
+        </div>
+      ),
       ...getColumnSearchProps('KodeBarang'),
     },
     {
@@ -166,7 +220,9 @@ const BarangJadi = () => {
       title: 'Selisih',
       dataIndex: 'selisih',
       key: 'selisih',
+      
       ...getColumnSearchProps('selisih'),
+      
   
     },
     // {
@@ -345,7 +401,7 @@ const BarangJadi = () => {
     <LayoutContent>
     <div>
     <div style={{ marginBottom: 16,  display: "flex", width: "100%", justifyContent: "center"}}>
-        <RangePicker onChange={handleDateChange} />
+        <RangePicker onChange={handleDateRangeChange} />
         <Select
           defaultValue="Export Type"
           style={{ width: 120, marginLeft: 16 }}
@@ -368,7 +424,7 @@ const BarangJadi = () => {
             Export {exportType.toUpperCase()}
           </Button>
         )}
-              <Button style={{marginLeft: 16,  backgroundColor: "#1f2431", color: "#efefef", borderRadius: "5px"}}>Kartu Stock</Button>
+              <Button onClick={callStoredProc} style={{marginLeft: 16,  backgroundColor: "#1f2431", color: "#efefef", borderRadius: "5px"}}>Kartu Stock</Button>
 
       </div>
       {filteredData.length > 0 ? (
