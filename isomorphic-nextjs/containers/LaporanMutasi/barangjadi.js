@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef} from 'react';
-import { Table, DatePicker, Select, Button } from 'antd';
+import { Table, DatePicker, Select, Button, Modal } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { Input, Space,  } from 'antd';
 import Highlighter from 'react-highlight-words';
@@ -33,6 +33,10 @@ const BarangJadi = () => {
   const [dt_Awal, setDt_Awal] = useState(null);
   const [Kd_Brg, setKd_Brg] = useState('');
   const [dt_Akhir, setDt_Akhir] = useState(null);
+  const [dataTrace, setDataTrace] = useState([])
+  const [dataTraceStyle, setDataTraceStyle] = useState([])
+  const [visible, setVisible] = useState(false);
+  const [visibleModal, setVisibleModal] = useState(false);
   const searchInput = useRef(null);
   const tableRef = useRef(null);
   const getColumnSearchProps = (dataIndex) => ({
@@ -74,16 +78,11 @@ const BarangJadi = () => {
     //     setTimeout(() => searchInput.current?.select(), 100);
     //   }
     // },
-  
-    const handleSearch = (selectedKeys, confirm, dataIndex) => {
-      confirm();
-      setSearchText(selectedKeys[0]);
-      setSearchedColumn(dataIndex);
-    };
+
     const handleTableClick = (record) => {
-      setSelectedRowKeys([record.index]);
+      setSelectedRowKeys([record.Kd_Brg]);
     
-      // Find the record with the selected key
+      
       const selectedRecord = data.find((item) => item.Kd_Brg === record.Kd_Brg);
       console.log("cek selectedRecord" ,selectedRecord)
 
@@ -94,16 +93,46 @@ const BarangJadi = () => {
         setKd_Brg('');
       }
     };  
-
-        const handleDateRangeChange = (dates) => {
-      // Handle date range picker change event and set dt_Awal and dt_Akhir states
-      setDt_Awal(dates[0]);
-      setDt_Akhir(dates[1]);
+    const showModal = () => {
+      setVisible(true);
     };
   
+    const handleOk = () => {
+      setVisible(false);
+    };
+  
+    const handleCancel = () => {
+      setVisible(false);
+    };
+    const showModalStyle = () => {
+      setVisibleModal(true);
+    };
+  
+    const handleOkModalStyle = () => {
+      setVisibleModal(false);
+    };
+  
+    const handleCancelModalStyle = () => {
+      setVisibleModal(false);
+    };
+    //     const handleDateRangeChange = (dates) => {
+    //      setDt_Awal(dates[0]);
+    //   setDt_Akhir(dates[1]);
+    // };
+    const handleDateRangeChange = (dates) => {
+      if (dates && dates.length > 0) {
+        // Handle date range picker change event and set dt_Awal and dt_Akhir states
+        setDt_Awal(dates[0]);
+        setDt_Akhir(dates[1]);
+      } else {
+        // Handle null or empty dates scenario
+        setDt_Awal(null);
+        setDt_Akhir(null);
+      }
+    };
     const callStoredProc = () => {
       const Kd_Brg = selectedRowKeys[0];
-      const apiUrl = 'http://localhost:3000/storedprocedure'; // Replace with your server URL
+      const apiUrl = 'http://localhost:3000/storedprocedure'; 
   
       axios
         .get(apiUrl, {
@@ -114,15 +143,35 @@ const BarangJadi = () => {
           },
         })
         .then((response) => {
-          // Handle the response from the server
-          console.log(response.data); // Do something with the data
+        
+          setDataTrace(response.data);
+          console.log(response.data);
         })
         .catch((error) => {
-          // Handle any errors
           console.error(error);
         });
     };
-    
+    const callStoredStyle = () => {
+      const Kd_Brg = selectedRowKeys[0];
+      const apiUrl = 'http://localhost:3000/storestyle'; 
+  
+      axios
+        .get(apiUrl, {
+          params: {
+            Kd_Brg,
+          },
+        })
+        .then((response) => {
+        
+          setDataTraceStyle(response.data);
+          console.log(response.data);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    };
+    console.log("setDataTrace", dataTrace)
+
     const handleReset = (clearFilters) => {
       clearFilters();
       setSearchText('');
@@ -145,12 +194,20 @@ const BarangJadi = () => {
     {
       title: 'No.',
       dataIndex: 'index',
-      render: (text, record, index) => index + 1, // Generate automation numbering
+      render: (text, record, index) => (
+        <div
+          style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
+          onClick={() => handleTableClick(record)}
+        >
+          {index + 1}
+        </div>
+      ),
+      // render: (text, record, index) => index + 1, // Generate automation numbering
     },
     {
       title: 'Kode Barang',
-      dataIndex: 'KodeBarang',
-      key: 'KodeBarang',
+      dataIndex: 'Kd_Brg',
+      key: 'Kd_Brg',
       render: (text, record) => (
         <div
           style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
@@ -159,24 +216,48 @@ const BarangJadi = () => {
           {text}
         </div>
       ),
-      ...getColumnSearchProps('KodeBarang'),
+      ...getColumnSearchProps('Kd_Brg'),
     },
     {
       title: 'Nama Barang',
       dataIndex: 'Nm_Brg',
       key: 'Nm_Brg',
+      render: (text, record) => (
+        <div
+          style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
+          onClick={() => handleTableClick(record)}
+        >
+          {text}
+        </div>
+      ),
       ...getColumnSearchProps('Nm_Brg'),
     },
     {
       title: 'Satuan',
       dataIndex: 'Unit_Desc',
       key: 'Unit_Desc',
+      render: (text, record) => (
+        <div
+          style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
+          onClick={() => handleTableClick(record)}
+        >
+          {text}
+        </div>
+      ),
       ...getColumnSearchProps('Unit_Desc'),
     },
     {
       title: 'Saldo Awal',
       dataIndex: 'Saldo_Awal',
-      key: 'Saldo_Awal',           
+      key: 'Saldo_Awal',      
+      render: (text, record) => (
+        <div
+          style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
+          onClick={() => handleTableClick(record)}
+        >
+          {  text.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+        </div>
+      ),     
       ...getColumnSearchProps('Saldo_Awal')
 
     },
@@ -184,6 +265,14 @@ const BarangJadi = () => {
       title: 'Pemasukan',
       dataIndex: 'IN_Brg',
       key: 'IN_Brg',
+      render: (text, record) => (
+        <div
+          style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
+          onClick={() => handleTableClick(record)}
+        >
+          {  text.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+        </div>
+      ),
       ...getColumnSearchProps('IN_Brg'),
   
     },
@@ -191,21 +280,42 @@ const BarangJadi = () => {
       title: 'Pengeluaran',
       dataIndex: 'OUT_Brg',
       key: 'OUT_Brg',
-
+      render: (text, record) => (
+        <div
+          style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
+          onClick={() => handleTableClick(record)}
+        >
+          {  text.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+        </div>
+      ),
       ...getColumnSearchProps('OUT_Brg')
-  
-    },
+      },
     {
       title: 'Penyusaian',
       dataIndex: 'Adjust_Brg',
       key: 'Adjust_Brg',
+      render: (text, record) => (
+        <div
+          style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
+          onClick={() => handleTableClick(record)}
+        >
+          {text.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+        </div>
+      ),
       ...getColumnSearchProps('Adjust_Brg'),
-  
-    },
+      },
     {
       title: 'Stock Opname',
       dataIndex: 'Qty_Fisik',
       key: 'Qty_Fisik',
+      render: (text, record) => (
+        <div
+          style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
+          onClick={() => handleTableClick(record)}
+        >
+          {text}
+        </div>
+      ),
       ...getColumnSearchProps('Qty_Fisik'),
   
     },
@@ -213,6 +323,14 @@ const BarangJadi = () => {
       title: 'Saldo Akhir',
       dataIndex: 'Qty_System',
       key: 'Qty_System',
+      render: (text, record) => (
+        <div
+          style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
+          onClick={() => handleTableClick(record)}
+        >
+          {  text.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+        </div>
+      ),
       ...getColumnSearchProps('Qty_System'),
   
     },
@@ -220,7 +338,14 @@ const BarangJadi = () => {
       title: 'Selisih',
       dataIndex: 'selisih',
       key: 'selisih',
-      
+      render: (text, record) => (
+        <div
+          style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
+          onClick={() => handleTableClick(record)}
+        >
+          {  text.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+        </div>
+      ),
       ...getColumnSearchProps('selisih'),
       
   
@@ -302,6 +427,131 @@ const BarangJadi = () => {
     });
     setFilteredData(filtered);
   };
+  const handleClick = () => {
+    showModal();
+    callStoredProc();
+  };
+  const handleClick2 = () => {
+    showModalStyle();
+    callStoredStyle();
+  };
+  const exportToCSVModal = () => {
+    const csvExporter = new ExportToCsv({
+      fieldSeparator: ',',
+      quoteStrings: '"',
+      decimalSeparator: '.',
+      showLabels: true,  // Set to true to include column headers
+      showTitle: true,
+      useTextFile: false,
+      useBom: true,
+    });
+  
+    const columnHeaders = {
+      "Sumber Trans": "Sumber Trans",
+      "No Refrensi": "No Refrensi",
+      "Keterangan": "Keterangan",
+      "Tanggal" : "Tanggal",
+      "Harga" : "Harga",
+      "Masuk" : "Masuk",
+      "Keluar" : "Keluar",
+      "Penyesuaian" : "Penyesuaian",
+      "Kode Barang" : "Kode Barang",
+      "Stock Opname" : "Stock Opname",
+      "Saldo Akhir" : "Saldo Akhir",
+      "Saldo(QTY)" : "Saldo(QTY)"
+    };
+  
+    const exportedData = [
+      columnHeaders,  // Include the column headers as the first row
+      ...dataTrace.map((item) => ({
+        "Sumber Trans": item.Source_Trans,
+        "No Refrensi": item.No_Reference,
+        "Keterangan": item.Keterangan,
+        "Tanggal": item.Date_Transaction,
+        "Harga": item.Harga,
+        "Masuk": item.IN_Brg,
+        "Keluar": item.OUT_Brg,
+        "Penyesuaian": item.ADJ_Brg,
+        "Kode Barang": item.Kd_Brg,
+        "Stock Opname": item.Qty_Fisik,
+        "Saldo Akhir": item.Qty_System,
+        "Saldo(QTY)": item.Balance_QTY,
+      }))
+    ];
+  
+    csvExporter.generateCsv(exportedData);
+  };
+  const exportToExcelModal = () => {
+    const exportedData = dataTrace.map((item) => ({
+      "Sumber Trans": item.Source_Trans,
+      "No Refrensi": item.No_Reference,
+      "Keterangan": item.Keterangan,
+      "Tanggal": item.Date_Transaction,
+      "Harga": item.Harga,
+      "Masuk": item.IN_Brg,
+      "Keluar": item.OUT_Brg,
+      "Penyesuaian": item.ADJ_Brg,
+      "Kode Barang": item.Kd_Brg,
+      "Stock Opname": item.Qty_Fisik,
+      "Saldo Akhir": item.Qty_System,
+      "Saldo(QTY)": item.Balance_QTY,
+      // 'Tanggal Transaksi': moment(item.TanggalTransaksi).format('YYYY-MM-DD'),
+    }));
+  
+    const worksheet = XLSX.utils.json_to_sheet(exportedData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Data');
+  
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+  
+    const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const downloadUrl = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = 'data.xlsx';
+    link.click();
+  };
+const pageSize = 20; // Number of rows per page
+
+const splitDataIntoChunks = (data, pageSize) => {
+  const chunks = [];
+  let index = 0;
+
+  while (index < data.length) {
+    chunks.push(data.slice(index, index + pageSize));
+    index += pageSize;
+  }
+
+  return chunks;
+};
+
+const generatePDFForChunk = (chunk, doc, columns) => {
+  const tableContent = chunk.map((row) => columns.map((column) => row[column.dataIndex]));
+  const customHeader = columns.map((column) => column.title);
+
+  doc.autoTable({
+    head: [customHeader],
+    body: tableContent,
+    theme: 'striped', // Apply striped theme for alternating row colors
+    styles: {
+      cellPadding: 1,
+      fontSize: 5,
+    },
+    columnStyles: columns.reduce((styles, column, index) => {
+      styles[index] = { fontStyle: 'light' }; // Apply bold font style to each column
+      return styles;
+    }, {}),
+    columnWidth: 'auto', // Set the initial column width to 'auto'
+    margin: { top: 15 }, // Add top margin to the table
+    didParseCell: (data) => {
+      // Adjust the column width based on the content
+      const col = data.column.index;
+      const headers = customHeader.length;
+      const colWidth = headers > col ? doc.getStringUnitWidth(customHeader[col]) * doc.internal.getFontSize() + 10 : 50;
+      data.cell.width = colWidth;
+    },
+  });
+};
 
   const exportToCSV = () => {
     const csvExporter = new ExportToCsv({
@@ -330,7 +580,7 @@ const BarangJadi = () => {
   
     const exportedData = [
       columnHeaders,  // Include the column headers as the first row
-      ...filteredData.map((item) => ({
+      ...filterData.map((item) => ({
         "Kode Barang": item.KodeBarang,
         "Nama Barang": item.Nm_Brg,
         "Satuan": item.Unit_Desc,
@@ -396,6 +646,122 @@ const BarangJadi = () => {
   
     doc.save('Barang_Jadi.pdf');
   };
+const columnStyle = [
+{
+  title: "Style",
+  dataIndex: "Style",
+  key: "Style"
+},
+{
+  title: "Kode Barang",
+  dataIndex: "Kd_Brg",
+  index: "Kd_Brg",
+},
+{
+  title: "Nama Barang",
+  dataIndex: "Nm_Brg",
+  index: "Nm_Brg",
+},
+{
+  title: "QTY Out",
+  dataIndex: "OUT_Qty",
+  key: "OUT_Qty"
+},
+{
+  title: "Satuan",
+  dataIndex: "Unit_Code",
+  key: "Unit_Code"
+},
+{
+  title: "Jenis Dok. BC",
+  dataIndex: "DOC_NO_Asal",
+  key: "DOC_NO_Asal"
+},
+{
+  title: "Tanggal Dok. BC",
+  dataIndex: "DOC_Date",
+  key: "DOC_Date"
+},
+]
+const columnModal =[ {
+  title: 'No.',
+  dataIndex: 'index',
+  render: (text, record, index) => (
+    <div
+      style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
+      onClick={() => handleTableClick(record)}
+    >
+      {index + 1}
+    </div>
+  ),
+  // render: (text, record, index) => index + 1, // Generate automation numbering
+},
+{
+  title: 'Sumber Trans',
+  dataIndex: 'Source_Trans',
+  key: 'Source_Trans',
+},
+{
+  title: 'No Refrensi',
+  dataIndex: 'No_Reference',
+  key: 'No_Reference',
+},
+{
+  title: 'Keterangan',
+  dataIndex: 'Keterangan',
+  key: 'Keterangan',
+},
+{
+  title: 'Tanggal',
+  dataIndex: 'Date_Transaction',
+  key: 'Date_Transaction',   
+  render: (text) => {
+    const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
+    const convertedDate = new Date(text).toLocaleDateString('id-ID', options);
+    return <span>{convertedDate}</span>;
+  },    
+},
+{
+  title: 'Harga',
+  dataIndex: 'Harga',
+  key: 'Harga',
+},
+{
+  title: 'Masuk',
+  dataIndex: 'IN_Brg',
+  key: 'IN_Brg',
+},
+{
+  title: 'Keluar',
+  dataIndex: 'OUT_Brg',
+  key: 'OUT_Brg',
+},
+{
+  title: 'Penyusaian',
+  dataIndex: 'Adjust_Brg',
+  key: 'Adjust_Brg',
+},
+{
+  title: 'Kode Barang',
+  dataIndex: 'Kd_Brg',
+  key: 'Kd_Brg',
+},
+{
+  title: 'Stock Opname',
+  dataIndex: 'Qty_Fisik',
+  key: 'Qty_Fisik',
+},
+{
+  title: 'Saldo Akhir',
+  dataIndex: 'Qty_System',
+  key: 'Qty_System',
+},
+{
+  title: 'Saldo(QTY)',
+  dataIndex: 'Balance_QTY',
+  key: 'Balance_QTY',
+}]
+
   return (
     <LayoutContentWrapper style={{ height: '100%' }}>
     <LayoutContent>
@@ -424,15 +790,87 @@ const BarangJadi = () => {
             Export {exportType.toUpperCase()}
           </Button>
         )}
-              <Button onClick={callStoredProc} style={{marginLeft: 16,  backgroundColor: "#1f2431", color: "#efefef", borderRadius: "5px"}}>Kartu Stock</Button>
 
+              <Button onClick={handleClick} style={{marginLeft: 16,  backgroundColor: "#1f2431", color: "#efefef", borderRadius: "5px"}}>Kartu Stock</Button>
+              <Button onClick={handleClick2} style={{marginLeft: 16,  backgroundColor: "rgba(0, 0, 0, 0.85)", color: "white", borderRadius: "5px"}}>Trace Style</Button>
+              <Modal
+        title={`Trace Style Kode Barang - ${selectedRowKeys}`}
+        visible={visibleModal}
+        onOk={handleOkModalStyle}
+        onCancel={handleCancelModalStyle}
+        width={1200}
+        footer
+      >
+        <div>
+        <div style={{ marginBottom: 16,  display: "flex", width: "100%", justifyContent: "center"}}>
+        <Select
+          defaultValue="Export Type"
+          style={{ width: 120, marginLeft: 16 }}
+          onChange={handleExportTypeChange}
+        >
+          <Option value="csvmodal">CSV</Option>
+          <Option value="excelmodal">Excel</Option>
+          <Option value="pdfmodal">PDF</Option>
+        </Select>
+        {exportType && (
+          <Button type="primary" onClick={() => {
+            if (exportType === 'csvmodal') {
+              exportToCSVModal();
+            } else if (exportType === 'excelmodal') {
+              exportToExcelModal();
+            } else if (exportType === 'pdfmodal') {
+              generatePDFForChunk();
+            }
+          }}>
+            Export {exportType.toUpperCase()}
+          </Button>)}
+          </div>
+        <Table id="table-ref-modal" columns={columnStyle} dataSource={dataTraceStyle} scroll={{ x: 400 }} ref={tableRef} />
+        </div>
+      </Modal>
+      <Modal
+        title={`Trace Stock Kode Barang - ${selectedRowKeys}`}
+        visible={visible}
+        onOk={handleOk}
+        onCancel={handleCancel}
+        width={1200}
+        footer
+      >
+        <div>
+        <div style={{ marginBottom: 16,  display: "flex", width: "100%", justifyContent: "center"}}>
+        <Select
+          defaultValue="Export Type"
+          style={{ width: 120, marginLeft: 16 }}
+          onChange={handleExportTypeChange}
+        >
+          <Option value="csvmodal">CSV</Option>
+          <Option value="excelmodal">Excel</Option>
+          <Option value="pdfmodal">PDF</Option>
+        </Select>
+        {exportType && (
+          <Button type="primary" onClick={() => {
+            if (exportType === 'csvmodal') {
+              exportToCSVModal();
+            } else if (exportType === 'excelmodal') {
+              exportToExcelModal();
+            } else if (exportType === 'pdfmodal') {
+              generatePDFForChunk();
+            }
+          }}>
+            Export {exportType.toUpperCase()}
+          </Button>)}
+          </div>
+        <Table id="table-ref-modal" columns={columnModal} dataSource={dataTrace} scroll={{ x: 400 }} ref={tableRef} />
+        </div>
+      </Modal>
       </div>
       {filteredData.length > 0 ? (
-        <Table id="table-ref" columns={columns} dataSource={filteredData} scroll={{ x: 400 }} ref={tableRef}/>
+        <Table id="table-ref" columns={columns} dataSource={filteredData} scroll={{ x: 400 }} ref={tableRef} />
       ) : (
         <p>No data available</p>
       )}
     </div>
+
     </LayoutContent>
       </LayoutContentWrapper>
   );

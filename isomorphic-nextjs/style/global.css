@@ -327,3 +327,6 @@ html[dir='rtl'] .dz-hidden-input {
   font-size: 28px;
   color: #999;
 }
+.ant-table-row-active {
+  background-color: red !important; 
+}
