@@ -29,13 +29,14 @@ const Wip = () => {
   const [exportType, setExportType] = useState(null);
   const [searchText, setSearchText] = useState('');
   const [searchedColumn, setSearchedColumn] = useState('');
+  const [selectedRow, setSelectedRow] = useState(null);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [dt_Awal, setDt_Awal] = useState(null);
   const [Kd_Brg, setKd_Brg] = useState('');
   const [dt_Akhir, setDt_Akhir] = useState(null);
   const [dataTrace, setDataTrace] = useState([])
   const [visible, setVisible] = useState(false);
-
+const [disabled, setDisabled] = useState();
   const searchInput = useRef(null);
   const tableRef = useRef(null);
   const getColumnSearchProps = (dataIndex) => ({
@@ -62,7 +63,33 @@ const Wip = () => {
     onFilter: (value, record) =>
       record[dataIndex] ? record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()) : '',
     })
-  
+    const getColumnDateProps = (dataIndex) => ({
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        <div style={{ padding: 8 }}>
+          <DatePicker
+            style={{ marginBottom: 8, display: 'block' }}
+            value={selectedKeys[0]}
+            onChange={(date) => setSelectedKeys(date ? [date] : [])}
+            onPressEnter={() => {
+              confirm();
+              setSearchText(selectedKeys[0]);
+              setSearchedColumn(dataIndex);
+            }}
+          />
+          <Space>
+            <button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
+              Search
+            </button>
+            <button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>
+              Reset
+            </button>
+          </Space>
+        </div>
+      ),
+      filterIcon: (filtered) => <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />,
+      onFilter: (value, record) =>
+        record[dataIndex] ? moment(record[dataIndex]).isSame(value, 'day') : false,
+    });
     // filterIcon: (filtered) => (
     //   <SearchOutlined
     //     style={{
@@ -77,21 +104,28 @@ const Wip = () => {
     //     setTimeout(() => searchInput.current?.select(), 100);
     //   }
     // },
-    const handleTableClick = (record) => {
-      setSelectedRowKeys([record.Kd_Brg]);
-    
-      
+    const handleRowClick = (record) => {
       const selectedRecord = data.find((item) => item.Kd_Brg === record.Kd_Brg);
-      console.log("cek selectedRecord" ,selectedRecord)
-
+  
       if (selectedRecord) {
-        setKd_Brg(selectedRecord.Kd_Brg);
-        console.log("cek", selectedRecord.KodeBarang)
+        setSelectedRowKeys([record.Kd_Brg]);
+        setSelectedRow(selectedRecord);
+        console.log("Selected Row: ", selectedRecord);
       } else {
-        setKd_Brg('');
+        setSelectedRowKeys([]);
+        setSelectedRow(null);
       }
-    };  
+    };
+  
+    const rowSelection = {
+      type: 'radio',
+      selectedRowKeys,
+      onSelect: (record) => {
+        handleRowClick(record);
+      },
+    };
 
+    const isButtonDisabled = !dt_Awal || !dt_Akhir; // Check if either dt_Awal or dt_Akhir is null
 
     //     const handleDateRangeChange = (dates) => {
     //      setDt_Awal(dates[0]);
@@ -102,10 +136,12 @@ const Wip = () => {
         // Handle date range picker change event and set dt_Awal and dt_Akhir states
         setDt_Awal(dates[0]);
         setDt_Akhir(dates[1]);
+
       } else {
         // Handle null or empty dates scenario
         setDt_Awal(null);
         setDt_Akhir(null);
+      
       }
     };
     const callStoredProc = () => {
@@ -175,16 +211,21 @@ const Wip = () => {
         title: 'Sumber Trans',
         dataIndex: 'Source_Trans',
         key: 'Source_Trans',
+        ...getColumnSearchProps('Source_Trans'),
+      
       },
       {
         title: 'No Refrensi',
         dataIndex: 'No_Reference',
         key: 'No_Reference',
+        ...getColumnSearchProps('No_Reference'),
+      
       },
       {
         title: 'Keterangan',
         dataIndex: 'Keterangan',
         key: 'Keterangan',
+        ...getColumnSearchProps('Keterangan'),
       },
       {
         title: 'Tanggal',
@@ -195,46 +236,61 @@ const Wip = () => {
           const convertedDate = new Date(text).toLocaleDateString('id-ID', options);
           return <span>{convertedDate}</span>;
         },    
+        ...getColumnDateProps('Date_Transaction')
       },
       {
         title: 'Harga',
         dataIndex: 'Harga',
         key: 'Harga',
+        ...getColumnSearchProps('Harga'),
       },
       {
         title: 'Masuk',
         dataIndex: 'IN_Brg',
         key: 'IN_Brg',
+        ...getColumnSearchProps('IN_Brg'),
       },
       {
         title: 'Keluar',
         dataIndex: 'OUT_Brg',
         key: 'OUT_Brg',
+        ...getColumnSearchProps('OUT_Brg'),
+      
       },
       {
         title: 'Penyusaian',
         dataIndex: 'Adjust_Brg',
         key: 'Adjust_Brg',
+        ...getColumnSearchProps('Adjust_Brg'),
+      
       },
       {
         title: 'Kode Barang',
         dataIndex: 'Kd_Brg',
         key: 'Kd_Brg',
+        ...getColumnSearchProps('Kd_Brg'),
+      
       },
       {
         title: 'Stock Opname',
         dataIndex: 'Qty_Fisik',
         key: 'Qty_Fisik',
+        ...getColumnSearchProps('Qty_Fisik'),
+      
       },
       {
         title: 'Saldo Akhir',
         dataIndex: 'Qty_System',
         key: 'Qty_System',
+        ...getColumnSearchProps('Qty_System'),
+      
       },
       {
         title: 'Saldo(QTY)',
         dataIndex: 'Balance_QTY',
         key: 'Balance_QTY',
+        ...getColumnSearchProps('Balance_QTY'),
+      
       }]
       
       
@@ -248,42 +304,21 @@ const Wip = () => {
       title: 'Kode Barang',
       dataIndex: 'Kd_Brg',
       key: 'Kd_Brg',
-      render: (text, record) => (
-        <div
-          style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
-          onClick={() => handleTableClick(record)}
-        >
-          {text.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-        </div>
-      ),
-      ...getColumnSearchProps('kodebarang'),
+
+      ...getColumnSearchProps('Kd_Brg'),
     },
     {
       title: 'Nama Barang',
       dataIndex: 'namabarang',
       key: 'namabarang',
-      render: (text, record) => (
-        <div
-          style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
-          onClick={() => handleTableClick(record)}
-        >
-          {text.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-        </div>
-      ),
+
       ...getColumnSearchProps('namabarang'),
     },
     {
       title: 'Qty',
       dataIndex: 'Qty',
       key: 'Qty',    
-      render: (text, record) => (
-        <div
-          style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
-          onClick={() => handleTableClick(record)}
-        >
-          {text.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-        </div>
-      ),       
+     
       ...getColumnSearchProps('Qty')
 
     },
@@ -291,20 +326,22 @@ const Wip = () => {
       title: 'Satuan',
       dataIndex: 'Satuan',
       key: 'Satuan',
-      render: (text, record) => (
-        <div
-          style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
-          onClick={() => handleTableClick(record)}
-        >
-          {text.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-        </div>
-      ),
       ...getColumnSearchProps('Satuan'),
     },
 
   
   ];
-  
+//   useEffect(()=>{
+// const date = dt_Akhir && dt_Awal;
+// setDisabled = (()=> {
+//   if(date == null) {
+// true
+//   }
+//   else{
+//     false
+//   }
+// })
+//   },[])
   useEffect(() => {
     fetchData();
   }, []);
@@ -383,6 +420,7 @@ const Wip = () => {
       showTitle: true,
       useTextFile: false,
       useBom: true,
+      filename: 'dataTraceStock',
     });
   
     const columnHeaders = {
@@ -447,50 +485,28 @@ const Wip = () => {
     const downloadUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = downloadUrl;
-    link.download = 'data.xlsx';
+    link.download = 'dataTraceStock.xlsx';
     link.click();
   };
-const pageSize = 20; // Number of rows per page
+  const exportToPDF2 = () => {
+    const doc = new jsPDF();
 
-const splitDataIntoChunks = (data, pageSize) => {
-  const chunks = [];
-  let index = 0;
+    const tableContent2 = [];
+    const columns2 = Object.keys(dataTrace[0]);
 
-  while (index < data.length) {
-    chunks.push(data.slice(index, index + pageSize));
-    index += pageSize;
-  }
+    dataTrace.forEach(row => {
+      const rowData = Object.values(row);
+      tableContent2.push(rowData);
+    });
 
-  return chunks;
-};
-
-const generatePDFForChunk = (chunk, doc, columns) => {
-  const tableContent = chunk.map((row) => columns.map((column) => row[column.dataIndex]));
-  const customHeader = columns.map((column) => column.title);
-
+  const customHeader2 = ['Sumber Trans', 'No Refrensi', 'Nama Barang', 'Satuan', 'Saldo Awal', 'Pemasukan', 'Pengeluaran', 'Penyesuaian', 'Stock Opname', 'Saldo Akhir', 'Selisih'];
   doc.autoTable({
-    head: [customHeader],
-    body: tableContent,
-    theme: 'striped', // Apply striped theme for alternating row colors
-    styles: {
-      cellPadding: 1,
-      fontSize: 5,
-    },
-    columnStyles: columns.reduce((styles, column, index) => {
-      styles[index] = { fontStyle: 'light' }; // Apply bold font style to each column
-      return styles;
-    }, {}),
-    columnWidth: 'auto', // Set the initial column width to 'auto'
-    margin: { top: 15 }, // Add top margin to the table
-    didParseCell: (data) => {
-      // Adjust the column width based on the content
-      const col = data.column.index;
-      const headers = customHeader.length;
-      const colWidth = headers > col ? doc.getStringUnitWidth(customHeader[col]) * doc.internal.getFontSize() + 10 : 50;
-      data.cell.width = colWidth;
-    },
-  });
-};
+      head: [customHeader2],
+      body: tableContent2,
+    });
+
+    doc.save('dataTraceStock.pdf');
+  };
   const exportToCSV = () => {
     const csvExporter = new ExportToCsv({
       fieldSeparator: ',',
@@ -500,36 +516,25 @@ const generatePDFForChunk = (chunk, doc, columns) => {
       showTitle: true,
       useTextFile: false,
       useBom: true,
+      filename:"WIP"
     });
   
     const columnHeaders = {
       "Kode Barang": "Kode Barang",
       "Nama Barang": "Nama Barang",
-      "Satuan": "Satuan",
-      "Saldo Awal" : "Saldo Awal",
-      "Pemasukan" : "Pemasukan",
-      "Pengeluaran" : "Pengeluaran",
-      "Penyesuaian" : "Penyesuaian",
-      "Stock Opname" : "Stock Opname",
-      "Nama Barang" : "Nama Barang",
-      "Saldo Akhir" : "Saldo Akhir",
-      "Selisih" : "Selisih"
+      "Qty": "Qty",
+      "Satuan" : "Satuan",
+      
     };
   
     const exportedData = [
       columnHeaders,  // Include the column headers as the first row
       ...filteredData.map((item) => ({
-        "Kode Barang": item.KodeBarang,
-        "Nama Barang": item.Nm_Brg,
-        "Satuan": item.Unit_Desc,
-        "Saldo Awal": item.Saldo_Awal,
-        "Pemasukan": item.IN_Brg,
-        "Pengeluaran": item.OUT_Brg,
-        "Penyesuaian": item.Adjust_Brg,
-        "Stock Opname": item.Qty_Fisik,
-        "Nama Barang": item.Nm_Brg,
-        "Saldo Akhir": item.Qty_System,
-        "Selisih": item.selisih,
+        "Kode Barang": item.Kd_Brg,
+        "Nama Barang": item.namabarang,
+        "Qty": item.Qty,
+        "Satuan": item.Satuan,
+        
       }))
     ];
   
@@ -538,7 +543,7 @@ const generatePDFForChunk = (chunk, doc, columns) => {
 
   const exportToExcel = () => {
     const exportedData = filteredData.map((item) => ({
-      "Kode Barang": item.KodeBarang,
+      "Kode Barang": item.Kd_Brg,
       "Nama Barang": item.namabarang,
       "Satuan": item.Satuan,
       "Qty": item.Qty,
@@ -554,7 +559,7 @@ const generatePDFForChunk = (chunk, doc, columns) => {
     const downloadUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = downloadUrl;
-    link.download = 'data.xlsx';
+    link.download = 'Wip.xlsx';
     link.click();
   };
 
@@ -614,7 +619,7 @@ const generatePDFForChunk = (chunk, doc, columns) => {
             Export {exportType.toUpperCase()}
           </Button>
         )}
-              <Button onClick={handleClick} style={{marginLeft: 16,  backgroundColor: "#1f2431", color: "#efefef", borderRadius: "5px"}}>Kartu Stock</Button>
+              <Button onClick={handleClick} disabled={isButtonDisabled} style={{marginLeft: 16,  backgroundColor: "#1f2431", color: "#efefef", borderRadius: "5px"}}>Kartu Stock</Button>
               <Modal
         title={`Trace Style Kode Barang - ${selectedRowKeys}`}
         visible={visible}
@@ -641,7 +646,7 @@ const generatePDFForChunk = (chunk, doc, columns) => {
             } else if (exportType === 'excelmodal') {
               exportToExcelModal();
             } else if (exportType === 'pdfmodal') {
-              generatePDFForChunk();
+              exportToPDF2();
             }
           }}>
             Export {exportType.toUpperCase()}
@@ -651,11 +656,11 @@ const generatePDFForChunk = (chunk, doc, columns) => {
         </div>
       </Modal>
       </div>
-      {filteredData.length > 0 ? (
-        <Table id="table-ref" columns={columns} dataSource={filteredData} scroll={{ x: 400 }} ref={tableRef}/>
-      ) : (
-        <p>No data available</p>
-      )}
+      <Table id="table-ref" columns={columns} dataSource={filteredData} scroll={{ x: 400 }} ref={tableRef}  rowKey="Kd_Brg"
+        rowSelection={rowSelection}    onRow={(record) => ({
+          onClick: () => handleRowClick(record),
+        })}
+      />
     </div>
     </LayoutContent>
       </LayoutContentWrapper>

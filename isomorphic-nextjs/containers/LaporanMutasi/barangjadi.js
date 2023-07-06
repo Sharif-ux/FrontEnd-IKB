@@ -29,6 +29,7 @@ const BarangJadi = () => {
   const [exportType, setExportType] = useState(null);
   const [searchText, setSearchText] = useState('');
   const [searchedColumn, setSearchedColumn] = useState('');
+  const [selectedRow, setSelectedRow] = useState(null);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [dt_Awal, setDt_Awal] = useState(null);
   const [Kd_Brg, setKd_Brg] = useState('');
@@ -63,6 +64,11 @@ const BarangJadi = () => {
     onFilter: (value, record) =>
       record[dataIndex] ? record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()) : '',
     })
+    const handleSearch = (selectedKeys, confirm, dataIndex) => {
+      confirm();
+      setSearchText(selectedKeys[0]);
+      setSearchedColumn(dataIndex);
+    };
   
     // filterIcon: (filtered) => (
     //   <SearchOutlined
@@ -79,20 +85,7 @@ const BarangJadi = () => {
     //   }
     // },
 
-    const handleTableClick = (record) => {
-      setSelectedRowKeys([record.Kd_Brg]);
-    
-      
-      const selectedRecord = data.find((item) => item.Kd_Brg === record.Kd_Brg);
-      console.log("cek selectedRecord" ,selectedRecord)
-
-      if (selectedRecord) {
-        setKd_Brg(selectedRecord.Kd_Brg);
-        console.log("cek", selectedRecord.KodeBarang)
-      } else {
-        setKd_Brg('');
-      }
-    };  
+   
     const showModal = () => {
       setVisible(true);
     };
@@ -208,56 +201,28 @@ const BarangJadi = () => {
       title: 'Kode Barang',
       dataIndex: 'Kd_Brg',
       key: 'Kd_Brg',
-      render: (text, record) => (
-        <div
-          style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
-          onClick={() => handleTableClick(record)}
-        >
-          {text}
-        </div>
-      ),
+
       ...getColumnSearchProps('Kd_Brg'),
     },
     {
       title: 'Nama Barang',
       dataIndex: 'Nm_Brg',
       key: 'Nm_Brg',
-      render: (text, record) => (
-        <div
-          style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
-          onClick={() => handleTableClick(record)}
-        >
-          {text}
-        </div>
-      ),
+
       ...getColumnSearchProps('Nm_Brg'),
     },
     {
       title: 'Satuan',
       dataIndex: 'Unit_Desc',
       key: 'Unit_Desc',
-      render: (text, record) => (
-        <div
-          style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
-          onClick={() => handleTableClick(record)}
-        >
-          {text}
-        </div>
-      ),
+
       ...getColumnSearchProps('Unit_Desc'),
     },
     {
       title: 'Saldo Awal',
       dataIndex: 'Saldo_Awal',
       key: 'Saldo_Awal',      
-      render: (text, record) => (
-        <div
-          style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
-          onClick={() => handleTableClick(record)}
-        >
-          {  text.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-        </div>
-      ),     
+      
       ...getColumnSearchProps('Saldo_Awal')
 
     },
@@ -265,14 +230,7 @@ const BarangJadi = () => {
       title: 'Pemasukan',
       dataIndex: 'IN_Brg',
       key: 'IN_Brg',
-      render: (text, record) => (
-        <div
-          style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
-          onClick={() => handleTableClick(record)}
-        >
-          {  text.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-        </div>
-      ),
+ 
       ...getColumnSearchProps('IN_Brg'),
   
     },
@@ -280,42 +238,21 @@ const BarangJadi = () => {
       title: 'Pengeluaran',
       dataIndex: 'OUT_Brg',
       key: 'OUT_Brg',
-      render: (text, record) => (
-        <div
-          style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
-          onClick={() => handleTableClick(record)}
-        >
-          {  text.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-        </div>
-      ),
+ 
       ...getColumnSearchProps('OUT_Brg')
       },
     {
       title: 'Penyusaian',
       dataIndex: 'Adjust_Brg',
       key: 'Adjust_Brg',
-      render: (text, record) => (
-        <div
-          style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
-          onClick={() => handleTableClick(record)}
-        >
-          {text.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-        </div>
-      ),
+
       ...getColumnSearchProps('Adjust_Brg'),
       },
     {
       title: 'Stock Opname',
       dataIndex: 'Qty_Fisik',
       key: 'Qty_Fisik',
-      render: (text, record) => (
-        <div
-          style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
-          onClick={() => handleTableClick(record)}
-        >
-          {text}
-        </div>
-      ),
+
       ...getColumnSearchProps('Qty_Fisik'),
   
     },
@@ -323,14 +260,7 @@ const BarangJadi = () => {
       title: 'Saldo Akhir',
       dataIndex: 'Qty_System',
       key: 'Qty_System',
-      render: (text, record) => (
-        <div
-          style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
-          onClick={() => handleTableClick(record)}
-        >
-          {  text.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-        </div>
-      ),
+ 
       ...getColumnSearchProps('Qty_System'),
   
     },
@@ -338,14 +268,7 @@ const BarangJadi = () => {
       title: 'Selisih',
       dataIndex: 'selisih',
       key: 'selisih',
-      render: (text, record) => (
-        <div
-          style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
-          onClick={() => handleTableClick(record)}
-        >
-          {  text.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-        </div>
-      ),
+ 
       ...getColumnSearchProps('selisih'),
       
   
@@ -357,7 +280,8 @@ const BarangJadi = () => {
     //   render: (text) => <span>{moment(text).format('YYYY-MM-DD')}</span>,
     // },
   ];
-  
+  const isButtonDisabled = !dt_Awal || !dt_Akhir; // Check if either dt_Awal or dt_Akhir is null
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -435,6 +359,104 @@ const BarangJadi = () => {
     showModalStyle();
     callStoredStyle();
   };
+
+  const exportToCSVModalStyle = () => {
+    const csvExporter = new ExportToCsv({
+      fieldSeparator: ',',
+      quoteStrings: '"',
+      decimalSeparator: '.',
+      showLabels: true,  // Set to true to include column headers
+      showTitle: true,
+      useTextFile: false,
+      useBom: true,
+      filename: "BarangJadiTraceStyle"
+    });
+  
+    const columnHeaders = {
+      "Sumber Trans": "Sumber Trans",
+      "No Refrensi": "No Refrensi",
+      "Keterangan": "Keterangan",
+      "Tanggal" : "Tanggal",
+      "Harga" : "Harga",
+      "Masuk" : "Masuk",
+      "Keluar" : "Keluar",
+      "Penyesuaian" : "Penyesuaian",
+      "Kode Barang" : "Kode Barang",
+      "Stock Opname" : "Stock Opname",
+      "Saldo Akhir" : "Saldo Akhir",
+      "Saldo(QTY)" : "Saldo(QTY)"
+    };
+  
+    const exportedData = [
+      columnHeaders,  // Include the column headers as the first row
+      ...dataTrace.map((item) => ({
+        "Sumber Trans": item.Source_Trans,
+        "No Refrensi": item.No_Reference,
+        "Keterangan": item.Keterangan,
+        "Tanggal": item.Date_Transaction,
+        "Harga": item.Harga,
+        "Masuk": item.IN_Brg,
+        "Keluar": item.OUT_Brg,
+        "Penyesuaian": item.ADJ_Brg,
+        "Kode Barang": item.Kd_Brg,
+        "Stock Opname": item.Qty_Fisik,
+        "Saldo Akhir": item.Qty_System,
+        "Saldo(QTY)": item.Balance_QTY,
+      }))
+    ];
+  
+    csvExporter.generateCsv(exportedData);
+  };
+  const exportToExcelModalTraceStyle = () => {
+    const exportedData = dataTrace.map((item) => ({
+      "Sumber Trans": item.Source_Trans,
+      "No Refrensi": item.No_Reference,
+      "Keterangan": item.Keterangan,
+      "Tanggal": item.Date_Transaction,
+      "Harga": item.Harga,
+      "Masuk": item.IN_Brg,
+      "Keluar": item.OUT_Brg,
+      "Penyesuaian": item.ADJ_Brg,
+      "Kode Barang": item.Kd_Brg,
+      "Stock Opname": item.Qty_Fisik,
+      "Saldo Akhir": item.Qty_System,
+      "Saldo(QTY)": item.Balance_QTY,
+      // 'Tanggal Transaksi': moment(item.TanggalTransaksi).format('YYYY-MM-DD'),
+    }));
+  
+    const worksheet = XLSX.utils.json_to_sheet(exportedData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Data');
+  
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+  
+    const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const downloadUrl = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = 'BarangJadiTraceStyle.xlsx';
+    link.click();
+  };
+  const exportToPDF3 = () => {
+    const doc = new jsPDF();
+
+    const tableContent2 = [];
+    const columns2 = Object.keys(dataTrace[0]);
+
+    dataTrace.forEach(row => {
+      const rowData = Object.values(row);
+      tableContent2.push(rowData);
+    });
+
+  const customHeader2 = ['Sumber Trans', 'No Refrensi', 'Nama Barang', 'Satuan', 'Saldo Awal', 'Pemasukan', 'Pengeluaran', 'Penyesuaian', 'Stock Opname', 'Saldo Akhir', 'Selisih'];
+  doc.autoTable({
+      head: [customHeader2],
+      body: tableContent2,
+    });
+
+    doc.save('BarangJadiTrace.pdf');
+  };
+
   const exportToCSVModal = () => {
     const csvExporter = new ExportToCsv({
       fieldSeparator: ',',
@@ -444,6 +466,7 @@ const BarangJadi = () => {
       showTitle: true,
       useTextFile: false,
       useBom: true,
+      filename: "BarangJadiTrace"
     });
   
     const columnHeaders = {
@@ -508,50 +531,28 @@ const BarangJadi = () => {
     const downloadUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = downloadUrl;
-    link.download = 'data.xlsx';
+    link.download = 'BarangJadiTrace.xlsx';
     link.click();
   };
-const pageSize = 20; // Number of rows per page
+  const exportToPDF2 = () => {
+    const doc = new jsPDF();
 
-const splitDataIntoChunks = (data, pageSize) => {
-  const chunks = [];
-  let index = 0;
+    const tableContent2 = [];
+    const columns2 = Object.keys(dataTrace[0]);
 
-  while (index < data.length) {
-    chunks.push(data.slice(index, index + pageSize));
-    index += pageSize;
-  }
+    dataTrace.forEach(row => {
+      const rowData = Object.values(row);
+      tableContent2.push(rowData);
+    });
 
-  return chunks;
-};
-
-const generatePDFForChunk = (chunk, doc, columns) => {
-  const tableContent = chunk.map((row) => columns.map((column) => row[column.dataIndex]));
-  const customHeader = columns.map((column) => column.title);
-
+  const customHeader2 = ['Sumber Trans', 'No Refrensi', 'Nama Barang', 'Satuan', 'Saldo Awal', 'Pemasukan', 'Pengeluaran', 'Penyesuaian', 'Stock Opname', 'Saldo Akhir', 'Selisih'];
   doc.autoTable({
-    head: [customHeader],
-    body: tableContent,
-    theme: 'striped', // Apply striped theme for alternating row colors
-    styles: {
-      cellPadding: 1,
-      fontSize: 5,
-    },
-    columnStyles: columns.reduce((styles, column, index) => {
-      styles[index] = { fontStyle: 'light' }; // Apply bold font style to each column
-      return styles;
-    }, {}),
-    columnWidth: 'auto', // Set the initial column width to 'auto'
-    margin: { top: 15 }, // Add top margin to the table
-    didParseCell: (data) => {
-      // Adjust the column width based on the content
-      const col = data.column.index;
-      const headers = customHeader.length;
-      const colWidth = headers > col ? doc.getStringUnitWidth(customHeader[col]) * doc.internal.getFontSize() + 10 : 50;
-      data.cell.width = colWidth;
-    },
-  });
-};
+      head: [customHeader2],
+      body: tableContent2,
+    });
+
+    doc.save('BarangJadiTrace.pdf');
+  };
 
   const exportToCSV = () => {
     const csvExporter = new ExportToCsv({
@@ -562,6 +563,7 @@ const generatePDFForChunk = (chunk, doc, columns) => {
       showTitle: true,
       useTextFile: false,
       useBom: true,
+filename: "BarangJadi",
     });
   
     const columnHeaders = {
@@ -580,8 +582,8 @@ const generatePDFForChunk = (chunk, doc, columns) => {
   
     const exportedData = [
       columnHeaders,  // Include the column headers as the first row
-      ...filterData.map((item) => ({
-        "Kode Barang": item.KodeBarang,
+      ...filteredData.map((item) => ({
+        "Kode Barang": item.Kd_Brg,
         "Nama Barang": item.Nm_Brg,
         "Satuan": item.Unit_Desc,
         "Saldo Awal": item.Saldo_Awal,
@@ -597,10 +599,36 @@ const generatePDFForChunk = (chunk, doc, columns) => {
   
     csvExporter.generateCsv(exportedData);
   };
-
+  const getColumnDateProps = (dataIndex) => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+      <div style={{ padding: 8 }}>
+        <DatePicker
+          style={{ marginBottom: 8, display: 'block' }}
+          value={selectedKeys[0]}
+          onChange={(date) => setSelectedKeys(date ? [date] : [])}
+          onPressEnter={() => {
+            confirm();
+            setSearchText(selectedKeys[0]);
+            setSearchedColumn(dataIndex);
+          }}
+        />
+        <Space>
+          <button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
+            Search
+          </button>
+          <button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>
+            Reset
+          </button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered) => <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />,
+    onFilter: (value, record) =>
+      record[dataIndex] ? moment(record[dataIndex]).isSame(value, 'day') : false,
+  });
   const exportToExcel = () => {
     const exportedData = filteredData.map((item) => ({
-      "Kode Barang": item.KodeBarang,
+      "Kode Barang": item.Kd_Brg,
       "Nama Barang": item.Nm_Brg,
       "Satuan": item.Unit_Desc,
       "Saldo Awal": item.Saldo_Awal,
@@ -624,11 +652,50 @@ const generatePDFForChunk = (chunk, doc, columns) => {
     const downloadUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = downloadUrl;
-    link.download = 'data.xlsx';
+    link.download = 'BarangJadi.xlsx';
     link.click();
   };
-
+  // const handleTableClick = (record) => {
+  //   setSelectedRowKeys([record.Kd_Brg]);
   
+    
+  //   const selectedRecord = data.find((item) => item.Kd_Brg === record.Kd_Brg);
+  //   console.log("cek selectedRecord" ,selectedRecord)
+
+  //   if (selectedRecord) {
+  //     setKd_Brg(selectedRecord.Kd_Brg);
+  //     console.log("cek", selectedRecord.Kd_Brg)
+  //   } else {
+  //     setKd_Brg('');
+  //   }
+  // };
+  // const rowSelection = {
+  //   type: 'radio',
+  //   onSelect: (record) => {
+  //     setSelectedRow(record);
+  //   },
+  //   selectedRowKeys: selectedRow ? [selectedRow.Kd_Brg] : [],
+  // };
+  const handleRowClick = (record) => {
+    const selectedRecord = data.find((item) => item.Kd_Brg === record.Kd_Brg);
+
+    if (selectedRecord) {
+      setSelectedRowKeys([record.Kd_Brg]);
+      setSelectedRow(selectedRecord);
+      console.log("Selected Row: ", selectedRecord);
+    } else {
+      setSelectedRowKeys([]);
+      setSelectedRow(null);
+    }
+  };
+
+  const rowSelection = {
+    type: 'radio',
+    selectedRowKeys,
+    onSelect: (record) => {
+      handleRowClick(record);
+    },
+  };
   const exportToPDF = async (data) => {
     const doc = new jsPDF();
     const tableContent = [];
@@ -650,37 +717,50 @@ const columnStyle = [
 {
   title: "Style",
   dataIndex: "Style",
-  key: "Style"
+  key: "Style",
+  ...getColumnSearchProps('Style')
 },
 {
   title: "Kode Barang",
   dataIndex: "Kd_Brg",
   index: "Kd_Brg",
+  ...getColumnSearchProps('Kd_Brg')
+
 },
 {
   title: "Nama Barang",
   dataIndex: "Nm_Brg",
   index: "Nm_Brg",
+  ...getColumnSearchProps('Nm_Brg')
+
 },
 {
   title: "QTY Out",
   dataIndex: "OUT_Qty",
-  key: "OUT_Qty"
+  key: "OUT_Qty",
+  ...getColumnSearchProps('OUT_Qty')
+
 },
 {
   title: "Satuan",
   dataIndex: "Unit_Code",
-  key: "Unit_Code"
+  key: "Unit_Code",
+  ...getColumnSearchProps('Unit_Code')
+
 },
 {
   title: "Jenis Dok. BC",
   dataIndex: "DOC_NO_Asal",
-  key: "DOC_NO_Asal"
+  key: "DOC_NO_Asal",
+  ...getColumnSearchProps('DOC_NO_Asal')
+
 },
 {
   title: "Tanggal Dok. BC",
   dataIndex: "DOC_Date",
-  key: "DOC_Date"
+  key: "DOC_Date",
+  ...getColumnSearchProps('DOC_NO_Asal')
+
 },
 ]
 const columnModal =[ {
@@ -700,16 +780,21 @@ const columnModal =[ {
   title: 'Sumber Trans',
   dataIndex: 'Source_Trans',
   key: 'Source_Trans',
+  ...getColumnSearchProps('Source_Trans'),
+
 },
 {
   title: 'No Refrensi',
   dataIndex: 'No_Reference',
   key: 'No_Reference',
+  ...getColumnSearchProps('No_Reference'),
+
 },
 {
   title: 'Keterangan',
   dataIndex: 'Keterangan',
   key: 'Keterangan',
+  ...getColumnSearchProps('Keterangan'),
 },
 {
   title: 'Tanggal',
@@ -720,48 +805,62 @@ const columnModal =[ {
     const convertedDate = new Date(text).toLocaleDateString('id-ID', options);
     return <span>{convertedDate}</span>;
   },    
+  ...getColumnDateProps('Date_Transaction')
 },
 {
   title: 'Harga',
   dataIndex: 'Harga',
   key: 'Harga',
+  ...getColumnSearchProps('Harga'),
 },
 {
   title: 'Masuk',
   dataIndex: 'IN_Brg',
   key: 'IN_Brg',
+  ...getColumnSearchProps('IN_Brg'),
 },
 {
   title: 'Keluar',
   dataIndex: 'OUT_Brg',
   key: 'OUT_Brg',
+  ...getColumnSearchProps('OUT_Brg'),
+
 },
 {
   title: 'Penyusaian',
   dataIndex: 'Adjust_Brg',
   key: 'Adjust_Brg',
+  ...getColumnSearchProps('Adjust_Brg'),
+
 },
 {
   title: 'Kode Barang',
   dataIndex: 'Kd_Brg',
   key: 'Kd_Brg',
+  ...getColumnSearchProps('Kd_Brg'),
+
 },
 {
   title: 'Stock Opname',
   dataIndex: 'Qty_Fisik',
   key: 'Qty_Fisik',
+  ...getColumnSearchProps('Qty_Fisik'),
+
 },
 {
   title: 'Saldo Akhir',
   dataIndex: 'Qty_System',
   key: 'Qty_System',
+  ...getColumnSearchProps('Qty_System'),
+
 },
 {
   title: 'Saldo(QTY)',
   dataIndex: 'Balance_QTY',
   key: 'Balance_QTY',
-}]
+  ...getColumnSearchProps('Balance_QTY'),
 
+}]
   return (
     <LayoutContentWrapper style={{ height: '100%' }}>
     <LayoutContent>
@@ -791,7 +890,7 @@ const columnModal =[ {
           </Button>
         )}
 
-              <Button onClick={handleClick} style={{marginLeft: 16,  backgroundColor: "#1f2431", color: "#efefef", borderRadius: "5px"}}>Kartu Stock</Button>
+              <Button onClick={handleClick} disabled={isButtonDisabled} style={{marginLeft: 16,  backgroundColor: "#1f2431", color: "#efefef", borderRadius: "5px"}}>Kartu Stock</Button>
               <Button onClick={handleClick2} style={{marginLeft: 16,  backgroundColor: "rgba(0, 0, 0, 0.85)", color: "white", borderRadius: "5px"}}>Trace Style</Button>
               <Modal
         title={`Trace Style Kode Barang - ${selectedRowKeys}`}
@@ -815,11 +914,11 @@ const columnModal =[ {
         {exportType && (
           <Button type="primary" onClick={() => {
             if (exportType === 'csvmodal') {
-              exportToCSVModal();
+              exportToCSVModalStyle();
             } else if (exportType === 'excelmodal') {
-              exportToExcelModal();
+              exportToExcelModalTraceStyle();
             } else if (exportType === 'pdfmodal') {
-              generatePDFForChunk();
+              exportToPDF3();
             }
           }}>
             Export {exportType.toUpperCase()}
@@ -854,7 +953,7 @@ const columnModal =[ {
             } else if (exportType === 'excelmodal') {
               exportToExcelModal();
             } else if (exportType === 'pdfmodal') {
-              generatePDFForChunk();
+              exportToPDF2();
             }
           }}>
             Export {exportType.toUpperCase()}
@@ -864,12 +963,12 @@ const columnModal =[ {
         </div>
       </Modal>
       </div>
-      {filteredData.length > 0 ? (
-        <Table id="table-ref" columns={columns} dataSource={filteredData} scroll={{ x: 400 }} ref={tableRef} />
-      ) : (
-        <p>No data available</p>
-      )}
-    </div>
+        <Table id="table-ref" columns={columns} dataSource={filteredData} scroll={{ x: 400 }} ref={tableRef}  rowKey="Kd_Brg"
+        rowSelection={rowSelection}    onRow={(record) => ({
+          onClick: () => handleRowClick(record),
+        })}
+      />
+</div>
 
     </LayoutContent>
       </LayoutContentWrapper>
