@@ -20,6 +20,7 @@ const { RangePicker } = DatePicker;
 const { Option } = Select;
 const pageSize = 20; // Number of rows per page
 
+const dateFormat = 'DD/MM/YYYY';
 
 const TableForm = () => {
   const [data, setData] = useState([]);
@@ -248,7 +249,7 @@ const TableForm = () => {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/penerimaanbarang');
+      const response = await axios.get('http:///192.168.1.21:3000/penerimaanbarang');
       setData(response.data);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -281,7 +282,6 @@ const TableForm = () => {
     });
     setFilteredData(filtered);
   };
-
   const exportToCSV = () => {
     const csvExporter = new ExportToCsv({
       fieldSeparator: ',',
@@ -564,7 +564,12 @@ const generatePDFForChunk = (chunk, doc, columns) => {
     <LayoutContent>
     <div>
     <div style={{ marginBottom: 16,  display: "flex", width: "100%", justifyContent: "center"}}>
-        <RangePicker onChange={handleDateChange} />
+    <h1 style={{margin: "0 10px 0 0", fontSize: "18px"}}>Masukan Tanggal:</h1>
+
+        {/* <RangePicker onChange={handleDateChange} /> */}
+        <RangePicker format={dateFormat}
+      renderExtraFooter={() => 'Custom footer'}
+      onChange={handleDateChange} />
         <Select
           defaultValue="Export Type"
           style={{ width: 120, marginLeft: 16 }}

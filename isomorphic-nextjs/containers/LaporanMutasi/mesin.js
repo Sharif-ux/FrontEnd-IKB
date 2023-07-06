@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef} from 'react';
-import { Table, DatePicker, Select, Button, Modal } from 'antd';
+import { Table, Select, Button, Modal } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { Input, Space,  } from 'antd';
 import Highlighter from 'react-highlight-words';
@@ -18,11 +18,14 @@ import { PDFViewer, Page, Text, View, Document, StyleSheet } from '@react-pdf/re
 import 'jspdf-autotable';
 import LayoutContentWrapper from '@iso/components/utility/layoutWrapper';
 import LayoutContent from '@iso/components/utility/layoutContent';
+// import locale from 'antd/es/date-picker/locale/id_ID';
+const { DatePicker } = require('antd');
+const dateFormat = 'DD/MM/YYYY';
+
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
-
-const BarangJadi = () => {
+const Mesin = () => {
   const [data, setData] = useState([]);
   const [dateRange, setDateRange] = useState(null);
   const [filteredData, setFilteredData] = useState([]);
@@ -143,7 +146,7 @@ const BarangJadi = () => {
     };
     const callStoredProc = () => {
       const Kd_Brg = selectedRowKeys[0];
-      const apiUrl = 'http://localhost:3000/storedprocedure'; 
+      const apiUrl = 'http://192.168.1.21:3000/storedprocedure'; 
   
       axios
         .get(apiUrl, {
@@ -295,7 +298,7 @@ const BarangJadi = () => {
       const token = cookie.get('token');
 
       // Make the API request with the token included in the headers
-      const response = await fetch('http://localhost:3000/mesin', {
+      const response = await fetch('http://192.168.1.21:3000/mesin', {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -651,7 +654,10 @@ const BarangJadi = () => {
     <LayoutContent>
     <div>
     <div style={{ marginBottom: 16,  display: "flex", width: "100%", justifyContent: "center"}}>
-        <RangePicker onChange={handleDateRangeChange} />
+    <h1 style={{margin: "0 10px 0 0", fontSize: "18px"}}>Masukan Tanggal:</h1>
+    <RangePicker format={dateFormat}
+      renderExtraFooter={() => 'Custom footer'}
+      onChange={handleDateRangeChange} />
         <Select
           defaultValue="Export Type"
           style={{ width: 120, marginLeft: 16 }}
@@ -724,4 +730,4 @@ const BarangJadi = () => {
   );
 };
 
-export default BarangJadi;
+export default Mesin;

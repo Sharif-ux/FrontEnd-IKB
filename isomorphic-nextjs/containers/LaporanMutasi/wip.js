@@ -39,6 +39,8 @@ const Wip = () => {
 const [disabled, setDisabled] = useState();
   const searchInput = useRef(null);
   const tableRef = useRef(null);
+  const dateFormat = 'DD/MM/YYYY';
+
   const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
       <div style={{ padding: 8 }}>
@@ -146,7 +148,7 @@ const [disabled, setDisabled] = useState();
     };
     const callStoredProc = () => {
       const Kd_Brg = selectedRowKeys[0];
-      const apiUrl = 'http://localhost:3000/storedprocedure'; 
+      const apiUrl = 'http://192.168.1.21:3000/storedprocedure'; 
   
       axios
         .get(apiUrl, {
@@ -363,7 +365,7 @@ const [disabled, setDisabled] = useState();
       const token = cookie.get('token');
 
       // Make the API request with the token included in the headers
-      const response = await fetch('http://localhost:3000/wip', {
+      const response = await fetch('http://192.168.1.21:3000/wip', {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -596,7 +598,10 @@ const [disabled, setDisabled] = useState();
     <LayoutContent>
     <div>
     <div style={{ marginBottom: 16,  display: "flex", width: "100%", justifyContent: "center"}}>
-        <RangePicker onChange={handleDateRangeChange} />
+    <h1 style={{margin: "0 10px 0 0", fontSize: "18px"}}>Masukan Tanggal:</h1>
+    <RangePicker format={dateFormat}
+      renderExtraFooter={() => 'Custom footer'}
+      onChange={handleDateRangeChange} />
         <Select
           defaultValue="Export Type"
           style={{ width: 120, marginLeft: 16 }}

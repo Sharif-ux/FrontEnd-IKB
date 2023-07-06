@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef} from 'react';
 import { Table, DatePicker, Select, Button } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
-import { Input, Space,  } from 'antd';
+import { Input, Space, Alert } from 'antd';
 import Highlighter from 'react-highlight-words';
 import moment from 'moment';
 import axios from 'axios';
@@ -18,6 +18,7 @@ import LayoutContent from '@iso/components/utility/layoutContent';
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
+const dateFormat = 'DD/MM/YYYY';
 
 const PengeluaranBarang = () => {
   const [data, setData] = useState([]);
@@ -236,7 +237,7 @@ const PengeluaranBarang = () => {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/pengeluaranbarang');
+      const response = await axios.get('http://192.168.1.21:3000/pengeluaranbarang');
       setData(response.data);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -562,7 +563,10 @@ const generatePDF = async () => {
     <LayoutContent>
     <div>
     <div style={{ marginBottom: 16,  display: "flex", width: "100%", justifyContent: "center"}}>
-        <RangePicker onChange={handleDateChange} />
+    <h1 style={{margin: "0 10px 0 0", fontSize: "18px"}}>Masukan Tanggal:</h1>
+    <RangePicker format={dateFormat}
+      renderExtraFooter={() => 'Custom footer'}
+      onChange={handleDateChange} />
         <Select
           defaultValue="Export Type"
           style={{ width: 120, marginLeft: 16 }}
@@ -586,11 +590,17 @@ const generatePDF = async () => {
           </Button>
         )}
       </div>
-      {filteredData.length > 0 ? (
-        <Table id="table-ref" columns={columns} dataSource={filteredData} scroll={{ x: 400 }} rowKey={(record, index) => index} ref={tableRef}/>
+      {
+      dateRange === null ? <div style={{position: "relative", top: "10", right: "10", display:dateRange === null ? "block" : "none", zIndex: "99"}}>  <Alert
+      message="Catatan Informasi"
+      description="Isi Date Range Sebelum Melihat Data"
+      type="info"
+      showIcon
+    /></div> :
+      filteredData.length > 0 ? (
+        <Table id="table-ref" columns={columns} dataSource={filteredData} scroll={{ x: 400 }} ref={tableRef}/>
       ) : (
-        <p>No data available</p>
-      )}
+        <Table id="table-ref" columns={columns}    scroll={{ x: 400 }} ref={tableRef}/>      )}
     </div>
     </LayoutContent>
       </LayoutContentWrapper>

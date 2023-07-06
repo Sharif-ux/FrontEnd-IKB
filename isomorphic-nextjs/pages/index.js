@@ -79,7 +79,7 @@ export default function SignInPage(props) {
     };
     try {
       // Send a POST request to the login API
-      const response = await fetch('http://localhost:3000/api/login', {
+      const response = await fetch('http://192.168.1.21:3000/api/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

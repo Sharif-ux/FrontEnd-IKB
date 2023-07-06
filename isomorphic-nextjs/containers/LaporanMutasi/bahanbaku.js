@@ -20,6 +20,7 @@ import LayoutContentWrapper from '@iso/components/utility/layoutWrapper';
 import LayoutContent from '@iso/components/utility/layoutContent';
 const { RangePicker } = DatePicker;
 const { Option } = Select;
+const dateFormat = 'DD/MM/YYYY';
 
 
 const BarangJadi = () => {
@@ -149,7 +150,7 @@ const BarangJadi = () => {
     };
     const callStoredProc = () => {
       const Kd_Brg = selectedRowKeys[0];
-      const apiUrl = 'http://localhost:3000/storedprocedure'; 
+      const apiUrl = 'http://192.168.1.21:3000/storedprocedure'; 
   
       axios
         .get(apiUrl, {
@@ -301,7 +302,7 @@ const BarangJadi = () => {
       const token = cookie.get('token');
 
       // Make the API request with the token included in the headers
-      const response = await fetch('http://localhost:3000/bahanbaku', {
+      const response = await fetch('http://192.168.1.21:3000/bahanbaku', {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -675,7 +676,11 @@ const columnModal =[ {
     <LayoutContent>
     <div>
     <div style={{ marginBottom: 16,  display: "flex", width: "100%", justifyContent: "center"}}>
-        <RangePicker onChange={handleDateRangeChange} />
+    <h1 style={{margin: "0 10px 0 0", fontSize: "18px"}}>Masukan Tanggal:</h1>
+        {/* <RangePicker onChange={handleDateRangeChange} /> */}
+        <RangePicker format={dateFormat}
+      renderExtraFooter={() => 'Custom footer'}
+      onChange={handleDateRangeChange} />
         <Select
           defaultValue="Export Type"
           style={{ width: 120, marginLeft: 16 }}
