@@ -144,20 +144,41 @@ const Mesin = () => {
         setDt_Akhir(null);
       }
     };
-    const callStoredProc = () => {
-      const Kd_Brg = selectedRowKeys[0];
-      const apiUrl = 'http://192.168.1.21:3000/storedprocedure'; 
+    // const callStoredProc = () => {
+    //   const Kd_Brg = selectedRowKeys[0];
+    //   const apiUrl = 'http://192.168.1.21:3000/storedprocedure'; 
   
+    //   axios
+    //     .get(apiUrl, {
+    //       params: {
+    //         Kd_Brg,
+    //         dt_Awal: dt_Awal.format('YYYY-MM-DD'),
+    //         dt_Akhir: dt_Akhir.format('YYYY-MM-DD'),
+    //       },
+    //     })
+    //     .then((response) => {
+        
+    //       setDataTrace(response.data);
+    //       console.log(response.data);
+    //     })
+    //     .catch((error) => {
+    //       console.error(error);
+    //     });
+    // };
+    const callStoredProc = () => {
+      const apiUrl = 'http://192.168.1.21:3000/spalat';
+      const token = cookie.get('token');
+      const User_Id = token; // Replace 'your_user_id' with the actual user ID
+    
       axios
         .get(apiUrl, {
           params: {
-            Kd_Brg,
+            User_Id,
             dt_Awal: dt_Awal.format('YYYY-MM-DD'),
             dt_Akhir: dt_Akhir.format('YYYY-MM-DD'),
           },
         })
         .then((response) => {
-        
           setDataTrace(response.data);
           console.log(response.data);
         })
@@ -165,7 +186,9 @@ const Mesin = () => {
           console.error(error);
         });
     };
-    console.log("setDataTrace", dataTrace)
+    
+    console.log('setDataTrace', dataTrace);
+
 
     const handleReset = (clearFilters) => {
       clearFilters();

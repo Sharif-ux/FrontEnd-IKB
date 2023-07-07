@@ -146,6 +146,7 @@ export default function SignInPage(props) {
             type="text"
             value={User_id}
             onChange={(e) => setUser_id(e.target.value)}
+            placeholder="Masukan Username"
           />
               </div>
 
@@ -166,6 +167,7 @@ export default function SignInPage(props) {
             type="password"
             value={Password}
             onChange={(e) => setPassword(e.target.value)}
+            placeholder="Masukan Password"
           />
               </div>
 
