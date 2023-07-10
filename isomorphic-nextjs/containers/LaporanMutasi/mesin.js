@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef} from 'react';
 import { Table, Select, Button, Modal } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
-import { Input, Space,  } from 'antd';
+import { Input, Space, Spin  } from 'antd';
 import Highlighter from 'react-highlight-words';
 import moment from 'moment';
 import axios from 'axios';
@@ -36,6 +36,7 @@ const Mesin = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [dt_Awal, setDt_Awal] = useState(null);
   const [Kd_Brg, setKd_Brg] = useState('');
+  const [loading, setLoading] = useState(false);
   const [dt_Akhir, setDt_Akhir] = useState(null);
   const [dataTrace, setDataTrace] = useState([])
   const [visible, setVisible] = useState(false);
@@ -97,7 +98,6 @@ const Mesin = () => {
       setSearchText(selectedKeys[0]);
       setSearchedColumn(dataIndex);
     };
-
     // const handleTableClick = (record) => {
     //   setSelectedRowKeys([record.Kd_Brg]);
     
@@ -165,20 +165,119 @@ const Mesin = () => {
     //       console.error(error);
     //     });
     // };
-    const callStoredProc = () => {
-      const apiUrl = 'http://192.168.1.21:3000/spalat';
-      const token = cookie.get('token');
-      const User_Id = token; // Replace 'your_user_id' with the actual user ID
+    // const callStoredProc = () => {
+    //   const apiUrl = 'http://192.168.1.21:3000/spalat';
+    //   const token = cookie.get('token');
+    //   const decodedToken = jwt.decode(token);
+    //   const User_id = decodedToken.User_id;
+    //   console.log('User_Id:', User_id);
+    //   console.log('Kategori:', Kategori);
     
+    //   axios
+    //     .get(apiUrl, {
+    //       params: {
+    //         User_id,
+    //         dt_Awal: dt_Awal.format('YYYY-MM-DD'),
+    //         dt_Akhir: dt_Akhir.format('YYYY-MM-DD'),
+    //         Kategori: "ALAT",
+    //       },
+    //     }
+    //     )
+    //     .then((response) => {
+    //       setDataTrace(response.data);
+    //       console.log("LaporanMutasiMesin",response.data);
+    //     })
+    //     .catch((error) => {
+    //       console.error(error);
+    //     });
+    // };
+    useEffect(() => {
+      const token = cookie.get('token');
+      console.log('Token:', token);
+    }, []);
+    const fetchData = async () => {
+      try {
+        const token = cookie.get('token');
+        const response = await fetch('http://192.168.1.21:3000/mesin', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Data:', data);
+          setData(data.data);
+        } else {
+          const errorData = await response.json();
+          console.log('Error:', errorData);
+        }
+      } catch (error) {
+        console.error('Error occurred during API request:', error);
+      }
+    };
+    
+    useEffect(() => {
+      fetchData();
+    
+      // Fetch data periodically
+      const interval = setInterval(fetchData, 5000); // Fetch data every 5 seconds (adjust the interval as needed)
+    
+      return () => {
+        // Clear the interval when the component is unmounted
+        clearInterval(interval);
+      };
+    }, []);
+    
+    const callStoredProc = async () => {
+      try {
+        setLoading(true);
+    
+        const token = cookie.get('token');
+        const User_Id = token;
+    
+        const response = await axios.get('http://192.168.1.21:3000/spalat', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: {
+            User_Id,
+            dt_Awal: dt_Awal.format('YYYY-MM-DD'),
+            dt_Akhir: dt_Akhir.format('YYYY-MM-DD'),
+            Kategori: 'ALAT',
+          },
+        });
+    
+        if (response.status === 200) {
+          setData(response.data);
+          setLoading(false);
+          console.log('Data after stored procedure:', response.data);
+        } else {
+          console.error('Error occurred during stored procedure:', response.data);
+        }
+      } catch (error) {
+        console.error('Error occurred during stored procedure:', error);
+      }finally {
+        setLoading(false);
+      }
+    };
+    
+
+    console.log('setDataTrace', dataTrace);
+    const traceStock = () => {
+      const Kd_Brg = selectedRowKeys[0];
+      const apiUrl = 'http://192.168.1.21:3000/tracebystock'; 
+  
       axios
         .get(apiUrl, {
           params: {
-            User_Id,
+            Kd_Brg,
             dt_Awal: dt_Awal.format('YYYY-MM-DD'),
             dt_Akhir: dt_Akhir.format('YYYY-MM-DD'),
           },
         })
         .then((response) => {
+        
           setDataTrace(response.data);
           console.log(response.data);
         })
@@ -186,9 +285,6 @@ const Mesin = () => {
           console.error(error);
         });
     };
-    
-    console.log('setDataTrace', dataTrace);
-
 
     const handleReset = (clearFilters) => {
       clearFilters();
@@ -246,18 +342,18 @@ const Mesin = () => {
     },
     {
       title: 'Pemasukan',
-      dataIndex: 'IN_Brg',
-      key: 'IN_Brg',
+      dataIndex: 'pemasukan',
+      key: 'pemasukan',
 
-      ...getColumnSearchProps('IN_Brg'),
+      ...getColumnSearchProps('pemasukan'),
   
     },
     {
       title: 'Pengeluaran',
-      dataIndex: 'OUT_Brg',
-      key: 'OUT_Brg',
+      dataIndex: 'pengeluaran',
+      key: 'pengeluaran',
 
-      ...getColumnSearchProps('OUT_Brg')
+      ...getColumnSearchProps('pengeluaran')
       },
     {
       title: 'Penyusaian',
@@ -298,50 +394,13 @@ const Mesin = () => {
     //   render: (text) => <span>{moment(text).format('YYYY-MM-DD')}</span>,
     // },
   ];
-  const isButtonDisabled = !dt_Awal || !dt_Akhir; // Check if either dt_Awal or dt_Akhir is null
+  const isButtonDisabled = !dt_Awal || !dt_Akhir || rowSelection == null; // Check if either dt_Awal or dt_Akhir is null
 
-  useEffect(() => {
-    fetchData();
-  }, []);
 
   useEffect(() => {
     filterData();
   }, [data, dateRange]);
-  useEffect(() => {
-    // Retrieve the token from the cookie
-    const token = cookie.get('token');
-    
-    // Use the token here or send it to another function or API request
-    console.log('Token:', token);
-  }, []);
-  const fetchData = async () => {
-    try {
-      // Retrieve the token from the local storage
-      // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNhIiwiaWF0IjoxNjg3NzQ2MjQ0LCJleHAiOjE2ODc4MzI2NDR9.43cykjUUw80sCbAinLXSLiJlAp7oz-rQVmthToZuh2M8';
-      const token = cookie.get('token');
-
-      // Make the API request with the token included in the headers
-      const response = await fetch('http://192.168.1.21:3000/mesin', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      if (response.ok) {
-        // Handle the successful response
-        const data = await response.json();
-        console.log('Data:', data);
-        setData(data.data)
-      } else {
-        // Handle the error response
-        const errorData = await response.json();
-        console.log('Error:', errorData);
-      }
-    } catch (error) {
-      // Handle network or server error
-      console.error('Error occurred during API request:', error);
-    }
-  };
+ 
 
   const handleDateChange = (dates) => {
     if (dates) {
@@ -371,7 +430,7 @@ const Mesin = () => {
   };
   const handleClick = () => {
     showModal();
-    callStoredProc();
+    traceStock();
   };
   const exportToCSVModal = () => {
     const csvExporter = new ExportToCsv({
@@ -382,7 +441,7 @@ const Mesin = () => {
       showTitle: true,
       useTextFile: false,
       useBom: true,
-      filename: "DataMesinTrace"
+      filename: "LaporanMutasiMesinTrace"
     });
   
     const columnHeaders = {
@@ -408,8 +467,8 @@ const Mesin = () => {
         "Keterangan": item.Keterangan,
         "Tanggal": item.Date_Transaction,
         "Harga": item.Harga,
-        "Masuk": item.IN_Brg,
-        "Keluar": item.OUT_Brg,
+        "Masuk": item.pemasukan,
+        "Keluar": item.pengeluaran,
         "Penyesuaian": item.ADJ_Brg,
         "Kode Barang": item.Kd_Brg,
         "Stock Opname": item.Qty_Fisik,
@@ -427,8 +486,8 @@ const Mesin = () => {
       "Keterangan": item.Keterangan,
       "Tanggal": item.Date_Transaction,
       "Harga": item.Harga,
-      "Masuk": item.IN_Brg,
-      "Keluar": item.OUT_Brg,
+      "Masuk": item.pemasukan,
+      "Keluar": item.pengeluaran,
       "Penyesuaian": item.ADJ_Brg,
       "Kode Barang": item.Kd_Brg,
       "Stock Opname": item.Qty_Fisik,
@@ -447,7 +506,7 @@ const Mesin = () => {
     const downloadUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = downloadUrl;
-    link.download = 'DataMesinTrace.xlsx';
+    link.download = 'LaporanMutasiMesinTrace.xlsx';
     link.click();
   };
   const exportToPDF2 = () => {
@@ -467,7 +526,7 @@ const Mesin = () => {
       body: tableContent2,
     });
 
-    doc.save('DataMesinTrace.pdf');
+    doc.save('LaporanMutasiMesinTrace.pdf');
   };
   const exportToCSV = () => {
     const csvExporter = new ExportToCsv({
@@ -478,7 +537,7 @@ const Mesin = () => {
       showTitle: true,
       useTextFile: false,
       useBom: true,
-      filename: "DataMesin"
+      filename: "LaporanMutasiMesin"
     });
   
     const columnHeaders = {
@@ -502,8 +561,8 @@ const Mesin = () => {
         "Nama Barang": item.Nm_Brg,
         "Satuan": item.Unit_Desc,
         "Saldo Awal": item.Saldo_Awal,
-        "Pemasukan": item.IN_Brg,
-        "Pengeluaran": item.OUT_Brg,
+        "Pemasukan": item.pemasukan,
+        "Pengeluaran": item.pengeluaran,
         "Penyesuaian": item.Adjust_Brg,
         "Stock Opname": item.Qty_Fisik,
         "Nama Barang": item.Nm_Brg,
@@ -521,8 +580,8 @@ const Mesin = () => {
       "Nama Barang": item.Nm_Brg,
       "Satuan": item.Unit_Desc,
       "Saldo Awal": item.Saldo_Awal,
-      "Pemasukan": item.IN_Brg,
-      "Pengeluaran": item.OUT_Brg,
+      "Pemasukan": item.pemasukan,
+      "Pengeluaran": item.pengeluaran,
       "Penyesuaian": item.Adjust_Brg,
       "Stock Opname": item.Qty_Fisik,
       "Nama Barang": item.Nm_Brg,
@@ -541,7 +600,7 @@ const Mesin = () => {
     const downloadUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = downloadUrl;
-    link.download = 'DataMesin.xlsx';
+    link.download = 'LaporanMutasiMesin.xlsx';
     link.click();
   };
 
@@ -561,7 +620,7 @@ const Mesin = () => {
       body: tableContent,
     });
   
-    doc.save('DataMesin.pdf');
+    doc.save('LaporanMutasiMesin.pdf');
   };
   const columnModal =[ {
     title: 'No.',
@@ -615,15 +674,15 @@ const Mesin = () => {
   },
   {
     title: 'Masuk',
-    dataIndex: 'IN_Brg',
-    key: 'IN_Brg',
-    ...getColumnSearchProps('IN_Brg'),
+    dataIndex: 'pemasukan',
+    key: 'pemasukan',
+    ...getColumnSearchProps('pemasukan'),
   },
   {
     title: 'Keluar',
-    dataIndex: 'OUT_Brg',
-    key: 'OUT_Brg',
-    ...getColumnSearchProps('OUT_Brg'),
+    dataIndex: 'pengeluaran',
+    key: 'pengeluaran',
+    ...getColumnSearchProps('pengeluaran'),
   
   },
   {
@@ -676,11 +735,22 @@ const Mesin = () => {
     <LayoutContentWrapper style={{ height: '100%' }}>
     <LayoutContent>
     <div>
-    <div style={{ marginBottom: 16,  display: "flex", width: "100%", justifyContent: "center"}}>
-    <h1 style={{margin: "0 10px 0 0", fontSize: "18px"}}>Masukan Tanggal:</h1>
-    <RangePicker format={dateFormat}
-      renderExtraFooter={() => 'Custom footer'}
-      onChange={handleDateRangeChange} />
+    <div style={{ marginBottom: 16,  display: "flex", width: "100%", justifyContent: "center"}} className='topRow'>
+    <h1 style={{margin: "7px 10px 0 0"}}>Masukan Tanggal:</h1>
+    <DatePicker.RangePicker
+  value={[dt_Awal, dt_Akhir]}
+  onChange={(dates) => {
+    if (dates === null) {
+      setDt_Awal(null);
+      setDt_Akhir(null);
+    } else {
+      setDt_Awal(dates[0]);
+      setDt_Akhir(dates[1]);
+    }
+  }}
+/>
+<Button type='primary' onClick={callStoredProc} style={{marginLeft: 16,  backgroundColor: "#1f2431", color: "#efefef", borderRadius: "5px"}}>Submit Tanggal</Button>
+
         <Select
           defaultValue="Export Type"
           style={{ width: 120, marginLeft: 16 }}
@@ -703,7 +773,6 @@ const Mesin = () => {
             Export {exportType.toUpperCase()}
           </Button>
         )}
-
               <Button onClick={handleClick} disabled={isButtonDisabled} style={{marginLeft: 16,  backgroundColor: "#1f2431", color: "#efefef", borderRadius: "5px"}}>Kartu Stock</Button>
               <Modal
         title={`Trace Stock Kode Barang - ${selectedRowKeys}`}
@@ -741,11 +810,17 @@ const Mesin = () => {
         </div>
       </Modal>
       </div>
-      <Table id="table-ref" columns={columns} dataSource={filteredData} scroll={{ x: 400 }} ref={tableRef}  rowKey="Kd_Brg"
+      {loading ? (
+        <div style={{width: "100%",display: "flex", justifyContent: "center", marginTop: "4rem"}}>
+        <Spin size="large" delay={5}/> 
+        </div>// Display the loading indicator while loading is true
+      ) : (
+      <Table id="table-ref" columns={columns} dataSource={!dt_Akhir||!dt_Awal == null ? "" : data} scroll={{ x: 400 }} ref={tableRef}  rowKey="Kd_Brg"
         rowSelection={rowSelection}    onRow={(record) => ({
           onClick: () => handleRowClick(record),
         })}
       />
+      )} 
     </div>
 
     </LayoutContent>

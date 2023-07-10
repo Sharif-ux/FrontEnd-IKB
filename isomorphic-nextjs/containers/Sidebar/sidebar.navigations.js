@@ -43,47 +43,47 @@ export default [
 	// },
 	{
 		key: 'dashboardikb',
-		label: 'Dashboard',
+		label: 'sidebar.dashboard',
 		leftIcon: <SidebarDashboard size={19} />,
 	},
 	{
 		key: 'dokumenbc',
-		label: 'Laporan Dokumen BC',
+		label: 'sidebar.laporanDokumenBC',
 		leftIcon: <SidebarLaporanDokumenBC size={19} />,
 		children: [
 			{
 				key: 'penerimaanbarang',
-				label: 'Penerimaan Barang',
+				label: 'sidebar.penerimaanBarang',
 			},
 			{
 				key: 'pengeluaranbarang',
-				label: 'Pengeluaran Barang',
+				label: 'sidebar.pengeluaranBarang',
 			},
 		],
 	},
 	{
 		key: 'mutasi',
-		label: 'Laporan Mutasi',
+		label: 'sidebar.mesin',
 		leftIcon: <SidebarLaporanMutasi size={19} />,
 		children: [
 			{
 				key: 'bahanbaku',
-				label: 'Bahan Baku & Pembantu',
+				label: 'sidebar.bahanbaku',
 			},
 			{
 				key: 'mesin',
-				label: 'Mesin & Peralatan Kantor',
+				label: 'sidebar.mesin',
 			},			{
 				key: 'barangjadi',
-				label: 'Barang Jadi',
+				label: 'sidebar.barangJadi',
 			},
 			{
 				key: 'barangsisa',
-				label: 'Barang Sisa & Scrap',
+				label: 'sidebar.bahansisa',
 			},			
 			{
 				key: 'wip',
-				label: 'Barang Dalam Proses (WIP)',
+				label: 'sidebar.wip',
 			},
 		],
 	},

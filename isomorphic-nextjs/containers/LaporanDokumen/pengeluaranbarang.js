@@ -27,6 +27,7 @@ const PengeluaranBarang = () => {
   const [exportType, setExportType] = useState(null);
   const [searchText, setSearchText] = useState('');
   const [searchedColumn, setSearchedColumn] = useState('');
+  const [alert, setAlert] = useState(false)
   const searchInput = useRef(null);
       const tableRef = React.useRef(null);
   
@@ -280,6 +281,7 @@ const PengeluaranBarang = () => {
       showTitle: true,
       useTextFile: false,
       useBom: true,
+      filename: "PengeluaranBarang"
     });
   
     const columnHeaders = {
@@ -351,7 +353,7 @@ const PengeluaranBarang = () => {
     const downloadUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = downloadUrl;
-    link.download = 'data.xlsx';
+    link.download = 'PengeluaranBarang.xlsx';
     link.click();
   };
 
@@ -441,7 +443,10 @@ const generatePDFForChunk = (chunk, doc, columns) => {
     },
   });
 };
-
+const handleClickAlert =() =>{
+  setAlert(true);
+}
+const isButtonDisabled = !dateRange ; // Check if either dt_Awal or dt_Akhir is null
 const generatePDF = async () => {
   try {
     const response = await axios.get('http://localhost:3000/pengeluaranbarang');
@@ -543,6 +548,7 @@ const generatePDF = async () => {
       // Add more columns as needed
     ];
 
+
     const doc = new jsPDF();
     const dataChunks = splitDataIntoChunks(tableData, pageSize);
 
@@ -563,10 +569,11 @@ const generatePDF = async () => {
     <LayoutContent>
     <div>
     <div style={{ marginBottom: 16,  display: "flex", width: "100%", justifyContent: "center"}}>
-    <h1 style={{margin: "0 10px 0 0", fontSize: "18px"}}>Masukan Tanggal:</h1>
+    <h1 style={{margin: "7px 10px 0 0"}}>Masukan Tanggal:</h1>
     <RangePicker format={dateFormat}
       renderExtraFooter={() => 'Custom footer'}
       onChange={handleDateChange} />
+    <Button onClick={handleClickAlert} disabled={isButtonDisabled} style={{marginLeft: 16,  backgroundColor: "#1f2431", color: "#efefef", borderRadius: "5px"}}>Submit Tanggal</Button>
         <Select
           defaultValue="Export Type"
           style={{ width: 120, marginLeft: 16 }}
@@ -591,7 +598,7 @@ const generatePDF = async () => {
         )}
       </div>
       {
-      dateRange === null ? <div style={{position: "relative", top: "10", right: "10", display:dateRange === null ? "block" : "none", zIndex: "99"}}>  <Alert
+      alert === false ? <div style={{position: "relative", top: "10", right: "10", display:alert === false ? "block" : "none", zIndex: "99"}}>  <Alert
       message="Catatan Informasi"
       description="Isi Date Range Sebelum Melihat Data"
       type="info"
