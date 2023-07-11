@@ -63,7 +63,7 @@ export default [
 	},
 	{
 		key: 'mutasi',
-		label: 'sidebar.mesin',
+		label: 'sidebar.laporanMutasi',
 		leftIcon: <SidebarLaporanMutasi size={19} />,
 		children: [
 			{
@@ -79,7 +79,7 @@ export default [
 			},
 			{
 				key: 'barangsisa',
-				label: 'sidebar.bahansisa',
+				label: 'sidebar.barangsisa',
 			},			
 			{
 				key: 'wip',

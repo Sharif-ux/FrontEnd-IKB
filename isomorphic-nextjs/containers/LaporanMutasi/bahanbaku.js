@@ -112,7 +112,7 @@ const BahanBaku = () => {
     //     setKd_Brg('');
     //   }
     // };  
-
+    const dataGeneratefile = `${dt_Awal} - ${dt_Akhir}` 
     const handleRowClick = (record) => {
       const selectedRecord = data.find((item) => item.Kd_Brg === record.Kd_Brg);
   
@@ -244,7 +244,7 @@ const BahanBaku = () => {
             User_Id,
             dt_Awal: dt_Awal.format('YYYY-MM-DD'),
             dt_Akhir: dt_Akhir.format('YYYY-MM-DD'),
-            Kategori: 'ALAT',
+            Kategori: 'BB/BP',
           },
         });
     
@@ -441,7 +441,7 @@ const BahanBaku = () => {
       showTitle: true,
       useTextFile: false,
       useBom: true,
-      filename: "LaporanMutasiBahanBakuTrace"
+      filename: `LaporanMutasiBahanBakuTrace ${dataGeneratefile}`
     });
   
     const columnHeaders = {
@@ -506,7 +506,7 @@ const BahanBaku = () => {
     const downloadUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = downloadUrl;
-    link.download = 'LaporanMutasiBahanBakuTrace.xlsx';
+    link.download = `LaporanMutasiBahanBakuTrace ${dataGeneratefile}.xlsx`;
     link.click();
   };
   const exportToPDF2 = () => {
@@ -537,7 +537,7 @@ const BahanBaku = () => {
       showTitle: true,
       useTextFile: false,
       useBom: true,
-      filename: "LaporanMutasiBahanBaku"
+      filename: `LaporanMutasiBahanBaku ${dataGeneratefile}`
     });
   
     const columnHeaders = {
@@ -600,7 +600,7 @@ const BahanBaku = () => {
     const downloadUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = downloadUrl;
-    link.download = 'LaporanMutasiBahanBaku.xlsx';
+    link.download = `LaporanMutasiBahanBaku${dataGeneratefile}.xlsx`;
     link.click();
   };
 
@@ -620,7 +620,7 @@ const BahanBaku = () => {
       body: tableContent,
     });
   
-    doc.save('LaporanMutasiBahanBaku.pdf');
+    doc.save(`LaporanMutasiBahanBaku${dataGeneratefile}.pdf`);
   };
   const columnModal =[ {
     title: 'No.',
@@ -739,6 +739,7 @@ const BahanBaku = () => {
     <h1 style={{margin: "7px 10px 0 0"}}>Masukan Tanggal:</h1>
     <DatePicker.RangePicker
   value={[dt_Awal, dt_Akhir]}
+  format={dateFormat}
   onChange={(dates) => {
     if (dates === null) {
       setDt_Awal(null);

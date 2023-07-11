@@ -98,6 +98,7 @@ const Mesin = () => {
       setSearchText(selectedKeys[0]);
       setSearchedColumn(dataIndex);
     };
+    const dataGeneratefile = `${dt_Awal} - ${dt_Akhir}` 
     // const handleTableClick = (record) => {
     //   setSelectedRowKeys([record.Kd_Brg]);
     
@@ -441,7 +442,7 @@ const Mesin = () => {
       showTitle: true,
       useTextFile: false,
       useBom: true,
-      filename: "LaporanMutasiMesinTrace"
+      filename: `LaporanMutasiMesinTrace ${dataGeneratefile}`
     });
   
     const columnHeaders = {
@@ -506,7 +507,7 @@ const Mesin = () => {
     const downloadUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = downloadUrl;
-    link.download = 'LaporanMutasiMesinTrace.xlsx';
+    link.download = `LaporanMutasiMesinTrace ${dataGeneratefile}.xlsx`;
     link.click();
   };
   const exportToPDF2 = () => {
@@ -526,7 +527,7 @@ const Mesin = () => {
       body: tableContent2,
     });
 
-    doc.save('LaporanMutasiMesinTrace.pdf');
+    doc.save(`LaporanMutasiMesinTrace ${dataGeneratefile}.pdf`);
   };
   const exportToCSV = () => {
     const csvExporter = new ExportToCsv({
@@ -600,7 +601,7 @@ const Mesin = () => {
     const downloadUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = downloadUrl;
-    link.download = 'LaporanMutasiMesin.xlsx';
+    link.download = `LaporanMutasiMesin ${dataGeneratefile}.xlsx`;
     link.click();
   };
 
@@ -620,7 +621,7 @@ const Mesin = () => {
       body: tableContent,
     });
   
-    doc.save('LaporanMutasiMesin.pdf');
+    doc.save(`LaporanMutasiMesin ${dataGeneratefile}.pdf`);
   };
   const columnModal =[ {
     title: 'No.',
@@ -739,6 +740,7 @@ const Mesin = () => {
     <h1 style={{margin: "7px 10px 0 0"}}>Masukan Tanggal:</h1>
     <DatePicker.RangePicker
   value={[dt_Awal, dt_Akhir]}
+  format={dateFormat}
   onChange={(dates) => {
     if (dates === null) {
       setDt_Awal(null);
@@ -815,7 +817,7 @@ const Mesin = () => {
         <Spin size="large" delay={5}/> 
         </div>// Display the loading indicator while loading is true
       ) : (
-      <Table id="table-ref" columns={columns} dataSource={!dt_Akhir||!dt_Awal == null ? "" : data} scroll={{ x: 400 }} ref={tableRef}  rowKey="Kd_Brg"
+      <Table id="table-ref" columns={columns} dataSource={data} scroll={{ x: 400 }} ref={tableRef}  rowKey="Kd_Brg"
         rowSelection={rowSelection}    onRow={(record) => ({
           onClick: () => handleRowClick(record),
         })}

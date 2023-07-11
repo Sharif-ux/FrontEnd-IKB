@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef} from 'react';
-import { Table, DatePicker, Select, Button,Modal } from 'antd';
+import { Table, Select, Button, Modal, Input, Space, Spin, Alert } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
-import { Input, Space,  } from 'antd';
 import Highlighter from 'react-highlight-words';
 import moment from 'moment';
 import axios from 'axios';
@@ -18,9 +17,12 @@ import { PDFViewer, Page, Text, View, Document, StyleSheet } from '@react-pdf/re
 import 'jspdf-autotable';
 import LayoutContentWrapper from '@iso/components/utility/layoutWrapper';
 import LayoutContent from '@iso/components/utility/layoutContent';
+// import locale from 'antd/es/date-picker/locale/id_ID';
+const { DatePicker } = require('antd');
+const dateFormat = 'DD/MM/YYYY';
+
 const { RangePicker } = DatePicker;
 const { Option } = Select;
-
 
 const Wip = () => {
   const [data, setData] = useState([]);
@@ -33,14 +35,14 @@ const Wip = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [dt_Awal, setDt_Awal] = useState(null);
   const [Kd_Brg, setKd_Brg] = useState('');
+  const [loading, setLoading] = useState(false);
   const [dt_Akhir, setDt_Akhir] = useState(null);
   const [dataTrace, setDataTrace] = useState([])
   const [visible, setVisible] = useState(false);
-const [disabled, setDisabled] = useState();
+  const [error, setError] = useState(null);
   const searchInput = useRef(null);
+  const [countdown, setCountdown] = useState(10); 
   const tableRef = useRef(null);
-  const dateFormat = 'DD/MM/YYYY';
-
   const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
       <div style={{ padding: 8 }}>
@@ -92,20 +94,26 @@ const [disabled, setDisabled] = useState();
       onFilter: (value, record) =>
         record[dataIndex] ? moment(record[dataIndex]).isSame(value, 'day') : false,
     });
-    // filterIcon: (filtered) => (
-    //   <SearchOutlined
-    //     style={{
-    //       color: filtered ? '#1677ff' : undefined,
-    //     }}
-    //   />
-    // ),
-    // onFilter: (value, record) =>
-    //   record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
-    // onFilterDropdownOpenChange: (visible) => {
-    //   if (visible) {
-    //     setTimeout(() => searchInput.current?.select(), 100);
+    const handleSearch = (selectedKeys, confirm, dataIndex) => {
+      confirm();
+      setSearchText(selectedKeys[0]);
+      setSearchedColumn(dataIndex);
+    };
+    // const handleTableClick = (record) => {
+    //   setSelectedRowKeys([record.Kd_Brg]);
+    
+      
+    //   const selectedRecord = data.find((item) => item.Kd_Brg === record.Kd_Brg);
+    //   console.log("cek selectedRecord" ,selectedRecord)
+
+    //   if (selectedRecord) {
+    //     setKd_Brg(selectedRecord.Kd_Brg);
+    //     console.log("cek", selectedRecord.KodeBarang)
+    //   } else {
+    //     setKd_Brg('');
     //   }
-    // },
+    // };  
+
     const handleRowClick = (record) => {
       const selectedRecord = data.find((item) => item.Kd_Brg === record.Kd_Brg);
   
@@ -126,29 +134,166 @@ const [disabled, setDisabled] = useState();
         handleRowClick(record);
       },
     };
-
-    const isButtonDisabled = !dt_Awal || !dt_Akhir; // Check if either dt_Awal or dt_Akhir is null
-
-    //     const handleDateRangeChange = (dates) => {
-    //      setDt_Awal(dates[0]);
-    //   setDt_Akhir(dates[1]);
-    // };
+ 
+    useEffect(() => {
+      let timer;
+      if (error) {
+        timer = setInterval(() => {
+          setCountdown((prevCountdown) => {
+            if (prevCountdown === 1) {
+              clearInterval(timer); // Stop the interval when countdown reaches 0
+            }
+            return prevCountdown - 1;
+          });
+        }, 1000); // Update countdown every second
+      }
+    
+      return () => {
+        clearInterval(timer);
+      };
+    }, [error]);
+    useEffect(() => {
+      if (countdown === 0) {
+        setError(null); // Clear the error to dismiss the alert
+      }
+    }, [countdown]);
     const handleDateRangeChange = (dates) => {
       if (dates && dates.length > 0) {
         // Handle date range picker change event and set dt_Awal and dt_Akhir states
         setDt_Awal(dates[0]);
         setDt_Akhir(dates[1]);
-
       } else {
         // Handle null or empty dates scenario
         setDt_Awal(null);
         setDt_Akhir(null);
-      
       }
     };
-    const callStoredProc = () => {
+    // const callStoredProc = () => {
+    //   const Kd_Brg = selectedRowKeys[0];
+    //   const apiUrl = 'http://192.168.1.21:3000/storedprocedure'; 
+  
+    //   axios
+    //     .get(apiUrl, {
+    //       params: {
+    //         Kd_Brg,
+    //         dt_Awal: dt_Awal.format('YYYY-MM-DD'),
+    //         dt_Akhir: dt_Akhir.format('YYYY-MM-DD'),
+    //       },
+    //     })
+    //     .then((response) => {
+        
+    //       setDataTrace(response.data);
+    //       console.log(response.data);
+    //     })
+    //     .catch((error) => {
+    //       console.error(error);
+    //     });
+    // };
+    // const callStoredProc = () => {
+    //   const apiUrl = 'http://192.168.1.21:3000/spalat';
+    //   const token = cookie.get('token');
+    //   const decodedToken = jwt.decode(token);
+    //   const User_id = decodedToken.User_id;
+    //   console.log('User_Id:', User_id);
+    //   console.log('Kategori:', Kategori);
+    
+    //   axios
+    //     .get(apiUrl, {
+    //       params: {
+    //         User_id,
+    //         dt_Awal: dt_Awal.format('YYYY-MM-DD'),
+    //         dt_Akhir: dt_Akhir.format('YYYY-MM-DD'),
+    //         Kategori: "ALAT",
+    //       },
+    //     }
+    //     )
+    //     .then((response) => {
+    //       setDataTrace(response.data);
+    //       console.log("LaporanMutasiBahanBaku",response.data);
+    //     })
+    //     .catch((error) => {
+    //       console.error(error);
+    //     });
+    // };
+    useEffect(() => {
+      const token = cookie.get('token');
+      console.log('Token:', token);
+    }, []);
+    const fetchData = async () => {
+      try {
+        const token = cookie.get('token');
+        const response = await fetch('http://192.168.1.21:3000/wip', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Data:', data);
+          setData(data.data);
+        } else {
+          const errorData = await response.json();
+          console.log('Error:', errorData);
+        }
+      } catch (error) {
+        console.error('Error occurred during API request:', error);
+      }
+    };
+    
+    useEffect(() => {
+      fetchData();
+    
+      // Fetch data periodically
+      const interval = setInterval(fetchData, 5000); // Fetch data every 5 seconds (adjust the interval as needed)
+    
+      return () => {
+        // Clear the interval when the component is unmounted
+        clearInterval(interval);
+      };
+    }, []);
+    
+    const callStoredProc = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+    
+        const token = cookie.get('token');
+        const User_Id = token;
+    
+        const response = await axios.get('http://192.168.1.21:3000/spwip', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: {
+            User_Id,
+            dt_Awal: dt_Awal.format('YYYY-MM-DD'),
+            dt_Akhir: dt_Akhir.format('YYYY-MM-DD'),
+            Kategori: 'WIP',
+          },
+        });
+    
+        if (response.status === 200) {
+          setData(response.data);
+          console.log('Data after stored procedure:', response.data);
+        } else {
+          console.error('Error occurred during stored procedure:', response.data);
+          setError('An error occurred during the stored procedure execution.');
+        }
+      } catch (error) {
+        console.error('Error occurred during stored procedure:', error);
+        setError('An error occurred during the stored procedure execution.');
+      } finally {
+        setLoading(false);
+        setCountdown(10);
+      }
+    };
+    
+
+    console.log('setDataTrace', dataTrace);
+    const traceStock = () => {
       const Kd_Brg = selectedRowKeys[0];
-      const apiUrl = 'http://192.168.1.21:3000/storedprocedure'; 
+      const apiUrl = 'http://192.168.1.21:3000/tracebystock'; 
   
       axios
         .get(apiUrl, {
@@ -167,17 +312,7 @@ const [disabled, setDisabled] = useState();
           console.error(error);
         });
     };
-    console.log("setDataTrace", dataTrace)
-    const handleClick = () => {
-      showModal();
-      callStoredProc();
-    };
-    const handleSearch = (selectedKeys, confirm, dataIndex) => {
-      confirm();
-      setSearchText(selectedKeys[0]);
-      setSearchedColumn(dataIndex);
-    };
-  
+
     const handleReset = (clearFilters) => {
       clearFilters();
       setSearchText('');
@@ -196,106 +331,6 @@ const [disabled, setDisabled] = useState();
       ) : (
         text
       )
-      const columnModal =[ {
-        title: 'No.',
-        dataIndex: 'index',
-        render: (text, record, index) => (
-          <div
-            style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
-            onClick={() => handleTableClick(record)}
-          >
-            {index + 1}
-          </div>
-        ),
-        // render: (text, record, index) => index + 1, // Generate automation numbering
-      },
-      {
-        title: 'Sumber Trans',
-        dataIndex: 'Source_Trans',
-        key: 'Source_Trans',
-        ...getColumnSearchProps('Source_Trans'),
-      
-      },
-      {
-        title: 'No Refrensi',
-        dataIndex: 'No_Reference',
-        key: 'No_Reference',
-        ...getColumnSearchProps('No_Reference'),
-      
-      },
-      {
-        title: 'Keterangan',
-        dataIndex: 'Keterangan',
-        key: 'Keterangan',
-        ...getColumnSearchProps('Keterangan'),
-      },
-      {
-        title: 'Tanggal',
-        dataIndex: 'Date_Transaction',
-        key: 'Date_Transaction',   
-        render: (text) => {
-          const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
-          const convertedDate = new Date(text).toLocaleDateString('id-ID', options);
-          return <span>{convertedDate}</span>;
-        },    
-        ...getColumnDateProps('Date_Transaction')
-      },
-      {
-        title: 'Harga',
-        dataIndex: 'Harga',
-        key: 'Harga',
-        ...getColumnSearchProps('Harga'),
-      },
-      {
-        title: 'Masuk',
-        dataIndex: 'IN_Brg',
-        key: 'IN_Brg',
-        ...getColumnSearchProps('IN_Brg'),
-      },
-      {
-        title: 'Keluar',
-        dataIndex: 'OUT_Brg',
-        key: 'OUT_Brg',
-        ...getColumnSearchProps('OUT_Brg'),
-      
-      },
-      {
-        title: 'Penyusaian',
-        dataIndex: 'Adjust_Brg',
-        key: 'Adjust_Brg',
-        ...getColumnSearchProps('Adjust_Brg'),
-      
-      },
-      {
-        title: 'Kode Barang',
-        dataIndex: 'Kd_Brg',
-        key: 'Kd_Brg',
-        ...getColumnSearchProps('Kd_Brg'),
-      
-      },
-      {
-        title: 'Stock Opname',
-        dataIndex: 'Qty_Fisik',
-        key: 'Qty_Fisik',
-        ...getColumnSearchProps('Qty_Fisik'),
-      
-      },
-      {
-        title: 'Saldo Akhir',
-        dataIndex: 'Qty_System',
-        key: 'Qty_System',
-        ...getColumnSearchProps('Qty_System'),
-      
-      },
-      {
-        title: 'Saldo(QTY)',
-        dataIndex: 'Balance_QTY',
-        key: 'Balance_QTY',
-        ...getColumnSearchProps('Balance_QTY'),
-      
-      }]
-      
-      
   const columns = [
     {
       title: 'No.',
@@ -333,59 +368,13 @@ const [disabled, setDisabled] = useState();
 
   
   ];
-//   useEffect(()=>{
-// const date = dt_Akhir && dt_Awal;
-// setDisabled = (()=> {
-//   if(date == null) {
-// true
-//   }
-//   else{
-//     false
-//   }
-// })
-//   },[])
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const isButtonDisabled = !dt_Awal || !dt_Akhir || rowSelection == null; // Check if either dt_Awal or dt_Akhir is null
+
 
   useEffect(() => {
     filterData();
   }, [data, dateRange]);
-  useEffect(() => {
-    // Retrieve the token from the cookie
-    const token = cookie.get('token');
-    
-    // Use the token here or send it to another function or API request
-    console.log('Token:', token);
-  }, []);
-  const fetchData = async () => {
-    try {
-      // Retrieve the token from the local storage
-      // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNhIiwiaWF0IjoxNjg3NzQ2MjQ0LCJleHAiOjE2ODc4MzI2NDR9.43cykjUUw80sCbAinLXSLiJlAp7oz-rQVmthToZuh2M8';
-      const token = cookie.get('token');
-
-      // Make the API request with the token included in the headers
-      const response = await fetch('http://192.168.1.21:3000/wip', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      if (response.ok) {
-        // Handle the successful response
-        const data = await response.json();
-        console.log('Data:', data);
-        setData(data.data)
-      } else {
-        // Handle the error response
-        const errorData = await response.json();
-        console.log('Error:', errorData);
-      }
-    } catch (error) {
-      // Handle network or server error
-      console.error('Error occurred during API request:', error);
-    }
-  };
+ 
 
   const handleDateChange = (dates) => {
     if (dates) {
@@ -413,6 +402,10 @@ const [disabled, setDisabled] = useState();
     });
     setFilteredData(filtered);
   };
+  const handleClick = () => {
+    showModal();
+    traceStock();
+  };
   const exportToCSVModal = () => {
     const csvExporter = new ExportToCsv({
       fieldSeparator: ',',
@@ -422,7 +415,7 @@ const [disabled, setDisabled] = useState();
       showTitle: true,
       useTextFile: false,
       useBom: true,
-      filename: 'dataTraceStock',
+      filename: "LaporanTraceWIP"
     });
   
     const columnHeaders = {
@@ -448,8 +441,8 @@ const [disabled, setDisabled] = useState();
         "Keterangan": item.Keterangan,
         "Tanggal": item.Date_Transaction,
         "Harga": item.Harga,
-        "Masuk": item.IN_Brg,
-        "Keluar": item.OUT_Brg,
+        "Masuk": item.pemasukan,
+        "Keluar": item.pengeluaran,
         "Penyesuaian": item.ADJ_Brg,
         "Kode Barang": item.Kd_Brg,
         "Stock Opname": item.Qty_Fisik,
@@ -467,8 +460,8 @@ const [disabled, setDisabled] = useState();
       "Keterangan": item.Keterangan,
       "Tanggal": item.Date_Transaction,
       "Harga": item.Harga,
-      "Masuk": item.IN_Brg,
-      "Keluar": item.OUT_Brg,
+      "Masuk": item.pemasukan,
+      "Keluar": item.pengeluaran,
       "Penyesuaian": item.ADJ_Brg,
       "Kode Barang": item.Kd_Brg,
       "Stock Opname": item.Qty_Fisik,
@@ -487,7 +480,7 @@ const [disabled, setDisabled] = useState();
     const downloadUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = downloadUrl;
-    link.download = 'dataTraceStock.xlsx';
+    link.download = 'LaporanTraceWIP.xlsx';
     link.click();
   };
   const exportToPDF2 = () => {
@@ -507,9 +500,9 @@ const [disabled, setDisabled] = useState();
       body: tableContent2,
     });
 
-    doc.save('dataTraceStock.pdf');
+    doc.save('LaporanTraceWIP.pdf');
   };
-  const exportToCSV = () => {
+   const exportToCSV = () => {
     const csvExporter = new ExportToCsv({
       fieldSeparator: ',',
       quoteStrings: '"',
@@ -565,18 +558,8 @@ const [disabled, setDisabled] = useState();
     link.click();
   };
 
-  const showModal = () => {
-    setVisible(true);
-  };
-
-  const handleOk = () => {
-    setVisible(false);
-  };
-
-  const handleCancel = () => {
-    setVisible(false);
-  };
-  const exportToPDF = async (data) => {
+  
+   const exportToPDF = async (data) => {
     const doc = new jsPDF();
     const tableContent = [];
     const columns = Object.keys(data[0]);
@@ -593,15 +576,136 @@ const [disabled, setDisabled] = useState();
   
     doc.save('Wip.pdf');
   };
+  const columnModal =[ {
+    title: 'No.',
+    dataIndex: 'index',
+    render: (text, record, index) => (
+      <div
+        style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
+        onClick={() => handleTableClick(record)}
+      >
+        {index + 1}
+      </div>
+    ),
+    // render: (text, record, index) => index + 1, // Generate automation numbering
+  },
+  {
+    title: 'Sumber Trans',
+    dataIndex: 'Source_Trans',
+    key: 'Source_Trans',
+    ...getColumnSearchProps('Source_Trans'),
+  
+  },
+  {
+    title: 'No Refrensi',
+    dataIndex: 'No_Reference',
+    key: 'No_Reference',
+    ...getColumnSearchProps('No_Reference'),
+  
+  },
+  {
+    title: 'Keterangan',
+    dataIndex: 'Keterangan',
+    key: 'Keterangan',
+    ...getColumnSearchProps('Keterangan'),
+  },
+  {
+    title: 'Tanggal',
+    dataIndex: 'Date_Transaction',
+    key: 'Date_Transaction',   
+    render: (text) => {
+      const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
+      const convertedDate = new Date(text).toLocaleDateString('id-ID', options);
+      return <span>{convertedDate}</span>;
+    },    
+    ...getColumnDateProps('Date_Transaction')
+  },
+  {
+    title: 'Harga',
+    dataIndex: 'Harga',
+    key: 'Harga',
+    ...getColumnSearchProps('Harga'),
+  },
+  {
+    title: 'Masuk',
+    dataIndex: 'pemasukan',
+    key: 'pemasukan',
+    ...getColumnSearchProps('pemasukan'),
+  },
+  {
+    title: 'Keluar',
+    dataIndex: 'pengeluaran',
+    key: 'pengeluaran',
+    ...getColumnSearchProps('pengeluaran'),
+  
+  },
+  {
+    title: 'Penyusaian',
+    dataIndex: 'Adjust_Brg',
+    key: 'Adjust_Brg',
+    ...getColumnSearchProps('Adjust_Brg'),
+  
+  },
+  {
+    title: 'Kode Barang',
+    dataIndex: 'Kd_Brg',
+    key: 'Kd_Brg',
+    ...getColumnSearchProps('Kd_Brg'),
+  
+  },
+  {
+    title: 'Stock Opname',
+    dataIndex: 'Qty_Fisik',
+    key: 'Qty_Fisik',
+    ...getColumnSearchProps('Qty_Fisik'),
+  
+  },
+  {
+    title: 'Saldo Akhir',
+    dataIndex: 'Qty_System',
+    key: 'Qty_System',
+    ...getColumnSearchProps('Qty_System'),
+  
+  },
+  {
+    title: 'Saldo(QTY)',
+    dataIndex: 'Balance_QTY',
+    key: 'Balance_QTY',
+    ...getColumnSearchProps('Balance_QTY'),
+  
+  }]
+  const showModal = () => {
+    setVisible(true);
+  };
+
+  const handleOk = () => {
+    setVisible(false);
+  };
+
+  const handleCancel = () => {
+    setVisible(false);
+  };
   return (
     <LayoutContentWrapper style={{ height: '100%' }}>
     <LayoutContent>
     <div>
-    <div style={{ marginBottom: 16,  display: "flex", width: "100%", justifyContent: "center"}}>
-    <h1 style={{margin: "0 10px 0 0", fontSize: "18px"}}>Masukan Tanggal:</h1>
-    <RangePicker format={dateFormat}
-      renderExtraFooter={() => 'Custom footer'}
-      onChange={handleDateRangeChange} />
+    <div style={{ marginBottom: 16,  display: "flex", width: "100%", justifyContent: "center"}} className='topRow'>
+    <h1 style={{margin: "7px 10px 0 0"}}>Masukan Tanggal:</h1>
+    <DatePicker.RangePicker
+  value={[dt_Awal, dt_Akhir]}
+  format={dateFormat}
+  onChange={(dates) => {
+    if (dates === null) {
+      setDt_Awal(null);
+      setDt_Akhir(null);
+    } else {
+      setDt_Awal(dates[0]);
+      setDt_Akhir(dates[1]);
+    }
+  }}
+/>
+<Button type='primary' onClick={callStoredProc} style={{marginLeft: 16,  backgroundColor: "#1f2431", color: "#efefef", borderRadius: "5px"}}>Submit Tanggal</Button>
+
         <Select
           defaultValue="Export Type"
           style={{ width: 120, marginLeft: 16 }}
@@ -626,7 +730,7 @@ const [disabled, setDisabled] = useState();
         )}
               <Button onClick={handleClick} disabled={isButtonDisabled} style={{marginLeft: 16,  backgroundColor: "#1f2431", color: "#efefef", borderRadius: "5px"}}>Kartu Stock</Button>
               <Modal
-        title={`Trace Style Kode Barang - ${selectedRowKeys}`}
+        title={`Trace Stock Kode Barang - ${selectedRowKeys}`}
         visible={visible}
         onOk={handleOk}
         onCancel={handleCancel}
@@ -661,12 +765,37 @@ const [disabled, setDisabled] = useState();
         </div>
       </Modal>
       </div>
-      <Table id="table-ref" columns={columns} dataSource={filteredData} scroll={{ x: 400 }} ref={tableRef}  rowKey="Kd_Brg"
+      {loading ? (
+        <div style={{width: "100%",display: "flex", justifyContent: "center", marginTop: "4rem"}}>
+        <Spin size="large" delay={5}/> 
+        </div>// Display the loading indicator while loading is true
+      )    : (
+        <>
+          {error && (
+            <Alert
+              message={`Error Message ${countdown } `}
+              description="Permintaan mu tidak dapat dipenuhi karena tanggal yang kau pilih tidak memiliki data dari No_Reference"
+              type="error"
+              style={{
+                position: 'absolute',
+                top: 10,
+                left: "25%",
+                width: '50%',
+                zIndex: 9999,
+                borderRadius: "10px"
+              }}
+              showIcon
+            />
+            )}
+      <Table id="table-ref" columns={columns} dataSource={!dt_Akhir||!dt_Awal == null ? "" : data} scroll={{ x: 400 }} ref={tableRef}  rowKey="Kd_Brg"
         rowSelection={rowSelection}    onRow={(record) => ({
           onClick: () => handleRowClick(record),
         })}
       />
+      </>
+      )} 
     </div>
+
     </LayoutContent>
       </LayoutContentWrapper>
   );
