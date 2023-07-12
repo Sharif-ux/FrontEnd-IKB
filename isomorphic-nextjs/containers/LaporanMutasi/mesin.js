@@ -628,8 +628,7 @@ const Mesin = () => {
     dataIndex: 'index',
     render: (text, record, index) => (
       <div
-        style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
-        onClick={() => handleTableClick(record)}
+  
       >
         {index + 1}
       </div>
@@ -675,22 +674,22 @@ const Mesin = () => {
   },
   {
     title: 'Masuk',
-    dataIndex: 'pemasukan',
-    key: 'pemasukan',
-    ...getColumnSearchProps('pemasukan'),
+    dataIndex: 'IN_Brg',
+    key: 'IN_Brg',
+    ...getColumnSearchProps('IN_Brg'),
   },
   {
     title: 'Keluar',
-    dataIndex: 'pengeluaran',
-    key: 'pengeluaran',
-    ...getColumnSearchProps('pengeluaran'),
+    dataIndex: 'OUT_Brg',
+    key: 'OUT_Brg',
+    ...getColumnSearchProps('OUT_Brg'),
   
   },
   {
     title: 'Penyusaian',
-    dataIndex: 'Adjust_Brg',
-    key: 'Adjust_Brg',
-    ...getColumnSearchProps('Adjust_Brg'),
+    dataIndex: 'ADJ_Brg',
+    key: 'ADJ_Brg',
+    ...getColumnSearchProps('ADJ_Brg'),
   
   },
   {

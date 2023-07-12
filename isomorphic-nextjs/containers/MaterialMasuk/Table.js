@@ -64,6 +64,34 @@ const TableMaterial = () => {
     onFilter: (value, record) =>
       record[dataIndex] ? record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()) : '',
     })
+    const getColumnDateProps = (dataIndex) => ({
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        <div style={{ padding: 8 }}>
+          <DatePicker
+            style={{ marginBottom: 8, display: 'block' }}
+            value={selectedKeys[0]}
+            onChange={(date) => setSelectedKeys(date ? [date] : [])}
+            onPressEnter={() => {
+              confirm();
+              setSearchText(selectedKeys[0]);
+              setSearchedColumn(dataIndex);
+            }}
+          />
+          <Space>
+            <button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
+              Search
+            </button>
+            <button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>
+              Reset
+            </button>
+          </Space>
+        </div>
+      ),
+      filterIcon: (filtered) => <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />,
+      onFilter: (value, record) =>
+        record[dataIndex] ? moment(record[dataIndex]).isSame(value, 'day') : false,
+    });
+   
   
     // filterIcon: (filtered) => (
     //   <SearchOutlined
@@ -117,7 +145,7 @@ const TableMaterial = () => {
       dataIndex: 'rawin_date',
       key: 'rawin_date',
       render: (text) => <span>{moment(text).format('YYYY-MM-DD')}</span>,
-      ...getColumnSearchProps('rawin_date'),
+      ...getColumnDateProps('rawin_date'),
     },
     {
       title: 'No Bukti',
@@ -135,8 +163,8 @@ const TableMaterial = () => {
       title: 'Action',
       dataIndex: 'action',
       key: 'action',
-      render: (text, record, index) => {<>    <Button style={{ backgroundColor: "#efefef", color: "#1f2431", borderRadius: "5px",   display: "inline-flex",
-      alignItems: "center", gap: "5px"}} icon={<IoIosCopy size={17} />}>Hapus</Button></>}, 
+      render: (text) => {   <Button style={{ backgroundColor: "#efefef", color: "#1f2431", borderRadius: "5px",   display: "inline-flex",
+      alignItems: "center", gap: "5px"}} icon={<IoIosCopy size={17} />}>Hapus</Button>}, 
 
     },
   ];

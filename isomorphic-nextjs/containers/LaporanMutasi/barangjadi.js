@@ -41,6 +41,7 @@ const BarangJadi = () => {
   const [dataTrace, setDataTrace] = useState([])
   const [dataTraceStyle, setDataTraceStyle] = useState([])
   const [visible, setVisible] = useState(false);
+  const [DataGeneratefile ,setDataGeneratefile] = useState('');
   const [visibleModal, setVisibleModal] = useState(false);
   const searchInput = useRef(null);
   const tableRef = useRef(null);
@@ -73,7 +74,7 @@ const BarangJadi = () => {
       setSearchText(selectedKeys[0]);
       setSearchedColumn(dataIndex);
     };
-  const dataGeneratefile = `${dt_Awal} - ${dt_Akhir}` 
+  const dataGeneratefile = () => `${dt_Awal} - ${dt_Akhir}` 
     // filterIcon: (filtered) => (
     //   <SearchOutlined
     //     style={{
@@ -89,7 +90,22 @@ const BarangJadi = () => {
     //   }
     // },
 
-   
+    const handleDateChangeDownload = (dates) =>{
+      if (dates === null) {
+        setDt_Awal(null);
+        setDt_Akhir(null);
+        setDataGeneratefile('');
+      } else {
+        setDt_Awal(dates[0]);
+        setDt_Akhir(dates[1]);
+        const [start, end] = dates;
+        setDt_Awal(start);
+        setDt_Akhir(end);
+        const formattedStart = start.format(dateFormat);
+        const formattedEnd = end.format(dateFormat);
+        setDataGeneratefile(`${formattedStart} - ${formattedEnd}`);
+      }
+    }
     const showModal = () => {
       setVisible(true);
     };
@@ -602,7 +618,7 @@ const BarangJadi = () => {
       showTitle: true,
       useTextFile: false,
       useBom: true,
-filename: `BarangJadi  ${dataGeneratefile}`,
+filename: `BarangJadi  ${handleDateChangeDownload}`,
     });
   
     const columnHeaders = {
@@ -853,22 +869,22 @@ const columnModal =[ {
 },
 {
   title: 'Masuk',
-  dataIndex: 'pemasukan',
-  key: 'pemasukan',
-  ...getColumnSearchProps('pemasukan'),
+  dataIndex: 'IN_Brg',
+  key: 'IN_Brg',
+  ...getColumnSearchProps('IN_Brg'),
 },
 {
   title: 'Keluar',
-  dataIndex: 'pengeluaran',
-  key: 'pengeluaran',
-  ...getColumnSearchProps('pengeluaran'),
+  dataIndex: 'OUT_Brg',
+  key: 'OUT_Brg',
+  ...getColumnSearchProps('OUT_Brg'),
 
 },
 {
   title: 'Penyusaian',
-  dataIndex: 'Adjust_Brg',
-  key: 'Adjust_Brg',
-  ...getColumnSearchProps('Adjust_Brg'),
+  dataIndex: 'ADJ_Brg',
+  key: 'ADJ_Brg',
+  ...getColumnSearchProps('ADJ_Brg'),
 
 },
 {
@@ -908,15 +924,7 @@ const columnModal =[ {
     <DatePicker.RangePicker
   value={[dt_Awal, dt_Akhir]}
   format={dateFormat}
-  onChange={(dates) => {
-    if (dates === null) {
-      setDt_Awal(null);
-      setDt_Akhir(null);
-    } else {
-      setDt_Awal(dates[0]);
-      setDt_Akhir(dates[1]);
-    }
-  }}
+  onChange={handleDateChangeDownload}
 />
 <Button type='primary' onClick={callStoredProc} style={{marginLeft: 16,  backgroundColor: "#1f2431", color: "#efefef", borderRadius: "5px"}}>Submit Tanggal</Button>
         <Select

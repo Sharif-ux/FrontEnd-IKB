@@ -68,6 +68,7 @@ class Topbar extends Component {
             >
               <TopbarMenuIcon size={24} color={customizedTheme.textColor} />
             </button>
+            <h3>PT. DASAN PAN PACIFIC INDONESIA</h3>
           </div>
 
           <ul className="isoRight">

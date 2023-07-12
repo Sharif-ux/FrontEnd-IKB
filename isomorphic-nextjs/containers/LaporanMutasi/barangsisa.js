@@ -262,6 +262,7 @@ const BarangSisa = () => {
       }
     };
     
+    const dataGeneratefile = `${dt_Awal} - ${dt_Akhir}` 
 
     console.log('setDataTrace', dataTrace);
     const traceStock = () => {
@@ -441,7 +442,7 @@ const BarangSisa = () => {
       showTitle: true,
       useTextFile: false,
       useBom: true,
-      filename: "LaporanMutasiBahanBakuTrace"
+      filename: `LaporanMutasiBahanBakuTrace ${dataGeneratefile}`
     });
   
     const columnHeaders = {
@@ -506,7 +507,7 @@ const BarangSisa = () => {
     const downloadUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = downloadUrl;
-    link.download = 'LaporanMutasiBahanBakuTrace.xlsx';
+    link.download = `LaporanMutasiBahanBakuTrace{${dataGeneratefile}}.xlsx`;
     link.click();
   };
   const exportToPDF2 = () => {
@@ -526,7 +527,7 @@ const BarangSisa = () => {
       body: tableContent2,
     });
 
-    doc.save('LaporanMutasiBahanBakuTrace.pdf');
+    doc.save(`LaporanMutasiBahanBakuTrace${dataGeneratefile}.pdf`);
   };
   const exportToCSV = () => {
     const csvExporter = new ExportToCsv({
@@ -600,7 +601,7 @@ const BarangSisa = () => {
     const downloadUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = downloadUrl;
-    link.download = 'LaporanMutasiBahanBaku.xlsx';
+    link.download = `LaporanMutasiBahanBaku ${dataGeneratefile}.xlsx`;
     link.click();
   };
 
@@ -620,15 +621,14 @@ const BarangSisa = () => {
       body: tableContent,
     });
   
-    doc.save('LaporanMutasiBahanBaku.pdf');
+    doc.save(`LaporanMutasiBahanBaku${dataGeneratefile}.pdf`);
   };
   const columnModal =[ {
     title: 'No.',
     dataIndex: 'index',
     render: (text, record, index) => (
       <div
-        style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
-        onClick={() => handleTableClick(record)}
+  
       >
         {index + 1}
       </div>
@@ -674,22 +674,22 @@ const BarangSisa = () => {
   },
   {
     title: 'Masuk',
-    dataIndex: 'pemasukan',
-    key: 'pemasukan',
-    ...getColumnSearchProps('pemasukan'),
+    dataIndex: 'IN_Brg',
+    key: 'IN_Brg',
+    ...getColumnSearchProps('IN_Brg'),
   },
   {
     title: 'Keluar',
-    dataIndex: 'pengeluaran',
-    key: 'pengeluaran',
-    ...getColumnSearchProps('pengeluaran'),
+    dataIndex: 'OUT_Brg',
+    key: 'OUT_Brg',
+    ...getColumnSearchProps('OUT_Brg'),
   
   },
   {
     title: 'Penyusaian',
-    dataIndex: 'Adjust_Brg',
-    key: 'Adjust_Brg',
-    ...getColumnSearchProps('Adjust_Brg'),
+    dataIndex: 'ADJ_Brg',
+    key: 'ADJ_Brg',
+    ...getColumnSearchProps('ADJ_Brg'),
   
   },
   {

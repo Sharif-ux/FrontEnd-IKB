@@ -581,8 +581,7 @@ const Wip = () => {
     dataIndex: 'index',
     render: (text, record, index) => (
       <div
-        style={{ cursor: 'pointer', fontWeight: selectedRowKeys.includes(record) ? 'bold' : 'normal' }}
-        onClick={() => handleTableClick(record)}
+  
       >
         {index + 1}
       </div>
@@ -628,22 +627,22 @@ const Wip = () => {
   },
   {
     title: 'Masuk',
-    dataIndex: 'pemasukan',
-    key: 'pemasukan',
-    ...getColumnSearchProps('pemasukan'),
+    dataIndex: 'IN_Brg',
+    key: 'IN_Brg',
+    ...getColumnSearchProps('IN_Brg'),
   },
   {
     title: 'Keluar',
-    dataIndex: 'pengeluaran',
-    key: 'pengeluaran',
-    ...getColumnSearchProps('pengeluaran'),
+    dataIndex: 'OUT_Brg',
+    key: 'OUT_Brg',
+    ...getColumnSearchProps('OUT_Brg'),
   
   },
   {
     title: 'Penyusaian',
-    dataIndex: 'Adjust_Brg',
-    key: 'Adjust_Brg',
-    ...getColumnSearchProps('Adjust_Brg'),
+    dataIndex: 'ADJ_Brg',
+    key: 'ADJ_Brg',
+    ...getColumnSearchProps('ADJ_Brg'),
   
   },
   {
@@ -787,7 +786,7 @@ const Wip = () => {
               showIcon
             />
             )}
-      <Table id="table-ref" columns={columns} dataSource={!dt_Akhir||!dt_Awal == null ? "" : data} scroll={{ x: 400 }} ref={tableRef}  rowKey="Kd_Brg"
+      <Table id="table-ref" columns={columns} dataSource={data} scroll={{ x: 400 }} ref={tableRef}  rowKey="Kd_Brg"
         rowSelection={rowSelection}    onRow={(record) => ({
           onClick: () => handleRowClick(record),
         })}

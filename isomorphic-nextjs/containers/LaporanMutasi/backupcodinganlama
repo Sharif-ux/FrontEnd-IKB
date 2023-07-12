@@ -1630,7 +1630,7 @@
 //             if (exportType === 'csvmodal') {
 //               exportToCSVModal();
 //             } else if (exportType === 'excelmodal') {
-//               exportToExcelModal();
+//               exportToExcelModal();b
 //             } else if (exportType === 'pdfmodal') {
 //               exportToPDF2();
 //             }

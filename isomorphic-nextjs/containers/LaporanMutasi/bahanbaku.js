@@ -40,8 +40,16 @@ const BahanBaku = () => {
   const [dt_Akhir, setDt_Akhir] = useState(null);
   const [dataTrace, setDataTrace] = useState([])
   const [visible, setVisible] = useState(false);
+  const [filteredInfo, setFilteredInfo] = useState({});
+  const [sortedInfo, setSortedInfo] = useState({});
   const searchInput = useRef(null);
   const tableRef = useRef(null);
+
+  const handleChange = (pagination, filters, sorter) => {
+    console.log('Various parameters', pagination, filters, sorter);
+    setFilteredInfo(filters);
+    setSortedInfo(sorter);
+  };
   const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
       <div style={{ padding: 8 }}>
@@ -79,6 +87,32 @@ const BahanBaku = () => {
               setSearchedColumn(dataIndex);
             }}
           />
+          <Space>
+            <button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
+              Search
+            </button>
+            <button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>
+              Reset
+            </button>
+          </Space>
+        </div>
+      ),
+      filterIcon: (filtered) => <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />,
+      onFilter: (value, record) =>
+        record[dataIndex] ? moment(record[dataIndex]).isSame(value, 'day') : false,
+    });
+    const getColumnFilterprops = (dataIndex) => ({
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        <div style={{ padding: 8 }}>
+          <Space>
+         <Input
+          placeholder={`Search ${dataIndex}`}
+          value={selectedKeys[0]}
+          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+          style={{ width: 188, marginBottom: 8, display: 'block' }}
+        />
+        </Space>
           <Space>
             <button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
               Search
@@ -352,8 +386,21 @@ const BahanBaku = () => {
       title: 'Pengeluaran',
       dataIndex: 'pengeluaran',
       key: 'pengeluaran',
+      filters: [
+        {
+          text: '<',
+          value: 'less',
+        },
+        {
+          text: '>',
+          value: 'more',
+        },
+      ],
+      filteredValue: filteredInfo.pengeluaran || null,
+      sorter: (a, b) => a.pengeluaran.length - b.pengeluaran.length,
+      sortOrder: sortedInfo.columnKey === 'pengeluaran' ? sortedInfo.order : null,
+      ...getColumnSearchProps('pengeluaran'),
 
-      ...getColumnSearchProps('pengeluaran')
       },
     {
       title: 'Penyusaian',
@@ -816,7 +863,7 @@ const BahanBaku = () => {
         <Spin size="large" delay={5}/> 
         </div>// Display the loading indicator while loading is true
       ) : (
-      <Table id="table-ref" columns={columns} dataSource={!dt_Akhir||!dt_Awal == null ? "" : data} scroll={{ x: 400 }} ref={tableRef}  rowKey="Kd_Brg"
+      <Table id="table-ref" columns={columns} dataSource={data} scroll={{ x: 400 }} ref={tableRef}  rowKey="Kd_Brg"
         rowSelection={rowSelection}    onRow={(record) => ({
           onClick: () => handleRowClick(record),
         })}

@@ -9,18 +9,16 @@ export default function LogoNext({ collapsed }) {
       {collapsed ? (
         <div>
           <h3>
-            <Link href="/dashboard">
+            {/* <Link href="/dashboardikb"> */}
               <a>
                 <IoMdCube size={27} />
               </a>
-            </Link>
+            {/* </Link> */}
           </h3>
         </div>
       ) : (
         <h3>
-          <Link href="/dashboard">
-            <a>I K B</a>
-          </Link>
+            <a>EG Solusindo</a>
         </h3>
       )}
     </div>
