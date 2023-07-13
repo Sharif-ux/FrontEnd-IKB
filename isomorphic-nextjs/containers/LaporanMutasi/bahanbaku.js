@@ -1,10 +1,13 @@
 import React, { useEffect, useState, useRef} from 'react';
-import { Table, Select, Button, Modal } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
+import { Table, Select, Button, Modal, InputNumber } from 'antd';
+import { SearchOutlined, FilterOutlined } from '@ant-design/icons';
 import { Input, Space, Spin  } from 'antd';
 import Highlighter from 'react-highlight-words';
 import moment from 'moment';
 import axios from 'axios';
+import Greater from "../../assets/images/greater.svg"
+import Less from "../../assets/images/less.svg"
+import Equal from "../../assets/images/equal.svg"
 import { saveAs } from 'file-saver';
 import nextCookie from 'next-cookies';
 import cookie from 'js-cookie';
@@ -42,14 +45,102 @@ const BahanBaku = () => {
   const [visible, setVisible] = useState(false);
   const [filteredInfo, setFilteredInfo] = useState({});
   const [sortedInfo, setSortedInfo] = useState({});
+  const [filterOption, setFilterOption] = useState(null);
+  const [filterValue, setFilterValue] = useState(null);
+  const [inputValue, setInputValue] = useState('');
+  const [selectedFilter, setSelectedFilter] = useState('');
+  const [filterVisible, setFilterVisible] = useState(false);
+  const [filterValues, setFilterValues] = useState(null);
   const searchInput = useRef(null);
   const tableRef = useRef(null);
+  const handleFilterClick = () => {
+    setFilterVisible(false);
+  };
 
+  const handleFilterChange = (value) => {
+    setFilterValues(value);
+  };
+
+  const handleFilterConfirm = (selectedKeys, confirm, dataIndex) => {
+    setFilterVisible(false);
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+  };
+
+  const handleFilterReset = () => {
+    setFilterValues(null);
+    setFilterVisible(false);
+  };
+
+  const handleFilterVisibleChange = (visible) => {
+    setFilterVisible(visible);
+  };
   const handleChange = (pagination, filters, sorter) => {
     console.log('Various parameters', pagination, filters, sorter);
     setFilteredInfo(filters);
     setSortedInfo(sorter);
   };
+  const handleFilter = () => {
+    const filtered = data.filter(item => {
+      if (filterOption === 'gte' && filterValue !== null) {
+        return item.value >= filterValue;
+      } else if (filterOption === 'lte' && filterValue !== null) {
+        return item.value <= filterValue;
+      }
+      return true;
+    });
+    setFilteredData(filtered);
+  };
+  
+  const getFilterDataInput = (dataIndex) => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+      <div style={{ padding: 8 }}>
+        <Select
+          style={{ width: 120, marginBottom: 8, display: 'block' }}
+          value={selectedKeys[0]}
+          onChange={(value) => setSelectedKeys(value ? [value] : [])}
+          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+        >
+          <Option value="less"><img src={Less} width="10" height="10"/></Option>
+          <Option value="equal"><img src={Equal} width="10" height="10"/></Option>
+          <Option value="greater"><img src={Greater} width="10" height="10"/></Option>
+        </Select>
+        <Input
+          placeholder={`Search ${dataIndex}`}
+          value={selectedKeys[1]}
+          onChange={(e) => setSelectedKeys([selectedKeys[0], e.target.value ? e.target.value : undefined])}
+          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+          style={{ width: 188, marginBottom: 8, display: 'block' }}
+        />
+        <Space>
+          <button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
+            Search
+          </button>
+          <button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>
+            Reset
+          </button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered) => <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />,
+    onFilter: (value, record) => {
+      const [operator, filterValue] = value;
+      const dataIndexValue = record[dataIndex];
+      if (typeof dataIndexValue === 'number' && !isNaN(dataIndexValue) && filterValue) {
+        if (operator === 'less') {
+          return dataIndexValue <= parseFloat(filterValue);
+        }else if(operator === 'equal'){
+          return dataIndexValue == parseInt(filterValue)
+        }
+         else if (operator === 'greater') {
+          return dataIndexValue >= parseFloat(filterValue);
+        }
+      }
+      return false;
+    },
+  });
+
   const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
       <div style={{ padding: 8 }}>
@@ -87,32 +178,6 @@ const BahanBaku = () => {
               setSearchedColumn(dataIndex);
             }}
           />
-          <Space>
-            <button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
-              Search
-            </button>
-            <button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>
-              Reset
-            </button>
-          </Space>
-        </div>
-      ),
-      filterIcon: (filtered) => <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />,
-      onFilter: (value, record) =>
-        record[dataIndex] ? moment(record[dataIndex]).isSame(value, 'day') : false,
-    });
-    const getColumnFilterprops = (dataIndex) => ({
-      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
-        <div style={{ padding: 8 }}>
-          <Space>
-         <Input
-          placeholder={`Search ${dataIndex}`}
-          value={selectedKeys[0]}
-          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
-          style={{ width: 188, marginBottom: 8, display: 'block' }}
-        />
-        </Space>
           <Space>
             <button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
               Search
@@ -386,22 +451,85 @@ const BahanBaku = () => {
       title: 'Pengeluaran',
       dataIndex: 'pengeluaran',
       key: 'pengeluaran',
-      filters: [
-        {
-          text: '<',
-          value: 'less',
-        },
-        {
-          text: '>',
-          value: 'more',
-        },
-      ],
-      filteredValue: filteredInfo.pengeluaran || null,
-      sorter: (a, b) => a.pengeluaran.length - b.pengeluaran.length,
-      sortOrder: sortedInfo.columnKey === 'pengeluaran' ? sortedInfo.order : null,
-      ...getColumnSearchProps('pengeluaran'),
+      // filters: [
+      //   {
+      //     text: 'Greater',
+      //     value: 'greater',
+      //   },
+      //   {
+      //     text: 'Less',
+      //     value: 'less',
+      //   },
+      //   {
+      //     text: 'Equal',
+      //     value: 'equal',
+      //   },
+      // ],
+      
+      // onFilter: (value, record) => {
+      //   switch (value) {
+      //     case 'greater':
+      //       return record.Qty_System > 0;
+      //     case 'less':
+      //       return record.Qty_System < 0;
+      //     case 'equal':
+      //       return record.Qty_System === 0;
+      //     default:
+      //       return true; // Return true for all other cases
+      //   }
+      // },
+      // filterMultiple: false,
+      // },
+      onFilter: (value, record) => {
+        if (filterValues === null) {
+          return true; // Return true if no filter value is set
+        }
 
+        switch (value) {
+          case 'greater':
+            return record.pengeluaran > filterValue;
+          case 'less':
+            return record.pengeluaran < filterValue;
+          case 'equal':
+            return record.pengeluaran === filterValue;
+          default:
+            return true; // Return true for all other cases
+        }
       },
+      filterMultiple: false,
+      filterDropdown: ({
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        clearFilters,
+      }) => (
+        <div style={{ padding: 8 }}>
+          <InputNumber
+            style={{ width: 120, marginRight: 8 }}
+            min={0}
+            placeholder="Enter a number"
+            value={selectedKeys[0]}
+            onChange={handleFilterChange}
+            onPressEnter={handleFilterConfirm}
+          />
+          <Button
+            type="primary"
+            onClick={handleFilterConfirm}
+            size="small"
+            style={{ marginRight: 8 }}
+          >
+            Filter
+          </Button>
+          <Button onClick={handleFilterReset} size="small">
+            Reset
+          </Button>
+        </div>
+      ),
+      filterIcon: (filtered) => (
+        <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+      ),
+      onFilterDropdownVisibleChange: handleFilterVisibleChange,
+    },
     {
       title: 'Penyusaian',
       dataIndex: 'Adjust_Brg',
@@ -410,7 +538,7 @@ const BahanBaku = () => {
       ...getColumnSearchProps('Adjust_Brg'),
       },
     {
-      title: 'Stock Opname',
+      title: 'Qty Fisik',
       dataIndex: 'Qty_Fisik',
       key: 'Qty_Fisik',
 
@@ -421,9 +549,35 @@ const BahanBaku = () => {
       title: 'Saldo Akhir',
       dataIndex: 'Qty_System',
       key: 'Qty_System',
-
-      ...getColumnSearchProps('Qty_System'),
-  
+      
+      // filters: [
+      //   {
+      //     text: 'Greater',
+      //     value: 'greater',
+      //   },
+      //   {
+      //     text: 'Less',
+      //     value: 'less',
+      //   },
+      //   {
+      //     text: 'Equal',
+      //     value: 'equal',
+      //   },
+      // ],
+      
+      // onFilter: (value, record) => {
+      //   switch (value) {
+      //     case 'greater':
+      //       return record.Qty_System > parseInt();
+      //     case 'less':
+      //       return record.Qty_System < 0;
+      //     case 'equal':
+      //       return record.Qty_System === 0;
+      //     default:
+      //       return true; // Return true for all other cases
+      //   }
+      // }
+      ...getFilterDataInput('Qty_System')
     },
     {
       title: 'Selisih',
