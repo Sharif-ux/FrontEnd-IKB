@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { SearchOutlined } from '@ant-design/icons';
-import { Table, DatePicker, Select, Button, Space, Modal } from 'antd';
+import { Table, DatePicker, Select, Button, Space, Modal, Popconfirm, message } from 'antd';
 import { Input } from 'antd';
 import Highlighter from 'react-highlight-words';
 import moment from 'moment';
@@ -107,6 +107,15 @@ const TableMaterial = () => {
     //     setTimeout(() => searchInput.current?.select(), 100);
     //   }
     // },
+    const handleDelete = (Kd_Brg) => {
+      // Perform delete operation based on the Kd_Brg
+      message.success(`Deleted item with Kd_Brg ${Kd_Brg}`);
+    };
+  
+    const handleUpdate = (Kd_Brg) => {
+      // Perform update operation based on the Kd_Brg
+      message.info(`Update item with Kd_Brg ${Kd_Brg}`);
+    };
   
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
       confirm();
@@ -163,9 +172,21 @@ const TableMaterial = () => {
       title: 'Action',
       dataIndex: 'action',
       key: 'action',
-      render: (text) => {   <Button style={{ backgroundColor: "#efefef", color: "#1f2431", borderRadius: "5px",   display: "inline-flex",
-      alignItems: "center", gap: "5px"}} icon={<IoIosCopy size={17} />}>Hapus</Button>}, 
-
+      render: (text, record) => (
+        <div>
+          <Button type="primary" onClick={() => handleUpdate(record.kd_brg)}>
+            Update
+          </Button>
+          <Popconfirm
+            title="Are you sure to delete this item?"
+            onConfirm={() => handleDelete(record.kd_brg)}
+          >
+            <Button type="danger" style={{ marginLeft: '8px' }}>
+              Delete
+            </Button>
+          </Popconfirm>
+        </div>
+      ),
     },
   ];
   useEffect(() => {

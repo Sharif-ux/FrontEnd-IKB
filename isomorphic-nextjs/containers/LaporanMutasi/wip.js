@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef} from 'react';
-import { Table, Select, Button, Modal, Input, Space, Spin, Alert } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
+import { Table, Select, Button, Modal, Input, Space, Spin, Alert, InputNumber } from 'antd';
+import { SearchOutlined, FilterOutlined } from '@ant-design/icons';
 import Highlighter from 'react-highlight-words';
 import moment from 'moment';
 import axios from 'axios';
@@ -35,6 +35,7 @@ const Wip = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [dt_Awal, setDt_Awal] = useState(null);
   const [Kd_Brg, setKd_Brg] = useState('');
+  const [userInputNumber, setUserInputNumber] = useState(0);
   const [loading, setLoading] = useState(false);
   const [dt_Akhir, setDt_Akhir] = useState(null);
   const [dataTrace, setDataTrace] = useState([])
@@ -331,6 +332,51 @@ const Wip = () => {
       ) : (
         text
       )
+      const filters = [
+        {
+          text: '>',
+          value: 'greater',
+        },
+        {
+          text: '<',
+          value: 'less',
+        },
+        {
+          text: '==',
+          value: 'equal',
+        },
+      ];
+    
+      const CustomFilter = ({ value, onChange }) => {
+        const handleInputChange = (inputValue) => {
+          const numberValue = Number(inputValue);
+          if (!isNaN(numberValue)) {
+            onChange(numberValue);
+          } else {
+            onChange(null);
+          }
+        };
+    
+        return (
+                  <InputNumber
+          style={{ margin: "10px", width: "80px" }}
+          value={value}
+          onChange={handleInputChange}
+        />
+        );
+      };
+      const handleFilter = (value, record, dataIndex) => {
+        switch (value) {
+          case 'greater':
+            return record[dataIndex] > userInputNumber;
+          case 'less':
+            return record[dataIndex] < userInputNumber;
+          case 'equal':
+            return record[dataIndex] === userInputNumber;
+          default:
+            return true; // Return true for all other cases
+        }
+      };
   const columns = [
     {
       title: 'No.',
@@ -355,8 +401,41 @@ const Wip = () => {
       title: 'Qty',
       dataIndex: 'Qty',
       key: 'Qty',    
-     
-      ...getColumnSearchProps('Qty')
+      filters: filters,
+      onFilter:(value, record) => handleFilter(value, record, 'Qty'),
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, dataIndex, clearFilters }) => (
+        <div style={{ padding: 8 }}>
+          <Select
+            style={{ width: 60 }}
+            value={selectedKeys[0]}
+            onChange={(value) => setSelectedKeys([value])}
+            onBlur={confirm}
+          >
+            {filters.map((filter) => (
+              <Option key={filter.value} value={filter.value}>
+                {filter.text}
+              </Option>
+            ))}
+          </Select>
+          <CustomFilter
+            value={userInputNumber}
+            onChange={(value) => setUserInputNumber(value)}
+          />
+          <Space style={{margin: "10px"}}>
+          <Button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
+            Search
+          </Button>
+            <Button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>Reset</Button>
+          </Space>
+        </div>
+      ),
+      filterIcon: (filtered) => (
+        <FilterOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+      ),
+      // ...getColumnSearchProps('Saldo_Awal')
+      render: (text) => parseInt(text).toLocaleString(),
+
+      // ...getColumnSearchProps('Qty')
 
     },
     {

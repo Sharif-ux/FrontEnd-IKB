@@ -229,6 +229,7 @@ const TableForm = () => {
       title: 'Jumlah',
       dataIndex: 'Item_Qty',
       key: 'Item_Qty',
+      render: (text) => parseInt(text).toLocaleString(),
       ...getColumnSearchProps('Item_Qty'),
   
     },
@@ -236,6 +237,7 @@ const TableForm = () => {
       title: 'Harga',
       dataIndex: 'Sub_Total',
       key: 'Sub_Total',
+              render: (text) => parseInt(text).toLocaleString(),
       ...getColumnSearchProps('Sub_Total'),
   
     },

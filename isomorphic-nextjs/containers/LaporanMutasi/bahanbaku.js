@@ -503,6 +503,7 @@ const BahanBaku = () => {
         <FilterOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
       ),
       // ...getColumnSearchProps('Saldo_Awal')
+      render: (text) => parseInt(text).toLocaleString(),
 
     },
     {
@@ -541,7 +542,8 @@ const BahanBaku = () => {
         <FilterOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
       ),
       // ...getColumnSearchProps('pemasukan'),
-  
+      render: (text) => parseInt(text).toLocaleString(),
+
     },
     {
       title: 'Pengeluaran',
@@ -578,6 +580,8 @@ const BahanBaku = () => {
       filterIcon: (filtered) => (
         <FilterOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
       ),
+      render: (text) => parseInt(text).toLocaleString(),
+
     },
     //   onFilter: (value, record) => {
     //     if (filterValues === null) {
@@ -664,6 +668,8 @@ const BahanBaku = () => {
       filterIcon: (filtered) => (
         <FilterOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
       ),
+      render: (text) => parseInt(text).toLocaleString(),
+
       // ...getColumnSearchProps('Adjust_Brg'),
       },
     {
@@ -702,7 +708,8 @@ const BahanBaku = () => {
         <FilterOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
       ),
       // ...getColumnSearchProps('Qty_Fisik'),
-  
+      render: (text) => parseInt(text).toLocaleString(),
+
     },
     {
       title: 'Saldo Akhir',
@@ -767,6 +774,8 @@ const BahanBaku = () => {
       //   }
       // }
       // ...getFilterDataInput('Qty_System')
+      render: (text) => parseInt(text).toLocaleString(),
+
     },
     {
       title: 'Selisih',
@@ -804,7 +813,8 @@ const BahanBaku = () => {
         <FilterOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
       ),
       // ...getColumnSearchProps('selisih'),
-      
+      render: (text) => parseInt(text).toLocaleString(),
+
   
     },
     // {

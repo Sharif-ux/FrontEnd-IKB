@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef} from 'react';
-import { Table, Select, Button, Modal } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
+import { Table, Select, Button, Modal, InputNumber } from 'antd';
+import { SearchOutlined, FilterOutlined  } from '@ant-design/icons';
 import { Input, Space, Spin  } from 'antd';
 import Highlighter from 'react-highlight-words';
 import moment from 'moment';
@@ -37,6 +37,7 @@ const BarangSisa = () => {
   const [dt_Awal, setDt_Awal] = useState(null);
   const [Kd_Brg, setKd_Brg] = useState('');
   const [loading, setLoading] = useState(false);
+  const [userInputNumber, setUserInputNumber] = useState(0);
   const [dt_Akhir, setDt_Akhir] = useState(null);
   const [dataTrace, setDataTrace] = useState([])
   const [visible, setVisible] = useState(false);
@@ -305,96 +306,436 @@ const BarangSisa = () => {
       ) : (
         text
       )
-  const columns = [
-    {
-      title: 'No.',
-      dataIndex: 'index',
-
-      render: (text, record, index) => index + 1, // Generate automation numbering
-    },
-    {
-      title: 'Kode Barang',
-      dataIndex: 'Kd_Brg',
-      key: 'Kd_Brg',
-
-      ...getColumnSearchProps('Kd_Brg'),
-    },
-    {
-      title: 'Nama Barang',
-      dataIndex: 'Nm_Brg',
-      key: 'Nm_Brg',
-
-      ...getColumnSearchProps('Nm_Brg'),
-    },
-    {
-      title: 'Satuan',
-      dataIndex: 'Unit_Desc',
-      key: 'Unit_Desc',
-
-      ...getColumnSearchProps('Unit_Desc'),
-    },
-    {
-      title: 'Saldo Awal',
-      dataIndex: 'Saldo_Awal',
-      key: 'Saldo_Awal',      
-     
-      ...getColumnSearchProps('Saldo_Awal')
-
-    },
-    {
-      title: 'Pemasukan',
-      dataIndex: 'pemasukan',
-      key: 'pemasukan',
-
-      ...getColumnSearchProps('pemasukan'),
-  
-    },
-    {
-      title: 'Pengeluaran',
-      dataIndex: 'pengeluaran',
-      key: 'pengeluaran',
-
-      ...getColumnSearchProps('pengeluaran')
-      },
-    {
-      title: 'Penyusaian',
-      dataIndex: 'Adjust_Brg',
-      key: 'Adjust_Brg',
-
-      ...getColumnSearchProps('Adjust_Brg'),
-      },
-    {
-      title: 'Stock Opname',
-      dataIndex: 'Qty_Fisik',
-      key: 'Qty_Fisik',
-
-      ...getColumnSearchProps('Qty_Fisik'),
-  
-    },
-    {
-      title: 'Saldo Akhir',
-      dataIndex: 'Qty_System',
-      key: 'Qty_System',
-
-      ...getColumnSearchProps('Qty_System'),
-  
-    },
-    {
-      title: 'Selisih',
-      dataIndex: 'selisih',
-      key: 'selisih',
-
-      ...getColumnSearchProps('selisih'),
+      const filters = [
+        {
+          text: '>',
+          value: 'greater',
+        },
+        {
+          text: '<',
+          value: 'less',
+        },
+        {
+          text: '==',
+          value: 'equal',
+        },
+      ];
+    
+      const CustomFilter = ({ value, onChange }) => {
+        const handleInputChange = (inputValue) => {
+          const numberValue = Number(inputValue);
+          if (!isNaN(numberValue)) {
+            onChange(numberValue);
+          } else {
+            onChange(null);
+          }
+        };
+    
+        return (
+                  <InputNumber
+          style={{ margin: "10px", width: "80px" }}
+          value={value}
+          onChange={handleInputChange}
+        />
+        );
+      };
+      const handleFilter = (value, record, dataIndex) => {
+        switch (value) {
+          case 'greater':
+            return record[dataIndex] > userInputNumber;
+          case 'less':
+            return record[dataIndex] < userInputNumber;
+          case 'equal':
+            return record[dataIndex] === userInputNumber;
+          default:
+            return true; // Return true for all other cases
+        }
+      };
+      const columns = [
+        {
+          title: 'No.',
+          dataIndex: 'index',
+    
+          render: (text, record, index) => index + 1, // Generate automation numbering
+        },
+        {
+          title: 'Kode Barang',
+          dataIndex: 'Kd_Brg',
+          key: 'Kd_Brg',
+    
+          ...getColumnSearchProps('Kd_Brg'),
+        },
+        {
+          title: 'Nama Barang',
+          dataIndex: 'Nm_Brg',
+          key: 'Nm_Brg',
+    
+          ...getColumnSearchProps('Nm_Brg'),
+        },
+        {
+          title: 'Satuan',
+          dataIndex: 'Unit_Desc',
+          key: 'Unit_Desc',
+    
+          ...getColumnSearchProps('Unit_Desc'),
+        },
+        {
+          title: 'Saldo Awal',
+          dataIndex: 'Saldo_Awal',
+          key: 'Saldo_Awal',      
+          filters: filters,
+          onFilter:(value, record) => handleFilter(value, record, 'Saldo_Awal'),
+          filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, dataIndex, clearFilters }) => (
+            <div style={{ padding: 8 }}>
+              <Select
+                style={{ width: 60 }}
+                value={selectedKeys[0]}
+                onChange={(value) => setSelectedKeys([value])}
+                onBlur={confirm}
+              >
+                {filters.map((filter) => (
+                  <Option key={filter.value} value={filter.value}>
+                    {filter.text}
+                  </Option>
+                ))}
+              </Select>
+              <CustomFilter
+                value={userInputNumber}
+                onChange={(value) => setUserInputNumber(value)}
+              />
+              <Space style={{margin: "10px"}}>
+              <Button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
+                Search
+              </Button>
+                <Button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>Reset</Button>
+              </Space>
+            </div>
+          ),
+          filterIcon: (filtered) => (
+            <FilterOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+          ),
+          // ...getColumnSearchProps('Saldo_Awal')
+          render: (text) => parseInt(text).toLocaleString(),
+    
+        },
+        {
+          title: 'Pemasukan',
+          dataIndex: 'pemasukan',
+          key: 'pemasukan',
+          filters: filters,
+          onFilter:(value, record) => handleFilter(value, record, 'pemasukan'),
+          filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, dataIndex, clearFilters }) => (
+            <div style={{ padding: 8 }}>
+              <Select
+                style={{ width: 60 }}
+                value={selectedKeys[0]}
+                onChange={(value) => setSelectedKeys([value])}
+                onBlur={confirm}
+              >
+                {filters.map((filter) => (
+                  <Option key={filter.value} value={filter.value}>
+                    {filter.text}
+                  </Option>
+                ))}
+              </Select>
+              <CustomFilter
+                value={userInputNumber}
+                onChange={(value) => setUserInputNumber(value)}
+              />
+              <Space style={{margin: "10px"}}>
+              <Button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
+                Search
+              </Button>
+                <Button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>Reset</Button>
+              </Space>
+            </div>
+          ),
+          filterIcon: (filtered) => (
+            <FilterOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+          ),
+          // ...getColumnSearchProps('pemasukan'),
+          render: (text) => parseInt(text).toLocaleString(),
+    
+        },
+        {
+          title: 'Pengeluaran',
+          dataIndex: 'pengeluaran',
+          key: 'pengeluaran',
+          filters: filters,
+          onFilter:(value, record) => handleFilter(value, record, 'pengeluaran'),
+          filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, dataIndex, clearFilters }) => (
+            <div style={{ padding: 8 }}>
+              <Select
+                style={{ width: 60 }}
+                value={selectedKeys[0]}
+                onChange={(value) => setSelectedKeys([value])}
+                onBlur={confirm}
+              >
+                {filters.map((filter) => (
+                  <Option key={filter.value} value={filter.value}>
+                    {filter.text}
+                  </Option>
+                ))}
+              </Select>
+              <CustomFilter
+                value={userInputNumber}
+                onChange={(value) => setUserInputNumber(value)}
+              />
+              <Space style={{margin: "10px"}}>
+              <Button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
+                Search
+              </Button>
+                <Button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>Reset</Button>
+              </Space>
+            </div>
+          ),
+          filterIcon: (filtered) => (
+            <FilterOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+          ),
+          render: (text) => parseInt(text).toLocaleString(),
+    
+        },
+        //   onFilter: (value, record) => {
+        //     if (filterValues === null) {
+        //       return true; // Return true if no filter value is set
+        //     }
+    
+        //     switch (value) {
+        //       case 'greater':
+        //         return record.pengeluaran > filterValue;
+        //       case 'less':
+        //         return record.pengeluaran < filterValue;
+        //       case 'equal':
+        //         return record.pengeluaran === filterValue;
+        //       default:
+        //         return true; // Return true for all other cases
+        //     }
+        //   },
+        //   filterMultiple: false,
+        //   filterDropdown: ({
+        //     setSelectedKeys,
+        //     selectedKeys,
+        //     confirm,
+        //     clearFilters,
+        //   }) => (
+        //     <div style={{ padding: 8 }}>
+        //       <InputNumber
+        //         style={{ width: 120, marginRight: 8 }}
+        //         min={0}
+        //         placeholder="Enter a number"
+        //         value={selectedKeys[0]}
+        //         onChange={handleFilterChange}
+        //         onPressEnter={handleFilterConfirm}
+        //       />
+        //       <Button
+        //         type="primary"
+        //         onClick={handleFilterConfirm}
+        //         size="small"
+        //         style={{ marginRight: 8 }}
+        //       >
+        //         Filter
+        //       </Button>
+        //       <Button onClick={handleFilterReset} size="small">
+        //         Reset
+        //       </Button>
+        //     </div>
+        //   ),
+        //   filterIcon: (filtered) => (
+        //     <FilterOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+        //   ),
+        //   onFilterDropdownVisibleChange: handleFilterVisibleChange,
+        // },
+        {
+          title: 'Penyusaian',
+          dataIndex: 'Adjust_Brg',
+          key: 'Adjust_Brg',
+          filters: filters,
+          onFilter:(value, record) => handleFilter(value, record, 'Adjust_Brg'),
+          filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, dataIndex, clearFilters }) => (
+            <div style={{ padding: 8 }}>
+              <Select
+                style={{ width: 60 }}
+                value={selectedKeys[0]}
+                onChange={(value) => setSelectedKeys([value])}
+                onBlur={confirm}
+              >
+                {filters.map((filter) => (
+                  <Option key={filter.value} value={filter.value}>
+                    {filter.text}
+                  </Option>
+                ))}
+              </Select>
+              <CustomFilter
+                value={userInputNumber}
+                onChange={(value) => setUserInputNumber(value)}
+              />
+              <Space style={{margin: "10px"}}>
+              <Button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
+                Search
+              </Button>
+                <Button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>Reset</Button>
+              </Space>
+            </div>
+          ),
+          filterIcon: (filtered) => (
+            <FilterOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+          ),
+          render: (text) => parseInt(text).toLocaleString(),
+    
+          // ...getColumnSearchProps('Adjust_Brg'),
+          },
+        {
+          title: 'Qty Fisik',
+          dataIndex: 'Qty_Fisik',
+          key: 'Qty_Fisik',
+          filters: filters,
+          onFilter:(value, record) => handleFilter(value, record, 'Qty_Fisik'),
+          filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, dataIndex, clearFilters }) => (
+            <div style={{ padding: 8 }}>
+              <Select
+                style={{ width: 60 }}
+                value={selectedKeys[0]}
+                onChange={(value) => setSelectedKeys([value])}
+                onBlur={confirm}
+              >
+                {filters.map((filter) => (
+                  <Option key={filter.value} value={filter.value}>
+                    {filter.text}
+                  </Option>
+                ))}
+              </Select>
+              <CustomFilter
+                value={userInputNumber}
+                onChange={(value) => setUserInputNumber(value)}
+              />
+              <Space style={{margin: "10px"}}>
+              <Button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
+                Search
+              </Button>
+                <Button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>Reset</Button>
+              </Space>
+            </div>
+          ),
+          filterIcon: (filtered) => (
+            <FilterOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+          ),
+          // ...getColumnSearchProps('Qty_Fisik'),
+          render: (text) => parseInt(text).toLocaleString(),
+    
+        },
+        {
+          title: 'Saldo Akhir',
+          dataIndex: 'Qty_System',
+          key: 'Qty_System',
+          filters: filters,
+          onFilter:(value, record) => handleFilter(value, record, 'Qty_System'),
+          filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, dataIndex, clearFilters }) => (
+            <div style={{ padding: 8 }}>
+              <Select
+                style={{ width: 60 }}
+                value={selectedKeys[0]}
+                onChange={(value) => setSelectedKeys([value])}
+                onBlur={confirm}
+              >
+                {filters.map((filter) => (
+                  <Option key={filter.value} value={filter.value}>
+                    {filter.text}
+                  </Option>
+                ))}
+              </Select>
+              <CustomFilter
+                value={userInputNumber}
+                onChange={(value) => setUserInputNumber(value)}
+              />
+              <Space style={{margin: "10px"}}>
+              <Button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
+                Search
+              </Button>
+                <Button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>Reset</Button>
+              </Space>
+            </div>
+          ),
+          filterIcon: (filtered) => (
+            <FilterOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+          ),
+          // filters: [
+          //   {
+          //     text: 'Greater',
+          //     value: 'greater',
+          //   },
+          //   {
+          //     text: 'Less',
+          //     value: 'less',
+          //   },
+          //   {
+          //     text: 'Equal',
+          //     value: 'equal',
+          //   },
+          // ],
+          
+          // onFilter: (value, record) => {
+          //   switch (value) {
+          //     case 'greater':
+          //       return record.Qty_System > parseInt();
+          //     case 'less':
+          //       return record.Qty_System < 0;
+          //     case 'equal':
+          //       return record.Qty_System === 0;
+          //     default:
+          //       return true; // Return true for all other cases
+          //   }
+          // }
+          // ...getFilterDataInput('Qty_System')
+          render: (text) => parseInt(text).toLocaleString(),
+    
+        },
+        {
+          title: 'Selisih',
+          dataIndex: 'selisih',
+          key: 'selisih',
+          filters: filters,
+          onFilter:(value, record) => handleFilter(value, record, 'selisih'),
+          filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, dataIndex, clearFilters }) => (
+            <div style={{ padding: 8 }}>
+              <Select
+                style={{ width: 60 }}
+                value={selectedKeys[0]}
+                onChange={(value) => setSelectedKeys([value])}
+                onBlur={confirm}
+              >
+                {filters.map((filter) => (
+                  <Option key={filter.value} value={filter.value}>
+                    {filter.text}
+                  </Option>
+                ))}
+              </Select>
+              <CustomFilter
+                value={userInputNumber}
+                onChange={(value) => setUserInputNumber(value)}
+              />
+              <Space style={{margin: "10px"}}>
+              <Button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
+                Search
+              </Button>
+                <Button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>Reset</Button>
+              </Space>
+            </div>
+          ),
+          filterIcon: (filtered) => (
+            <FilterOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+          ),
+          // ...getColumnSearchProps('selisih'),
+          render: (text) => parseInt(text).toLocaleString(),
+    
       
-  
-    },
-    // {
-    //   title: 'Tanggal Transaksi',
-    //   dataIndex: 'TanggalTransaksi',
-    //   key: 'TanggalTransaksi',
-    //   render: (text) => <span>{moment(text).format('YYYY-MM-DD')}</span>,
-    // },
-  ];
+        },
+        // {
+        //   title: 'Tanggal Transaksi',
+        //   dataIndex: 'TanggalTransaksi',
+        //   key: 'TanggalTransaksi',
+        //   render: (text) => <span>{moment(text).format('YYYY-MM-DD')}</span>,
+        // },
+      ];
   const isButtonDisabled = !dt_Awal || !dt_Akhir || rowSelection == null; // Check if either dt_Awal or dt_Akhir is null
 
 
