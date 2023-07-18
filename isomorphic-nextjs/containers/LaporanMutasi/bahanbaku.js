@@ -395,6 +395,14 @@ const BahanBaku = () => {
       )
       const filters = [
         {
+          text: '>=',
+          value: 'greaterandequal',
+        },
+        {
+          text: '<=',
+          value: 'lessandequal',
+        },
+        {
           text: '>',
           value: 'greater',
         },
@@ -428,6 +436,10 @@ const BahanBaku = () => {
       };
       const handleFilter = (value, record, dataIndex) => {
         switch (value) {
+          case 'greaterandequal':
+            return record[dataIndex] >= userInputNumber;
+            case 'lessandequal':
+              return record[dataIndex] <= userInputNumber;
           case 'greater':
             return record[dataIndex] > userInputNumber;
           case 'less':
@@ -470,7 +482,8 @@ const BahanBaku = () => {
     {
       title: 'Saldo Awal',
       dataIndex: 'Saldo_Awal',
-      key: 'Saldo_Awal',      
+      key: 'Saldo_Awal',     
+      align: "right", 
       filters: filters,
       onFilter:(value, record) => handleFilter(value, record, 'Saldo_Awal'),
       filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, dataIndex, clearFilters }) => (
@@ -510,6 +523,7 @@ const BahanBaku = () => {
       title: 'Pemasukan',
       dataIndex: 'pemasukan',
       key: 'pemasukan',
+      align: "right", 
       filters: filters,
       onFilter:(value, record) => handleFilter(value, record, 'pemasukan'),
       filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, dataIndex, clearFilters }) => (
@@ -549,6 +563,7 @@ const BahanBaku = () => {
       title: 'Pengeluaran',
       dataIndex: 'pengeluaran',
       key: 'pengeluaran',
+      align: "right", 
       filters: filters,
       onFilter:(value, record) => handleFilter(value, record, 'pengeluaran'),
       filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, dataIndex, clearFilters }) => (
@@ -634,9 +649,10 @@ const BahanBaku = () => {
     //   onFilterDropdownVisibleChange: handleFilterVisibleChange,
     // },
     {
-      title: 'Penyusaian',
+      title: 'Penyesuaian',
       dataIndex: 'Adjust_Brg',
       key: 'Adjust_Brg',
+      align: "right", 
       filters: filters,
       onFilter:(value, record) => handleFilter(value, record, 'Adjust_Brg'),
       filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, dataIndex, clearFilters }) => (
@@ -676,6 +692,7 @@ const BahanBaku = () => {
       title: 'Qty Fisik',
       dataIndex: 'Qty_Fisik',
       key: 'Qty_Fisik',
+      align: "right", 
       filters: filters,
       onFilter:(value, record) => handleFilter(value, record, 'Qty_Fisik'),
       filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, dataIndex, clearFilters }) => (
@@ -715,6 +732,7 @@ const BahanBaku = () => {
       title: 'Saldo Akhir',
       dataIndex: 'Qty_System',
       key: 'Qty_System',
+      align: "right", 
       filters: filters,
       onFilter:(value, record) => handleFilter(value, record, 'Qty_System'),
       filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, dataIndex, clearFilters }) => (
@@ -781,6 +799,7 @@ const BahanBaku = () => {
       title: 'Selisih',
       dataIndex: 'selisih',
       key: 'selisih',
+      align: "right", 
       filters: filters,
       onFilter:(value, record) => handleFilter(value, record, 'selisih'),
       filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, dataIndex, clearFilters }) => (
@@ -1024,13 +1043,20 @@ const BahanBaku = () => {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Data');
   
+    // Autofit column widths
+    const columnNames = Object.keys(exportedData[0]);
+    const columnWidths = columnNames.map((columnName) => ({
+      wch: columnName.length + 5, // Add some extra width for better readability
+    }));
+    worksheet['!cols'] = columnWidths;
+  
     const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
   
     const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     const downloadUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = downloadUrl;
-    link.download = `LaporanMutasiBahanBaku${dataGeneratefile}.xlsx`;
+    link.download = `LaporanMutasiBahanBaku ${dataGeneratefile}.xlsx`;
     link.click();
   };
 
@@ -1116,7 +1142,7 @@ const BahanBaku = () => {
   
   },
   {
-    title: 'Penyusaian',
+    title: 'Penyesuaian',
     dataIndex: 'Adjust_Brg',
     key: 'Adjust_Brg',
     ...getColumnSearchProps('Adjust_Brg'),

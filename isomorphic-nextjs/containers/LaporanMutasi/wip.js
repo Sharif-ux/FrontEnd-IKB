@@ -623,9 +623,16 @@ const Wip = () => {
       "Qty": item.Qty,
     }));
   
-    const worksheet = XLSX.utils.json_to_sheet(exportedData);
+ const worksheet = XLSX.utils.json_to_sheet(exportedData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Data');
+  
+    // Autofit column widths
+    const columnNames = Object.keys(exportedData[0]);
+    const columnWidths = columnNames.map((columnName) => ({
+      wch: columnName.length + 10, // Add some extra width for better readability
+    }));
+    worksheet['!cols'] = columnWidths;
   
     const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
   
@@ -633,7 +640,7 @@ const Wip = () => {
     const downloadUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = downloadUrl;
-    link.download = 'Wip.xlsx';
+    link.download = `LaporanMutasiWIP.xlsx`;
     link.click();
   };
 
@@ -715,10 +722,9 @@ const Wip = () => {
     dataIndex: 'OUT_Brg',
     key: 'OUT_Brg',
     ...getColumnSearchProps('OUT_Brg'),
-  
   },
   {
-    title: 'Penyusaian',
+    title: 'Penyesuaian',
     dataIndex: 'ADJ_Brg',
     key: 'ADJ_Brg',
     ...getColumnSearchProps('ADJ_Brg'),

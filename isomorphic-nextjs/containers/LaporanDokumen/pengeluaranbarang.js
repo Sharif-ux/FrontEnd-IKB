@@ -415,42 +415,12 @@ const splitDataIntoChunks = (data, pageSize) => {
 
   return chunks;
 };
-
-const generatePDFForChunk = (chunk, doc, columns) => {
-  const tableContent = chunk.map((row) => columns.map((column) => row[column.dataIndex]));
-  const customHeader = columns.map((column) => column.title);
-
-  doc.autoTable({
-    head: [customHeader],
-    body: tableContent,
-    theme: 'striped', // Apply striped theme for alternating row colors
-    styles: {
-      cellPadding: 1,
-      fontSize: 5,
-    },
-    columnStyles: columns.reduce((styles, column, index) => {
-      styles[index] = { fontStyle: 'light' }; // Apply bold font style to each column
-      return styles;
-    }, {}),
-    columnWidth: 'auto', // Set the initial column width to 'auto'
-    margin: { top: 15 }, // Add top margin to the table
-    didParseCell: (data) => {
-      // Adjust the column width based on the content
-      const col = data.column.index;
-      const headers = customHeader.length;
-      const colWidth = headers > col ? doc.getStringUnitWidth(customHeader[col]) * doc.internal.getFontSize() + 10 : 50;
-      data.cell.width = colWidth;
-    },
-  });
-};
-const handleClickAlert =() =>{
-  setAlert(true);
-}
-const isButtonDisabled = !dateRange ; // Check if either dt_Awal or dt_Akhir is null
 const generatePDF = async () => {
   try {
-    const response = await axios.get('http://localhost:3000/pengeluaranbarang');
-    const tableData = response.data;
+        const response = await axios.get('http://localhost:3000/pengeluaranbarang');
+    const tableData = filteredData;
+    const pageSize = 10; // Number of items per page
+    const totalPages = Math.ceil(tableData.length / pageSize); // Calculate the total number of pages
 
     const columns = [
       // Define your columns here, following the Ant Design (antd) column configuration
@@ -548,15 +518,24 @@ const generatePDF = async () => {
       // Add more columns as needed
     ];
 
-
     const doc = new jsPDF();
-    const dataChunks = splitDataIntoChunks(tableData, pageSize);
 
-    for (let i = 0; i < dataChunks.length; i++) {
-      if (i > 0) {
-        doc.addPage(); // Add a new page for each chunk after the first one
+    for (let page = 1; page <= totalPages; page++) {
+      // Calculate the start and end index for the current page
+      const startIndex = (page - 1) * pageSize;
+      const endIndex = page * pageSize;
+
+      // Fetch the data for the current page
+      const currentPageData = tableData.slice(startIndex, endIndex);
+
+      const dataChunks = splitDataIntoChunks(currentPageData, pageSize);
+
+      for (let i = 0; i < dataChunks.length; i++) {
+        if (i > 0) {
+          doc.addPage(); // Add a new page for each chunk after the first one
+        }
+        generatePDFForChunk(dataChunks[i], doc, columns);
       }
-      generatePDFForChunk(dataChunks[i], doc, columns);
     }
 
     doc.save('Pengeluaran_Barang.pdf');
@@ -564,6 +543,155 @@ const generatePDF = async () => {
     console.error('Error fetching data:', error);
   }
 };
+
+const generatePDFForChunk = (chunk, doc, columns) => {
+  const tableContent = chunk.map((row) => columns.map((column) => row[column.dataIndex]));
+  const customHeader = columns.map((column) => column.title);
+
+  doc.autoTable({
+    head: [customHeader],
+    body: tableContent,
+    theme: 'striped', // Apply striped theme for alternating row colors
+    styles: {
+      cellPadding: 1,
+      fontSize: 5,
+    },
+    columnStyles: columns.reduce((styles, column, index) => {
+      styles[index] = { fontStyle: 'light' }; // Apply bold font style to each column
+      return styles;
+    }, {}),
+    columnWidth: 'auto', // Set the initial column width to 'auto'
+    margin: { top: 15 }, // Add top margin to the table
+    didParseCell: (data) => {
+      // Adjust the column width based on the content
+      const col = data.column.index;
+      const headers = customHeader.length;
+      const colWidth = headers > col ? doc.getStringUnitWidth(customHeader[col]) * doc.internal.getFontSize() + 10 : 50;
+      data.cell.width = colWidth;
+    },
+  });
+};
+const handleClickAlert =() =>{
+  setAlert(true);
+}
+const isButtonDisabled = !dateRange ; // Check if either dt_Awal or dt_Akhir is null
+// const generatePDF = async () => {
+//   try {
+//     const response = await axios.get('http://localhost:3000/pengeluaranbarang');
+//     const tableData = response.data;
+
+//     const columns = [
+//       // Define your columns here, following the Ant Design (antd) column configuration
+//       {
+//         title: 'Jenis Dokumen',
+//         dataIndex: 'DOC_Type',
+//         key: 'DOC_Type',
+//         width: '4%'
+//       },
+//       {
+//         title: 'No Aju',
+//         dataIndex: 'NO_REG',
+//         key: 'NO_REG',
+//         width: '6%'
+//       },
+//       {
+//         title: 'No. Pabean',
+//         dataIndex: 'DOC_NO',
+//         key: 'DOC_NO',
+//         width: '6%'
+//       },
+//       {
+//         title: 'Tgl. Pabean',
+//         dataIndex: 'DOC_Date',
+//         key: 'DOC_Date',
+//         render: (text) => {
+//           const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
+//           const convertedDate = new Date(text).toLocaleDateString('id-ID', options);
+//           return <span>{convertedDate}</span>;
+//         },      
+//         width: '8%'
+//       },
+//       {
+//         title: 'No. PO',
+//         dataIndex: 'DO_NO',
+//         key: 'DO_NO',
+//         width: '5%'
+//       },
+//       {
+//         title: 'Tgl. Pengeluaran',
+//         dataIndex: 'DO_Date',
+//         key: 'DO_Date',
+//         render: (text) => <span>{moment(text).format('YYYY-MM-DD')}</span>,
+//         width: '8%'
+
+//       },
+//       {
+//         title: 'Penerima Barang',
+//         dataIndex: 'Buyer_Name',
+//         key: 'Buyer_Name',
+//         width: '8%'
+
+//       },
+//       {
+//         title: 'Kode Barang',
+//         dataIndex: 'Kd_Brg',
+//         key: 'Kd_Brg',
+//         width: '8%'
+//       },
+//       {
+//         title: 'Nama Barang',
+//         dataIndex: 'Nm_Brg',
+//         key: 'Nm_Brg',
+//         width: '5%' 
+    
+//       },
+//       {
+//         title: 'Satuan',
+//         dataIndex: 'Unit_Code',
+//         key: 'Unit_Code',
+//         width: '8%'    
+    
+//       },
+//       {
+//         title: 'Jumlah',
+//         dataIndex: 'Item_Qty',
+//         key: 'Item_Qty',
+//         width: '8%'  
+    
+//       },
+//       {
+//         title: 'Harga CMT',
+//         dataIndex: 'CM_Price_Tot',
+//         key: 'CM_Price_Tot',
+//         width: '8%'
+    
+//       },
+//       {
+//         title: 'Harga FOB',
+//         dataIndex: 'FOB_Price_Tot',
+//         key: 'FOB_Price_Tot',
+//         width: '8%'    
+//       },
+//       // {
+//       // Add more columns as needed
+//     ];
+
+
+//     const doc = new jsPDF();
+//     const dataChunks = splitDataIntoChunks(tableData, pageSize);
+
+//     for (let i = 0; i < dataChunks.length; i++) {
+//       if (i > 0) {
+//         doc.addPage(); // Add a new page for each chunk after the first one
+//       }
+//       generatePDFForChunk(dataChunks[i], doc, columns);
+//     }
+
+//     doc.save('Pengeluaran_Barang.pdf');
+//   } catch (error) {
+//     console.error('Error fetching data:', error);
+//   }
+// };
   return (
     <LayoutContentWrapper style={{ height: '100%' }}>
     <LayoutContent>

@@ -35,7 +35,142 @@ const TableForm = () => {
   const tableRef = useRef(null);
   const [selectedStartDate, setSelectedStartDate] = useState(null);
   const [selectedEndDate, setSelectedEndDate] = useState(null);
+  const generatePDF = async () => {
+    try {
+          const response = await axios.get('http://localhost:3000/penerimaanbarang');
+      const tableData = filteredData;
+      const pageSize = 10; // Number of items per page
+      const totalPages = Math.ceil(tableData.length / pageSize); // Calculate the total number of pages
+  
+      const columns = [
+        // Define your columns here, following the Ant Design (antd) column configuration
+        {
+          title: 'Jenis Dokumen',
+          dataIndex: 'DOC_Type',
+          key: 'DOC_Type',
+      
+        },
+        {
+          title: 'No Aju',
+          dataIndex: 'NO_REG',
+          key: 'NO_REG',
+          
+        },
+        {
+          title: 'No. Pabean',
+          dataIndex: 'DOC_NO',
+          key: 'DOC_NO',
+                  },
+        {
+          title: 'Tgl. Pabean',
+          dataIndex: 'DOC_Date',
+          key: 'DOC_Date',
+    
+        },
+        {
+          title: 'No. Penerimaan Barang',
+          dataIndex: 'NO_BUKTI',
+          key: 'NO_BUKTI',
+          
+      
+        },
+        {
+          title: 'Tgl. Penerimaan Barang',
+          dataIndex: 'Date_Transaction',
+          key: 'Date_Transaction',
+        },
+        {
+          title: 'Pemasok/Pengirim',
+          dataIndex: 'Ship_Name',
+          key: 'Ship_Name',
+        },
+        {
+          title: 'Kode Barang',
+          dataIndex: 'Kd_Brg',
+          key: 'Kd_Brg',
+        },
+        {
+          title: 'Nama Barang',
+          dataIndex: 'Nm_Brg',
+          key: 'Nm_Brg',
+          
+      
+        },
+        {
+          title: 'Satuan',
+          dataIndex: 'Unit_Code',
+          key: 'Unit_Code',
+        },
+        {
+          title: 'Jumlah',
+          dataIndex: 'Item_Qty',
+          key: 'Item_Qty',
+      
+        },
+        {
+          title: 'Harga',
+          dataIndex: 'Sub_Total',
+          key: 'Sub_Total',
 
+      
+        },
+        // {
+        // Add more columns as needed
+      ];
+  
+      const doc = new jsPDF();
+  
+      for (let page = 1; page <= totalPages; page++) {
+        // Calculate the start and end index for the current page
+        const startIndex = (page - 1) * pageSize;
+        const endIndex = page * pageSize;
+  
+        // Fetch the data for the current page
+        const currentPageData = tableData.slice(startIndex, endIndex);
+  
+        const dataChunks = splitDataIntoChunks(currentPageData, pageSize);
+  
+        for (let i = 0; i < dataChunks.length; i++) {
+          if (i > 0) {
+            doc.addPage(); // Add a new page for each chunk after the first one
+          }
+          generatePDFForChunk(dataChunks[i], doc, columns);
+        }
+      }
+  
+      doc.save(`Pengeluaran_Barang.pdf`);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+  
+  const generatePDFForChunk = (chunk, doc, columns) => {
+    const tableContent = chunk.map((row) => columns.map((column) => row[column.dataIndex]));
+    const customHeader = columns.map((column) => column.title);
+  
+    doc.autoTable({
+      head: [customHeader],
+      body: tableContent,
+      theme: 'striped', // Apply striped theme for alternating row colors
+      styles: {
+        cellPadding: 1,
+        fontSize: 5,
+      },
+      columnStyles: columns.reduce((styles, column, index) => {
+        styles[index] = { fontStyle: 'light' }; // Apply bold font style to each column
+        return styles;
+      }, {}),
+      columnWidth: 'auto', // Set the initial column width to 'auto'
+      margin: { top: 15 }, // Add top margin to the table
+      didParseCell: (data) => {
+        // Adjust the column width based on the content
+        const col = data.column.index;
+        const headers = customHeader.length;
+        const colWidth = headers > col ? doc.getStringUnitWidth(customHeader[col]) * doc.internal.getFontSize() + 10 : 50;
+        data.cell.width = colWidth;
+      },
+    });
+  };
   const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
       <div style={{ padding: 8 }}>
@@ -126,27 +261,7 @@ const TableForm = () => {
       ) : (
         text
       )
-      const generatePDF = async () => {
-        const doc = new jsPDF();
-        const currentPage = tableRef.current?.state.pagination.current || 1;
-        const startIndex = (currentPage - 1) * pageSize;
-      
-        // Retrieve the currently rendered table rows
-        const rows = await tableRef.current?.getRenderedRows();
-      
-        if (rows && rows.length > 0) {
-          const endIndex = Math.min(startIndex + pageSize, rows.length);
-          const visibleData = rows.slice(startIndex, endIndex).map(row => row.props.data);
-      
-          const filteredData = visibleData.filter(row => {
-            const rowDate = row.dateRange; // Replace 'date' with the actual date field in your row data
-            return rowDate >= dateRange; // Replace with your selected date range logic
-          });
-      
-          generatePDFForChunk(filteredData, doc, columns);
-          doc.save('Penerimaan_Barang.pdf');
-        }
-      };
+
   const columns = [
     {
       title: 'Jenis Dokumen',
@@ -277,6 +392,8 @@ const TableForm = () => {
       setAlert(false)
     }
   };
+  console.log("dateRange",dateRange)
+
   const handleDateChange2 = (dates) => {
     if (dates && dates.length === 2) {
       const [start, end] = dates;
@@ -432,33 +549,33 @@ const splitDataIntoChunks = (data, pageSize) => {
   return chunks;
 };
 
-const generatePDFForChunk = (chunk, doc, columns) => {
-  const tableContent = chunk.map((row) => columns.map((column) => row[column.dataIndex]));
-  const customHeader = columns.map((column) => column.title);
+// const generatePDFForChunk = (chunk, doc, columns) => {
+//   const tableContent = chunk.map((row) => columns.map((column) => row[column.dataIndex]));
+//   const customHeader = columns.map((column) => column.title);
 
-  doc.autoTable({
-    head: [customHeader],
-    body: tableContent,
-    theme: 'striped', // Apply striped theme for alternating row colors
-    styles: {
-      cellPadding: 1,
-      fontSize: 5,
-    },
-    columnStyles: columns.reduce((styles, column, index) => {
-      styles[index] = { fontStyle: 'light' }; // Apply bold font style to each column
-      return styles;
-    }, {}),
-    columnWidth: 'auto', // Set the initial column width to 'auto'
-    margin: { top: 15 }, // Add top margin to the table
-    didParseCell: (data) => {
-      // Adjust the column width based on the content
-      const col = data.column.index;
-      const headers = customHeader.length;
-      const colWidth = headers > col ? doc.getStringUnitWidth(customHeader[col]) * doc.internal.getFontSize() + 10 : 50;
-      data.cell.width = colWidth;
-    },
-  });
-};
+//   doc.autoTable({
+//     head: [customHeader],
+//     body: tableContent,
+//     theme: 'striped', // Apply striped theme for alternating row colors
+//     styles: {
+//       cellPadding: 1,
+//       fontSize: 5,
+//     },
+//     columnStyles: columns.reduce((styles, column, index) => {
+//       styles[index] = { fontStyle: 'light' }; // Apply bold font style to each column
+//       return styles;
+//     }, {}),
+//     columnWidth: 'auto', // Set the initial column width to 'auto'
+//     margin: { top: 15 }, // Add top margin to the table
+//     didParseCell: (data) => {
+//       // Adjust the column width based on the content
+//       const col = data.column.index;
+//       const headers = customHeader.length;
+//       const colWidth = headers > col ? doc.getStringUnitWidth(customHeader[col]) * doc.internal.getFontSize() + 10 : 50;
+//       data.cell.width = colWidth;
+//     },
+//   });
+// };
 
 
   return (
