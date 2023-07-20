@@ -440,8 +440,8 @@ const Wip = () => {
     },
     {
       title: 'Satuan',
-      dataIndex: 'Satuan',
-      key: 'Satuan',
+      dataIndex: 'Unit_Desc',
+      key: 'Unit_Desc',
       ...getColumnSearchProps('Satuan'),
     },
 

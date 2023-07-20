@@ -393,6 +393,7 @@ const BahanBaku = () => {
       ) : (
         text
       )
+      //this are the option for filter column
       const filters = [
         {
           text: '>=',
@@ -415,7 +416,7 @@ const BahanBaku = () => {
           value: 'equal',
         },
       ];
-    
+    //this for filter generate column number input by value option arithmetic
       const CustomFilter = ({ value, onChange }) => {
         const handleInputChange = (inputValue) => {
           const numberValue = Number(inputValue);

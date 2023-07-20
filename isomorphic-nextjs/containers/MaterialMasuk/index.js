@@ -5,7 +5,7 @@ import TableMaterial from "./Table";
 import React from "react";
 export default function MaterialMasuk(){
     return <>
-          <LayoutContentWrapper style={{ height: '100vh' }}>
+          <LayoutContentWrapper style={{ height: '100%' }}>
         <LayoutContent>
           <TableMaterial/>
         </LayoutContent>
