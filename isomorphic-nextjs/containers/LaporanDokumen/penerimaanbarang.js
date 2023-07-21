@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef} from 'react';
-import { Table, DatePicker, Select, Button, } from 'antd';
+import { Table, DatePicker, Select, Button, Modal} from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { Input, Space, Alert } from 'antd';
 import Highlighter from 'react-highlight-words';
@@ -33,8 +33,74 @@ const TableForm = () => {
   const [searchedColumn, setSearchedColumn] = useState('');
   const searchInput = useRef(null);
   const tableRef = useRef(null);
+  const [visible, setVisible] = useState(false);
+  const [dataTrace, setDataTrace] = useState([])
   const [selectedStartDate, setSelectedStartDate] = useState(null);
   const [selectedEndDate, setSelectedEndDate] = useState(null);
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const handleRowClick = (record) => {
+    const selectedRecord = data.find((item) => item.DOC_NO === record.DOC_NO);
+    if (selectedRecord) {
+      setSelectedRowKeys([record.DOC_NO]);
+      setSelectedRow(selectedRecord);
+      console.log("Selected Row: ", selectedRecord);
+    } else {
+      setSelectedRowKeys([]);
+      setSelectedRow(null);
+    }
+  };
+  const rowSelection = {
+    type: 'radio',
+    selectedRowKeys,
+    onSelect: (record) => {
+      handleRowClick(record);
+    },
+  };
+  const handleDateRangeChange = (dates) => {
+    if (dates && dates.length > 0) {
+      // Handle date range picker change event and set dt_Awal and dt_Akhir states
+      setDt_Awal(dates[0]);
+      setDt_Akhir(dates[1]);
+    } else {
+      // Handle null or empty dates scenario
+      setDt_Awal(null);
+      setDt_Akhir(null);
+    }
+  };
+  const tracepenerimaanbarang = () => {
+    const DOC_NO = selectedRowKeys[0];
+    const apiUrl = 'http://192.168.1.21:3000/sptracepenerimaanbarang'; 
+    axios
+      .get(apiUrl, {
+        params: {
+          DOC_NO,
+        },
+      })
+      .then((response) => {
+      
+        setDataTrace(response.data);
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+  const showModal = () => {
+    setVisible(true);
+  };
+
+  const handleOk = () => {
+    setVisible(false);
+  };
+
+  const handleCancel = () => {
+    setVisible(false);
+  };
+  const handleClick = () => {
+    showModal();
+    tracepenerimaanbarang();
+  };
   const generatePDF = async () => {
     try {
           const response = await axios.get('http://localhost:3000/penerimaanbarang');
@@ -366,6 +432,103 @@ const TableForm = () => {
   // useEffect(() => {
   //   handleDateChange()
   // }, [])
+  const columnModal =[ 
+  //   {
+  //   title: 'No.',
+  //   dataIndex: 'index',
+  //   render: (text, record, index) => (
+  //     <div
+  
+  //     >
+  //       {index + 1}
+  //     </div>
+  //   ),
+  //   // render: (text, record, index) => index + 1, // Generate automation numbering
+  // },
+  {
+    title: 'Phase',
+    dataIndex: 'Phase',
+    key: 'Phase',
+    ...getColumnSearchProps('Phase'),
+  
+  },
+  {
+    title: 'Type',
+    dataIndex: 'No_Reference',
+    key: 'No_Reference',
+    ...getColumnSearchProps('No_Reference'),
+  
+  },
+  {
+    title: 'Tanggal',
+    dataIndex: 'Tanggal',
+    key: 'Tanggal',   
+    render: (text) => {
+      const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
+      const convertedDate = new Date(text).toLocaleDateString('id-ID', options);
+      return <span>{convertedDate}</span>;
+    },    
+    ...getColumnDateProps('Tanggal')
+  },
+  {
+    title: 'Harga',
+    dataIndex: 'Harga',
+    key: 'Harga',
+    ...getColumnSearchProps('Harga'),
+  },
+  {
+    title: 'Nm_Brg',
+    dataIndex: 'Nm_Brg',
+    key: 'Nm_Brg',
+    ...getColumnSearchProps('Nm_Brg'),
+  },
+  {
+    title: 'Kd_Brg',
+    dataIndex: 'Kd_Brg',
+    key: 'Kd_Brg',
+    ...getColumnSearchProps('Kd_Brg'),
+  
+  },
+  {
+    title: 'QTY',
+    dataIndex: 'Item_Qty',
+    key: 'Item_Qty',
+    ...getColumnSearchProps('Item_Qty'),
+  
+  },
+  {
+    title: 'Satuan',
+    dataIndex: 'Unit_Code',
+    key: 'Unit_Code',
+    ...getColumnSearchProps('Unit_Code'),
+  
+  },
+  {
+    title: 'Jenis Dok.BC',
+    dataIndex: 'DOC_Type',
+    key: 'DOC_Type',
+    ...getColumnSearchProps('DOC_Type'),
+  
+  },
+  {
+    title: 'Nomor Dok.BC',
+    dataIndex: 'DOC_NO',
+    key: 'DOC_NO',
+    ...getColumnSearchProps('DOC_NO'),
+  
+  },
+  {
+    title: 'Tanggal Dok.BC',
+    dataIndex: 'DOC_Date',
+    key: 'DOC_Date',   
+    render: (text) => {
+      const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
+      const convertedDate = new Date(text).toLocaleDateString('id-ID', options);
+      return <span>{convertedDate}</span>;
+    },    
+    ...getColumnDateProps('DOC_Date')
+  },
+]
   useEffect(() => {
     fetchData();
   }, []);
@@ -502,7 +665,6 @@ const TableForm = () => {
   };
 
 
-
 // const exportToPDF = () => {
 //   const tableRef = document.getElementById('table-ref');
 
@@ -612,6 +774,19 @@ const splitDataIntoChunks = (data, pageSize) => {
             Export {exportType.toUpperCase()}
           </Button>
         )}
+        <Button onClick={handleClick} style={{width: 130, marginLeft: 16,  backgroundColor: "#1f2431", color: "#efefef", borderRadius: "5px"}}>Trace</Button>
+        <Modal
+        title={`Trace Stock Kode Barang - ${selectedRowKeys}`}
+        visible={visible}
+        onOk={handleOk}
+        onCancel={handleCancel}
+        width={1200}
+        footer
+      >
+        <div>
+        <Table id="table-ref-modal"  columns={columnModal} dataSource={dataTrace} scroll={{ x: 400 }} ref={tableRef} />
+        </div>
+      </Modal>
       </div>
       
       {
@@ -622,7 +797,9 @@ const splitDataIntoChunks = (data, pageSize) => {
       showIcon
     /></div> :
       filteredData.length > 0 ? (
-        <Table id="table-ref" columns={columns} dataSource={filteredData} scroll={{ x: 400 }} ref={tableRef}/>
+        <Table id="table-ref" columns={columns} dataSource={filteredData}  rowSelection={rowSelection}    onRow={(record) => ({
+          onClick: () => handleRowClick(record),
+        })} rowKey="DOC_NO" scroll={{ x: 400 }} ref={tableRef}/>
       ) : (
         <Table id="table-ref" columns={columns}    scroll={{ x: 400 }} ref={tableRef}/>      )}
     </div>

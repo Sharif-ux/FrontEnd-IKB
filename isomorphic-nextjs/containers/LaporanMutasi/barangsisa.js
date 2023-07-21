@@ -145,53 +145,7 @@ const BarangSisa = () => {
         setDt_Akhir(null);
       }
     };
-    // const callStoredProc = () => {
-    //   const Kd_Brg = selectedRowKeys[0];
-    //   const apiUrl = 'http://192.168.1.21:3000/storedprocedure'; 
-  
-    //   axios
-    //     .get(apiUrl, {
-    //       params: {
-    //         Kd_Brg,
-    //         dt_Awal: dt_Awal.format('YYYY-MM-DD'),
-    //         dt_Akhir: dt_Akhir.format('YYYY-MM-DD'),
-    //       },
-    //     })
-    //     .then((response) => {
-        
-    //       setDataTrace(response.data);
-    //       console.log(response.data);
-    //     })
-    //     .catch((error) => {
-    //       console.error(error);
-    //     });
-    // };
-    // const callStoredProc = () => {
-    //   const apiUrl = 'http://192.168.1.21:3000/spalat';
-    //   const token = cookie.get('token');
-    //   const decodedToken = jwt.decode(token);
-    //   const User_id = decodedToken.User_id;
-    //   console.log('User_Id:', User_id);
-    //   console.log('Kategori:', Kategori);
     
-    //   axios
-    //     .get(apiUrl, {
-    //       params: {
-    //         User_id,
-    //         dt_Awal: dt_Awal.format('YYYY-MM-DD'),
-    //         dt_Akhir: dt_Akhir.format('YYYY-MM-DD'),
-    //         Kategori: "ALAT",
-    //       },
-    //     }
-    //     )
-    //     .then((response) => {
-    //       setDataTrace(response.data);
-    //       console.log("LaporanMutasiBahanBaku",response.data);
-    //     })
-    //     .catch((error) => {
-    //       console.error(error);
-    //     });
-    // };
     useEffect(() => {
       const token = cookie.get('token');
       console.log('Token:', token);

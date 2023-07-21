@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef} from 'react';
-import { Table, DatePicker, Select, Button } from 'antd';
+import { Table, DatePicker, Select, Button, Modal } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { Input, Space, Alert } from 'antd';
 import Highlighter from 'react-highlight-words';
@@ -28,6 +28,10 @@ const PengeluaranBarang = () => {
   const [searchText, setSearchText] = useState('');
   const [searchedColumn, setSearchedColumn] = useState('');
   const [alert, setAlert] = useState(false)
+    const [selectedRow, setSelectedRow] = useState(null);
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+    const [visible, setVisible] = useState(false);
+  const [dataTrace, setDataTrace] = useState([])
   const searchInput = useRef(null);
       const tableRef = React.useRef(null);
   
@@ -574,124 +578,155 @@ const generatePDFForChunk = (chunk, doc, columns) => {
 const handleClickAlert =() =>{
   setAlert(true);
 }
+  const handleRowClick = (record) => {
+    const selectedRecord = data.find((item) => item.DOC_NO === record.DOC_NO);
+    if (selectedRecord) {
+      setSelectedRowKeys([record.DOC_NO]);
+      setSelectedRow(selectedRecord);
+      console.log("Selected Row: ", selectedRecord);
+    } else {
+      setSelectedRowKeys([]);
+      setSelectedRow(null);
+    }
+  };
+  const rowSelection = {
+    type: 'radio',
+    selectedRowKeys,
+    onSelect: (record) => {
+      handleRowClick(record);
+    },
+  };
+  const tracepenerimaanbarang = () => {
+    const DOC_NO = selectedRowKeys[0];
+    const apiUrl = 'http://192.168.1.21:3000/sptracepengeluaranbarang'; 
+    axios
+      .get(apiUrl, {
+        params: {
+          DOC_NO,
+        },
+      })
+      .then((response) => {
+      
+        setDataTrace(response.data);
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
 const isButtonDisabled = !dateRange ; // Check if either dt_Awal or dt_Akhir is null
-// const generatePDF = async () => {
-//   try {
-//     const response = await axios.get('http://localhost:3000/pengeluaranbarang');
-//     const tableData = response.data;
+  const showModal = () => {
+    setVisible(true);
+  };
 
-//     const columns = [
-//       // Define your columns here, following the Ant Design (antd) column configuration
-//       {
-//         title: 'Jenis Dokumen',
-//         dataIndex: 'DOC_Type',
-//         key: 'DOC_Type',
-//         width: '4%'
-//       },
-//       {
-//         title: 'No Aju',
-//         dataIndex: 'NO_REG',
-//         key: 'NO_REG',
-//         width: '6%'
-//       },
-//       {
-//         title: 'No. Pabean',
-//         dataIndex: 'DOC_NO',
-//         key: 'DOC_NO',
-//         width: '6%'
-//       },
-//       {
-//         title: 'Tgl. Pabean',
-//         dataIndex: 'DOC_Date',
-//         key: 'DOC_Date',
-//         render: (text) => {
-//           const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
-//           const convertedDate = new Date(text).toLocaleDateString('id-ID', options);
-//           return <span>{convertedDate}</span>;
-//         },      
-//         width: '8%'
-//       },
-//       {
-//         title: 'No. PO',
-//         dataIndex: 'DO_NO',
-//         key: 'DO_NO',
-//         width: '5%'
-//       },
-//       {
-//         title: 'Tgl. Pengeluaran',
-//         dataIndex: 'DO_Date',
-//         key: 'DO_Date',
-//         render: (text) => <span>{moment(text).format('YYYY-MM-DD')}</span>,
-//         width: '8%'
+  const handleOk = () => {
+    setVisible(false);
+  };
 
-//       },
-//       {
-//         title: 'Penerima Barang',
-//         dataIndex: 'Buyer_Name',
-//         key: 'Buyer_Name',
-//         width: '8%'
-
-//       },
-//       {
-//         title: 'Kode Barang',
-//         dataIndex: 'Kd_Brg',
-//         key: 'Kd_Brg',
-//         width: '8%'
-//       },
-//       {
-//         title: 'Nama Barang',
-//         dataIndex: 'Nm_Brg',
-//         key: 'Nm_Brg',
-//         width: '5%' 
+  const handleCancel = () => {
+    setVisible(false);
+  };
+  const handleClick = () => {
+    showModal();
+    tracepenerimaanbarang();
+  };
+  const columnModal =[ 
+    //   {
+    //   title: 'No.',
+    //   dataIndex: 'index',
+    //   render: (text, record, index) => (
+    //     <div
     
-//       },
-//       {
-//         title: 'Satuan',
-//         dataIndex: 'Unit_Code',
-//         key: 'Unit_Code',
-//         width: '8%'    
+    //     >
+    //       {index + 1}
+    //     </div>
+    //   ),
+    //   // render: (text, record, index) => index + 1, // Generate automation numbering
+    // },
+    {
+      title: 'Phase',
+      dataIndex: 'Phase',
+      key: 'Phase',
+      ...getColumnSearchProps('Phase'),
     
-//       },
-//       {
-//         title: 'Jumlah',
-//         dataIndex: 'Item_Qty',
-//         key: 'Item_Qty',
-//         width: '8%'  
+    },
+    {
+      title: 'Type',
+      dataIndex: 'No_Reference',
+      key: 'No_Reference',
+      ...getColumnSearchProps('No_Reference'),
     
-//       },
-//       {
-//         title: 'Harga CMT',
-//         dataIndex: 'CM_Price_Tot',
-//         key: 'CM_Price_Tot',
-//         width: '8%'
+    },
+    {
+      title: 'Tanggal',
+      dataIndex: 'Tanggal',
+      key: 'Tanggal',   
+      render: (text) => {
+        const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
+        const convertedDate = new Date(text).toLocaleDateString('id-ID', options);
+        return <span>{convertedDate}</span>;
+      },    
+      ...getColumnDateProps('Tanggal')
+    },
+    {
+      title: 'Harga',
+      dataIndex: 'Harga',
+      key: 'Harga',
+      ...getColumnSearchProps('Harga'),
+    },
+    {
+      title: 'Nm_Brg',
+      dataIndex: 'Nm_Brg',
+      key: 'Nm_Brg',
+      ...getColumnSearchProps('Nm_Brg'),
+    },
+    {
+      title: 'Kd_Brg',
+      dataIndex: 'Kd_Brg',
+      key: 'Kd_Brg',
+      ...getColumnSearchProps('Kd_Brg'),
     
-//       },
-//       {
-//         title: 'Harga FOB',
-//         dataIndex: 'FOB_Price_Tot',
-//         key: 'FOB_Price_Tot',
-//         width: '8%'    
-//       },
-//       // {
-//       // Add more columns as needed
-//     ];
-
-
-//     const doc = new jsPDF();
-//     const dataChunks = splitDataIntoChunks(tableData, pageSize);
-
-//     for (let i = 0; i < dataChunks.length; i++) {
-//       if (i > 0) {
-//         doc.addPage(); // Add a new page for each chunk after the first one
-//       }
-//       generatePDFForChunk(dataChunks[i], doc, columns);
-//     }
-
-//     doc.save('Pengeluaran_Barang.pdf');
-//   } catch (error) {
-//     console.error('Error fetching data:', error);
-//   }
-// };
+    },
+    {
+      title: 'QTY',
+      dataIndex: 'Item_Qty',
+      key: 'Item_Qty',
+      ...getColumnSearchProps('Item_Qty'),
+    
+    },
+    {
+      title: 'Satuan',
+      dataIndex: 'Unit_Code',
+      key: 'Unit_Code',
+      ...getColumnSearchProps('Unit_Code'),
+    
+    },
+    {
+      title: 'Jenis Dok.BC',
+      dataIndex: 'DOC_Type',
+      key: 'DOC_Type',
+      ...getColumnSearchProps('DOC_Type'),
+    
+    },
+    {
+      title: 'Nomor Dok.BC',
+      dataIndex: 'DOC_NO',
+      key: 'DOC_NO',
+      ...getColumnSearchProps('DOC_NO'),
+    
+    },
+    {
+      title: 'Tanggal Dok.BC',
+      dataIndex: 'DOC_Date',
+      key: 'DOC_Date',   
+      render: (text) => {
+        const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
+        const convertedDate = new Date(text).toLocaleDateString('id-ID', options);
+        return <span>{convertedDate}</span>;
+      },    
+      ...getColumnDateProps('DOC_Date')
+    },
+  ]
   return (
     <LayoutContentWrapper style={{ height: '100%' }}>
     <LayoutContent>
@@ -724,6 +759,19 @@ const isButtonDisabled = !dateRange ; // Check if either dt_Awal or dt_Akhir is 
             Export {exportType.toUpperCase()}
           </Button>
         )}
+          <Button onClick={handleClick}  style={{width: 130, marginLeft: 16,  backgroundColor: "#1f2431", color: "#efefef", borderRadius: "5px"}}>Trace</Button>
+        <Modal
+        title={`Trace Stock Kode Barang - ${selectedRowKeys}`}
+        visible={visible}
+        onOk={handleOk}
+        onCancel={handleCancel}
+        width={1200}
+        footer
+      >
+        <div>
+        <Table id="table-ref-modal"  columns={columnModal} dataSource={dataTrace} scroll={{ x: 400 }} ref={tableRef} />
+        </div>
+      </Modal>
       </div>
       {
       alert === false ? <div style={{position: "relative", top: "10", right: "10", display:alert === false ? "block" : "none", zIndex: "99"}}>  <Alert
@@ -733,7 +781,9 @@ const isButtonDisabled = !dateRange ; // Check if either dt_Awal or dt_Akhir is 
       showIcon
     /></div> :
       filteredData.length > 0 ? (
-        <Table id="table-ref" columns={columns} dataSource={filteredData} scroll={{ x: 400 }} ref={tableRef}/>
+        <Table id="table-ref" columns={columns} dataSource={filteredData}  rowSelection={rowSelection}    onRow={(record) => ({
+          onClick: () => handleRowClick(record),
+        })} rowKey="DOC_NO" scroll={{ x: 400 }} ref={tableRef}/>
       ) : (
         <Table id="table-ref" columns={columns}    scroll={{ x: 400 }} ref={tableRef}/>      )}
     </div>
