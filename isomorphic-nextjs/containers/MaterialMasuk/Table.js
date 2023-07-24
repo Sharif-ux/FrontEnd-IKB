@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { SearchOutlined } from '@ant-design/icons';
+import { SearchOutlined, EditOutlined, DeleteOutlined} from '@ant-design/icons';
 import { Table, DatePicker, Select, Button, Space, Modal, Popconfirm, message } from 'antd';
 import { Input } from 'antd';
 import Highlighter from 'react-highlight-words';
@@ -21,6 +21,7 @@ const { RangePicker } = DatePicker;
 const { Option } = Select;
 
 
+const dateFormat = 'DD/MM/YYYY';
 
 const TableMaterial = () => {
   const [data, setData] = useState([]);
@@ -30,7 +31,7 @@ const TableMaterial = () => {
   const [searchText, setSearchText] = useState('');
   const [searchedColumn, setSearchedColumn] = useState('');
   const searchInput = useRef(null);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [insertVisible, setInsertVisible] = useState(false);
   // const handleSearch = (selectedKeys, confirm, dataIndex) => {
   //   confirm();
   //   setSearchText(selectedKeys[0]);
@@ -150,44 +151,100 @@ const TableMaterial = () => {
 
     },
     {
+      title: 'NO. REFF',
+      dataIndex: 'RAWIN_NO',
+      key: 'RAWIN_NO',
+      ...getColumnSearchProps('PO_NO'),
+
+    },
+    {
+      title: 'No. Po',
+      dataIndex: 'PO_NO',
+      key: 'PO_NO',
+      ...getColumnSearchProps('PO_NO'),
+    },
+    {
       title: 'Tanggal',
-      dataIndex: 'rawin_date',
-      key: 'rawin_date',
+      dataIndex: 'RAWIN_Date',
+      key: 'RAWIN_Date',
+      render: (text) => <span>{moment(text).format('YYYY-MM-DD')}</span>,
+      ...getColumnDateProps('RAWIN_Date'),
+    },
+    {
+      title: 'Jenis Transaksi',
+      dataIndex: 'RAWIN_Type',
+      key: 'RAWIN_Type',
+      ...getColumnSearchProps('RAWIN_Type'),
+    },
+    {
+      title: 'Pengirim',
+      dataIndex: 'Pengirim',
+      key: 'Pengirim',
+      ...getColumnSearchProps('Pengirim'),
+    },
+    {
+      title: 'Keterangan',
+      dataIndex: 'RAWIN_Desc',
+      key: 'RAWIN_Desc',
+      ...getColumnSearchProps('RAWIN_Desc'),
+    },
+    {
+      title: 'Jenis Dokumen',
+      dataIndex: 'DOC_Type',
+      key: 'DOC_Type',
+      ...getColumnSearchProps('DOC_Type'),
+    },
+    {
+      title: 'Tanggal Dok.BC',
+      dataIndex: 'DOC_Date',
+      key: 'DOC_Date',
       render: (text) => <span>{moment(text).format('YYYY-MM-DD')}</span>,
       ...getColumnDateProps('rawin_date'),
     },
     {
-      title: 'No Bukti',
-      dataIndex: 'rawin_no',
-      key: 'rawin_no',
-      ...getColumnSearchProps('rawin_no'),
+      title: 'No Dok.BC',
+      dataIndex: 'DOC_NO',
+      key: 'DOC_NO',
+      ...getColumnSearchProps('DOC_NO'),
     },
     {
-      title: 'Kode Barang',
-      dataIndex: 'kd_brg',
-      key: 'kd_brg',
-      ...getColumnSearchProps('kd_brg'),
+      title: 'Keterangan Gudang',
+      dataIndex: 'Gudang_Desc',
+      key: 'Gudang_Desc',
+      ...getColumnSearchProps('Gudang_Desc'),
+    },
+       {
+      title: 'No. Invoice',
+      dataIndex: 'INV_NO',
+      key: 'INV_NO',
+      ...getColumnSearchProps('INV_NO'),
     },
     {
-      title: 'Action',
-      dataIndex: 'action',
-      key: 'action',
-      render: (text, record) => (
-        <div>
-          <Button type="primary" onClick={() => handleUpdate(record.kd_brg)}>
-            Update
-          </Button>
-          <Popconfirm
-            title="Are you sure to delete this item?"
-            onConfirm={() => handleDelete(record.kd_brg)}
-          >
-            <Button type="danger" style={{ marginLeft: '8px' }}>
-              Delete
-            </Button>
-          </Popconfirm>
-        </div>
-      ),
+      title: 'No. BL',
+      dataIndex: 'BL_NO',
+      key: 'BL_NO',
+      ...getColumnSearchProps('BL_NO'),
     },
+    // {
+    //   title: 'Action',
+    //   dataIndex: 'action',
+    //   key: 'action',
+    //   render: (text, record) => (
+    //     <div>
+    //       <Button type="primary" onClick={() => handleUpdate(record.kd_brg)}>
+    //         Update
+    //       </Button>
+    //       <Popconfirm
+    //         title="Are you sure to delete this item?"
+    //         onConfirm={() => handleDelete(record.kd_brg)}
+    //       >
+    //         <Button type="danger" style={{ }}>
+    //           Delete
+    //         </Button>
+    //       </Popconfirm>
+    //     </div>
+    //   ),
+    // },
   ];
   useEffect(() => {
     fetchData();
@@ -233,12 +290,12 @@ const TableMaterial = () => {
     setFilteredData(filtered);
   };
  
-  const openModal = () => {
-    setModalVisible(true);
+  const openModalInsert = () => {
+    setInsertVisible(true);
   };
 
-  const closeModal = () => {
-    setModalVisible(false);
+  const closeModalInsert = () => {
+    setInsertVisible(false);
   }
   const exportToCSV = () => {
     const csvExporter = new ExportToCsv({
@@ -374,12 +431,19 @@ const TableMaterial = () => {
             Export {exportType.toUpperCase()}
           </Button>
         )} */}
-         <Button onClick={openModal} style={{ backgroundColor: "#1f2431", color: "#efefef", borderRadius: "5px",   display: "inline-flex",
+         <Button onClick={openModalInsert} style={{ backgroundColor: "#1f2431", color: "#efefef", borderRadius: "5px",   display: "inline-flex",
   alignItems: "center", gap: "5px"}} icon={<IoMdAdd size={17}  />}>Baru</Button>
+    <Button onClick={openModalInsert} type='primary' style={{borderRadius: "5px",   display: "inline-flex",
+  alignItems: "center", gap: "5px"}} icon={<EditOutlined size={17}/>}>Edit</Button>
+      <Button onClick={openModalInsert} type='danger' style={{borderRadius: "5px",   display: "inline-flex",
+  alignItems: "center", gap: "5px"}} icon={<DeleteOutlined size={17}/>}>Hapus</Button>
+    <RangePicker format={dateFormat}
+      renderExtraFooter={() => 'Custom footer'}
+      onChange={handleDateChange} />
     <Button style={{ backgroundColor: "#efefef", color: "#1f2431", borderRadius: "5px",   display: "inline-flex",
   alignItems: "center", gap: "5px"}} icon={<IoIosCopy size={17} />}>Impor Excell</Button>
 
-  <ModalComponent visible={modalVisible} closeModal={closeModal}/>
+  <ModalComponent visible={insertVisible} closeModal={closeModalInsert}/>
       </div>
       {filteredData.length > 0 ? (
         <Table id="table-ref" columns={columns} dataSource={filteredData}  rowKey={(record, index) => index}/>
