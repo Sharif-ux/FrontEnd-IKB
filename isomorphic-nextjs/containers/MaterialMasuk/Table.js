@@ -31,7 +31,30 @@ const TableMaterial = () => {
   const [searchText, setSearchText] = useState('');
   const [searchedColumn, setSearchedColumn] = useState('');
   const searchInput = useRef(null);
+  const tableRef = useRef(null);
+  const [selectedRow, setSelectedRow] = useState(null);
   const [insertVisible, setInsertVisible] = useState(false);
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const handleRowClick = (record) => {
+    const selectedRecord = data.find((item) => item.RAWIN_NO === record.RAWIN_NO);
+    if (selectedRecord) {
+      setSelectedRowKeys([record.RAWIN_NO]);
+      setSelectedRow(selectedRecord);
+      console.log("Selected Row: ", selectedRecord);
+    } else {
+      setSelectedRowKeys([]);
+      setSelectedRow(null);
+    }
+  };
+  
+  const rowSelection = {
+    type: 'radio',
+    selectedRowKeys,
+    onSelect: (record) => {
+      handleRowClick(record);
+    },
+  };
+  console.log(rowSelection)
   // const handleSearch = (selectedKeys, confirm, dataIndex) => {
   //   confirm();
   //   setSearchText(selectedKeys[0]);
@@ -108,10 +131,18 @@ const TableMaterial = () => {
     //     setTimeout(() => searchInput.current?.select(), 100);
     //   }
     // },
-    const handleDelete = (Kd_Brg) => {
-      // Perform delete operation based on the Kd_Brg
-      message.success(`Deleted item with Kd_Brg ${Kd_Brg}`);
+    const handleDelete = async (RAWIN_NO) => {
+      try {
+        const response = await axios.delete(`http://localhost:3000/deleteform/${RAWIN_NO}`);
+        message.success(response.data.message);
+        // After deletion, refetch the updated data
+        fetchData();
+      } catch (error) {
+        console.error('Error deleting data:', error.message);
+        message.error('Failed to delete data.');
+      }
     };
+  
   
     const handleUpdate = (Kd_Brg) => {
       // Perform update operation based on the Kd_Brg
@@ -435,8 +466,20 @@ const TableMaterial = () => {
   alignItems: "center", gap: "5px"}} icon={<IoMdAdd size={17}  />}>Baru</Button>
     <Button onClick={openModalInsert} type='primary' style={{borderRadius: "5px",   display: "inline-flex",
   alignItems: "center", gap: "5px"}} icon={<EditOutlined size={17}/>}>Edit</Button>
-      <Button onClick={openModalInsert} type='danger' style={{borderRadius: "5px",   display: "inline-flex",
-  alignItems: "center", gap: "5px"}} icon={<DeleteOutlined size={17}/>}>Hapus</Button>
+      <Button
+        type='danger'
+        style={{
+          borderRadius: '5px',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '5px',
+          marginBottom: '10px', // Adjust the margin as needed
+        }}
+        icon={<DeleteOutlined size={17} />}
+        onClick={() => handleDelete(selectedRowKeys)}
+      >
+        Hapus
+      </Button>
     <RangePicker format={dateFormat}
       renderExtraFooter={() => 'Custom footer'}
       onChange={handleDateChange} />
@@ -446,7 +489,10 @@ const TableMaterial = () => {
   <ModalComponent visible={insertVisible} closeModal={closeModalInsert}/>
       </div>
       {filteredData.length > 0 ? (
-        <Table id="table-ref" columns={columns} dataSource={filteredData}  rowKey={(record, index) => index}/>
+        <Table id="table-ref" columns={columns} dataSource={filteredData} rowKey="RAWIN_NO"
+        rowSelection={rowSelection} scroll={{ x: 400 }} ref={tableRef} onRow={(record) => ({
+          onClick: () => handleRowClick(record),
+        })}/>
       ) : (
         <p>No data available</p>
       )}
