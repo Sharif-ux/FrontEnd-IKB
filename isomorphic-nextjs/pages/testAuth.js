@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Modal } from 'antd';
+import { Button, Modal, Input } from 'antd';
 
 const MyModal = () => {
   const [visible, setVisible] = useState(false);
@@ -15,7 +15,7 @@ const MyModal = () => {
   const handleCancel = () => {
     setVisible(false);
   };
-
+const testvalue = 'IN/IKB/21/03/0001'
   return (
     <div>
       <Button type="primary" onClick={showModal}>
@@ -28,6 +28,7 @@ const MyModal = () => {
         onCancel={handleCancel}
       >
         <p>Modal content goes here.</p>
+        <Input value={testvalue}/>
       </Modal>
     </div>
   );

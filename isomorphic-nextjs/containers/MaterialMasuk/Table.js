@@ -17,6 +17,7 @@ import { IoMdCreate, IoIosTrash, IoMdAdd, IoIosCopy } from "react-icons/io";
 import LayoutContentWrapper from '@iso/components/utility/layoutWrapper';
 import LayoutContent from '@iso/components/utility/layoutContent';
 import ModalComponent from './addMaterial';
+import ModalUpdateComponent from './updateMaterial';
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
@@ -34,7 +35,9 @@ const TableMaterial = () => {
   const tableRef = useRef(null);
   const [selectedRow, setSelectedRow] = useState(null);
   const [insertVisible, setInsertVisible] = useState(false);
+  const [updateVisible, setUpdateVisible] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [dataUpdate, setDataUpdate] = useState([]);
   const handleRowClick = (record) => {
     const selectedRecord = data.find((item) => item.RAWIN_NO === record.RAWIN_NO);
     if (selectedRecord) {
@@ -142,9 +145,32 @@ const TableMaterial = () => {
         message.error('Failed to delete data.');
       }
     };
+    const getData = () => {
+      const RAWIN_NO = selectedRowKeys[0];
+      const apiUrl = 'http://192.168.1.21:3000/getDataforUpdate'; 
   
-  
-    const handleUpdate = (Kd_Brg) => {
+      axios
+        .get(apiUrl, {
+          params: {
+            RAWIN_NO,
+          },
+        })
+        .then((response) => {
+        
+          setDataUpdate(response.data);
+          console.log(response.data);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    };
+    
+  console.log("dataUpdate",dataUpdate)
+  const updateData = () => {
+    getData();
+    openModalUpdate();
+  }  
+  const handleUpdate = (Kd_Brg) => {
       // Perform update operation based on the Kd_Brg
       message.info(`Update item with Kd_Brg ${Kd_Brg}`);
     };
@@ -312,7 +338,7 @@ const TableMaterial = () => {
       return;
     }
     const filtered = data.filter((item) => {
-      const itemDate = moment(item.TanggalTransaksi, 'YYYY-MM-DD');
+      const itemDate = moment(item.RAWIN_Date, 'YYYY-MM-DD');
       return (
         itemDate.isSameOrAfter(dateRange[0], 'day') &&
         itemDate.isSameOrBefore(dateRange[1], 'day')
@@ -327,6 +353,13 @@ const TableMaterial = () => {
 
   const closeModalInsert = () => {
     setInsertVisible(false);
+  }
+  const openModalUpdate = () => {
+    setUpdateVisible(true);
+  };
+
+  const closeModalUpdate = () => {
+    setUpdateVisible(false);
   }
   const exportToCSV = () => {
     const csvExporter = new ExportToCsv({
@@ -343,7 +376,7 @@ const TableMaterial = () => {
       KONTRAK_NO: item.KONTRAK_NO,
       Kd_Brg: item.Kd_Brg,
       Item_Qty: item.Item_Qty,
-      'Tanggal Transaksi': moment(item.TanggalTransaksi).format('YYYY-MM-DD'),
+      'Tanggal Transaksi': moment(item.RAWIN_Date).format('YYYY-MM-DD'),
     }));
 
     csvExporter.generateCsv(exportedData);
@@ -354,7 +387,7 @@ const TableMaterial = () => {
       KONTRAK_NO: item.KONTRAK_NO,
       Kd_Brg: item.Kd_Brg,
       Item_Qty: item.Item_Qty,
-      'Tanggal Transaksi': moment(item.TanggalTransaksi).format('YYYY-MM-DD'),
+      'Tanggal Transaksi': moment(item.RAWIN_Date).format('YYYY-MM-DD'),
     }));
   
     const worksheet = XLSX.utils.json_to_sheet(exportedData);
@@ -415,7 +448,7 @@ const TableMaterial = () => {
 //       Code: item.code,
 //       Description: item.description,
 //       Category: item.category,
-//       'Tanggal Transaksi': moment(item.TanggalTransaksi).format('YYYY-MM-DD'),
+//       'Tanggal Transaksi': moment(item.RAWIN_Date).format('YYYY-MM-DD'),
 //     }));
   
 //     const columns = [
@@ -464,7 +497,7 @@ const TableMaterial = () => {
         )} */}
          <Button onClick={openModalInsert} style={{ backgroundColor: "#1f2431", color: "#efefef", borderRadius: "5px",   display: "inline-flex",
   alignItems: "center", gap: "5px"}} icon={<IoMdAdd size={17}  />}>Baru</Button>
-    <Button onClick={openModalInsert} type='primary' style={{borderRadius: "5px",   display: "inline-flex",
+    <Button onClick={updateData} type='primary' style={{borderRadius: "5px",   display: "inline-flex",
   alignItems: "center", gap: "5px"}} icon={<EditOutlined size={17}/>}>Edit</Button>
       <Button
         type='danger'
@@ -485,7 +518,7 @@ const TableMaterial = () => {
       onChange={handleDateChange} />
     <Button style={{ backgroundColor: "#efefef", color: "#1f2431", borderRadius: "5px",   display: "inline-flex",
   alignItems: "center", gap: "5px"}} icon={<IoIosCopy size={17} />}>Impor Excell</Button>
-
+<ModalUpdateComponent visible={updateVisible} closeModal={closeModalUpdate}/>
   <ModalComponent visible={insertVisible} closeModal={closeModalInsert}/>
       </div>
       {filteredData.length > 0 ? (

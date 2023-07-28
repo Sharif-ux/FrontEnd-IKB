@@ -33,7 +33,7 @@ const onChange = (value) => {
   };
   const testvalue = 'IN/IKB/21/03/0001'
 
-const FormDisabledDemo = () => {
+const UpdateModal = () => {
   const [form] = Form.useForm();
   const [formData, setFormData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -375,7 +375,7 @@ const FormDisabledDemo = () => {
       </>
     );
   };
-const ModalComponent = ({ visible, closeModal }) => {
+const ModalUpdateComponent = ({ visible, closeModal }) => {
   
     return (
       <Modal
@@ -388,9 +388,9 @@ const ModalComponent = ({ visible, closeModal }) => {
           top: 20,
         }}
       >
-        <FormDisabledDemo/>
+        <UpdateModal/>
       </Modal>
     );
   };
   
-  export default ModalComponent;
+  export default ModalUpdateComponent;
