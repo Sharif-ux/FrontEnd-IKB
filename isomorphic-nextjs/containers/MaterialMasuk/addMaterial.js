@@ -139,7 +139,6 @@ const FormDisabledDemo = () => {
     try {
       const response = await axios.post('http://localhost:3000/submitform', values);
       if (response.status === 200) {
-        // Increment the counter and reset if the month or year changes
         if (month !== new Date().getMonth() + 1 || year !== new Date().getFullYear()) {
           setMonth(new Date().getMonth() + 1);
           setYear(new Date().getFullYear());
@@ -148,7 +147,6 @@ const FormDisabledDemo = () => {
           setCounter((prevCounter) => prevCounter + 1);
         }
 
-        // Update the RAWIN_NO field
         updateRawinNo();
 
         message.success('Data inserted successfully!');
@@ -224,7 +222,7 @@ const FormDisabledDemo = () => {
           </Form.Item>  
           </Col>  
           <Col span={8}>      
-          <Form.Item name="Gudang_Desc" label="Dikirim ke">
+          <Form.Item name="Gudang_Code" label="Dikirim ke">
             <Select>
             {gudang.map(gudang => (
         <Option key={gudang.Gudang_Code} value={gudang.Gudang_Code}>
@@ -284,12 +282,12 @@ const FormDisabledDemo = () => {
           </Row>
           <Row gutter={16}>
         <Col span={7}>
-          <Form.Item name="" label="No Aju">
+          <Form.Item name="NO_REG" label="No Aju">
             <Input />
           </Form.Item>
           </Col>
           <Col span={7}>
-          <Form.Item name="Pengirim" label="Pengirim">
+          <Form.Item name="Ship_Code" label="Pengirim">
             <Select>
             {pengirim.map(pengirim => (
         <Option key={pengirim.Ship_Code} value={pengirim.Ship_Code}>

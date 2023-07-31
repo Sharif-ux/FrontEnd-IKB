@@ -158,17 +158,20 @@ const TableMaterial = () => {
         .then((response) => {
         
           setDataUpdate(response.data);
-          console.log(response.data);
+          console.log("getData",response.data);
         })
         .catch((error) => {
           console.error(error);
         });
     };
     
-  console.log("dataUpdate",dataUpdate)
   const updateData = () => {
-    getData();
-    openModalUpdate();
+    if (selectedRowKeys.length !== 0){
+      getData();
+      openModalUpdate();
+    } else {
+      message.info('Please choose the row')
+    }
   }  
   const handleUpdate = (Kd_Brg) => {
       // Perform update operation based on the Kd_Brg
@@ -518,7 +521,7 @@ const TableMaterial = () => {
       onChange={handleDateChange} />
     <Button style={{ backgroundColor: "#efefef", color: "#1f2431", borderRadius: "5px",   display: "inline-flex",
   alignItems: "center", gap: "5px"}} icon={<IoIosCopy size={17} />}>Impor Excell</Button>
-<ModalUpdateComponent visible={updateVisible} closeModal={closeModalUpdate}/>
+<ModalUpdateComponent visible={updateVisible} closeModal={closeModalUpdate}  initialData={dataUpdate}/>
   <ModalComponent visible={insertVisible} closeModal={closeModalInsert}/>
       </div>
       {filteredData.length > 0 ? (
