@@ -1,51 +1,52 @@
 import React, { useState } from 'react';
-import { Form, Input, Button, message } from 'antd';
-import axios from 'axios';
-const MyModal = () => {
-  const [form] = Form.useForm();
-  const [isFormVisible, setIsFormVisible] = useState(false);
 
-  const handleFormSubmit = (values) => {
-    const { RAWIN_NO, ...data } = values; // Extract RAWIN_NO and the rest of the form values
+function SerialNumberGenerator() {
+  const [formatString, setFormatString] = useState('');
+  const [dateParam, setDateParam] = useState('');
+  const [generatedSerialNumber, setGeneratedSerialNumber] = useState('');
 
-    // Make a PUT request to your backend API
-    const apiUrl = `http://192.168.1.21:3000/updateform/${RAWIN_NO}`;
-    axios
-      .put(apiUrl, data)
-      .then((response) => {
-        console.log('Data updated successfully!', response.data);
-        message.success('Data updated successfully!');
-        setIsFormVisible(false); // Hide the form after successful update
-      })
-      .catch((error) => {
-        console.error('Failed to update data:', error);
-        message.error('Failed to update data.');
-      });
+  const handleGenerateSerialNumber = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/getSerialNumber?formatString=${formatString}&dateParam=${dateParam}`);
+      const data = await response.json();
+      if (data.length > 0) {
+        setGeneratedSerialNumber(data[0].RAWIN_NO);
+      } else {
+        setGeneratedSerialNumber('No matching serial number found.');
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setGeneratedSerialNumber('Error fetching data from server.');
+    }
   };
 
   return (
     <div>
-      <Button onClick={() => setIsFormVisible(true)}>Show Update Form</Button>
-      {isFormVisible && (
-        <Form form={form} onFinish={handleFormSubmit}>
-          <Form.Item name="RAWIN_NO" label="RAWIN_NO" rules={[{ required: true, message: 'Please enter RAWIN_NO' }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="PO_NO" label="PO_NO">
-            <Input />
-          </Form.Item>
-          <Form.Item name="RAWIN_Date" label="RAWIN_Date">
-            <Input />
-          </Form.Item>
-          {/* Add other form items for the rest of the fields */}
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
-              Update Data
-            </Button>
-          </Form.Item>
-        </Form>
-      )}
+      <label>
+        Format String:
+        <input
+          type="text"
+          value={formatString}
+          onChange={(e) => setFormatString(e.target.value)}
+        />
+      </label>
+      <br />
+      <label>
+        Date Parameter:
+        <input
+          type="date"
+          value={dateParam}
+          onChange={(e) => setDateParam(e.target.value)}
+        />
+      </label>
+      <br />
+      <button onClick={handleGenerateSerialNumber}>Generate Serial Number</button>
+      <br />
+      <div>
+        Generated Serial Number: {generatedSerialNumber}
+      </div>
     </div>
   );
-};
-export default MyModal;
+}
+
+export default SerialNumberGenerator;

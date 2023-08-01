@@ -164,11 +164,28 @@ const TableMaterial = () => {
           console.error(error);
         });
     };
-    
+    const handleDataUpdate = async (updatedData) => {
+      // // Implement the data update logic here (e.g., using fetch or Axios)
+      // Make a PUT request to your backend API to update the data
+  const RAWIN_NO = selectedRowKeys[0];
+  const response = await fetch(`http://localhost:3000/updateform/${RAWIN_NO}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedData),
+      });
+      if (response.ok) {
+        fetchData(); // Fetch updated data after successful update
+        message.success('Data Berhasil di update')
+
+      }
+      handleCloseModal();
+    };
   const updateData = () => {
     if (selectedRowKeys.length !== 0){
       getData();
-      openModalUpdate();
+      handleOpenModal();
     } else {
       message.info('Please choose the row')
     }
@@ -357,13 +374,13 @@ const TableMaterial = () => {
   const closeModalInsert = () => {
     setInsertVisible(false);
   }
-  const openModalUpdate = () => {
+  const handleOpenModal = () => {
     setUpdateVisible(true);
   };
 
-  const closeModalUpdate = () => {
+  const handleCloseModal = () => {
     setUpdateVisible(false);
-  }
+  };
   const exportToCSV = () => {
     const csvExporter = new ExportToCsv({
       fieldSeparator: ',',
@@ -521,7 +538,15 @@ const TableMaterial = () => {
       onChange={handleDateChange} />
     <Button style={{ backgroundColor: "#efefef", color: "#1f2431", borderRadius: "5px",   display: "inline-flex",
   alignItems: "center", gap: "5px"}} icon={<IoIosCopy size={17} />}>Impor Excell</Button>
-<ModalUpdateComponent visible={updateVisible} closeModal={closeModalUpdate}  initialData={dataUpdate}/>
+{/* <ModalUpdateComponent visible={updateVisible} closeModal={closeModalUpdate}  initialData={dataUpdate}/> */}
+<Modal         title="Update Form"
+        visible={updateVisible}
+        onCancel={handleCloseModal}
+        footer={null}
+        width={1200}
+        >
+<ModalUpdateComponent initialData={dataUpdate} onUpdate={handleDataUpdate} onClose={handleCloseModal} />
+</Modal>
   <ModalComponent visible={insertVisible} closeModal={closeModalInsert}/>
       </div>
       {filteredData.length > 0 ? (
