@@ -15,7 +15,8 @@ import {
   TreeSelect,
   Upload,
   Modal,
-  message 
+  message,
+  Table
 } from 'antd';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -34,7 +35,7 @@ const onChange = (value) => {
     console.log('changed', value);
   };
   const testvalue = 'IN/IKB/21/03/0001'
-const ModalUpdateComponent = ({ initialData, onUpdate, onClose }) => {
+const ModalUpdateComponent = ({detailmutasi, initialData, onUpdate, onClose }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [month, setMonth] = useState(new Date().getMonth() + 1); // Add 1 because getMonth() returns zero-based index
@@ -201,7 +202,141 @@ useEffect(() => {
     }
   };
   console.log("initialData",initialData)
+  
+  const columns = [
+    {
+      title: 'No Refrensi',
+      dataIndex: 'RAWIN_NO',
+      key: 'RAWIN_NO',
+    },
+    {
+      title: 'Kode Barang',
+      dataIndex: 'Kd_Brg',
+      key: 'Kd_Brg',
+    },
+    {
+      title: 'Nama Barang',
+      dataIndex: 'Nm_Brg',
+      key: 'Nm_Brg',
+    },
+    {
+      title: 'Description',
+      dataIndex: '',
+      key: '',
+    },
+    {
+      title: 'Terima',
+      dataIndex: '',
+      key: '',
+    },
+    {
+      title: 'Qty',
+      dataIndex: 'Item_Qty',
+      key: 'Item_Qty',
+    },
+    {
+      title: 'Qty Masuk',
+      dataIndex: 'IN_Qty',
+      key: 'IN_Qty',
+    },
+    {
+      title: 'Qty Adjust',
+      dataIndex: 'Unit_Code_Origin',
+      key: 'Unit_Code_Origin',
+    },
+    {
+      title: 'Satuan',
+      dataIndex: 'Unit_Code',
+      key: 'Unit_Code',
+    },
+    {
+      title: 'Packing Code',
+      dataIndex: 'Packing_Code',
+      key: 'Packing_Code',
+    },
+    {
+      title: 'Packing Qty',
+      dataIndex: 'Packing_Qty',
+      key: 'Packing_Qty',
+    },
+    {
+      title: 'Harga Beli',
+      dataIndex: 'Harga_Beli',
+      key: 'Harga_Beli',
+    },
+    {
+      title: 'Kurs',
+      dataIndex: '',
+      key: '',
+    },
+    {
+      title: 'Disc %',
+      dataIndex: 'Disc_Brg_Percent',
+      key: 'Disc_Brg_Percent',
+    },
+    {
+      title: 'Jumlah Disc',
+      dataIndex: 'Disc_Brg_Amount',
+      key: 'Disc_Brg_Amount',
+    },
+    {
+      title: 'Total',
+      dataIndex: 'Sub_Total',
+      key: 'Sub_Total',
+    },
+    {
+      title: 'No. Aju',
+      dataIndex: 'NO_AJU',
+      key: 'NO_AJU',
+    },
+    {
+      title: 'Jenis Dok. BC',
+      dataIndex: 'DOC_Type',
+      key: 'DOC_Type',
+    },
+    {
+      title: 'Dok_Year',
+      dataIndex: 'DOC_Year',
+      key: 'DOC_Year',
+    },
+    {
+      title: 'Nomor Dok. BC',
+      dataIndex: 'DOC_No',
+      key: 'DOC_No',
+    },
+    {
+      title: 'Nomor Po',
+      dataIndex: 'PO_NO_Manual',
+      key: 'PO_NO_Manual',
+    },
+    {
+      title: 'Net Weight',
+      dataIndex: 'net_Weight',
+      key: 'net_Weight',
+    },
+    {
+      title: 'No Invoice',
+      dataIndex: 'INV_NO',
+      key: 'INV_NO',
+    },
+    {
+      title: 'No. FP',
+      dataIndex: 'NO_FP',
+      key: 'NO_FP',
+    },
+    {
+      title: 'Tgl. FP',
+      dataIndex: 'DT_FP',
+      key: 'DT_FP',
+    },
+    {
+      title: 'Ditagihkan',
+      dataIndex: '',
+      key: '',
+    },
+  ];
     return (
+      <div>
                <Form
           // labelCol={{
           //   span: 4,
@@ -416,7 +551,10 @@ useEffect(() => {
           </Form.Item>
           {/* {formData && <pre>{JSON.stringify(formData, null, 2)}</pre>} */}
           </Row>
+          
         </Form>
+        <Table columns={columns} dataSource={detailmutasi}  scroll={{ x: 400 }}/>;
+        </div>
     );
   };
   

@@ -1,52 +1,50 @@
 import React, { useState } from 'react';
+import { Form, Input, Button, message } from 'antd';
+import axios from 'axios';
 
-function SerialNumberGenerator() {
-  const [formatString, setFormatString] = useState('');
-  const [dateParam, setDateParam] = useState('');
-  const [generatedSerialNumber, setGeneratedSerialNumber] = useState('');
+const YourFormComponent = () => {
+  const [form] = Form.useForm();
+  const [generatedRAWIN_NO, setGeneratedRAWIN_NO] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleGenerateSerialNumber = async () => {
+  const onFinish = async (values) => {
+    setLoading(true);
     try {
-      const response = await fetch(`http://localhost:3000/getSerialNumber?formatString=${formatString}&dateParam=${dateParam}`);
-      const data = await response.json();
-      if (data.length > 0) {
-        setGeneratedSerialNumber(data[0].RAWIN_NO);
-      } else {
-        setGeneratedSerialNumber('No matching serial number found.');
+
+      const response = await axios.post('http://localhost:3000/submitform', {
+        ...values,
+        RAWIN_NO: generatedRAWIN_NO 
+      });
+      if (response.status === 200) {
+        message.success('Data inserted successfully!');
+        form.resetFields();
       }
     } catch (error) {
-      console.error('Error fetching data:', error);
-      setGeneratedSerialNumber('Error fetching data from server.');
+      console.error('Error submitting form:', error);
+      message.error('Failed to insert data into the database.');
     }
+    setLoading(false);
   };
 
   return (
-    <div>
-      <label>
-        Format String:
-        <input
-          type="text"
-          value={formatString}
-          onChange={(e) => setFormatString(e.target.value)}
-        />
-      </label>
-      <br />
-      <label>
-        Date Parameter:
-        <input
-          type="date"
-          value={dateParam}
-          onChange={(e) => setDateParam(e.target.value)}
-        />
-      </label>
-      <br />
-      <button onClick={handleGenerateSerialNumber}>Generate Serial Number</button>
-      <br />
-      <div>
-        Generated Serial Number: {generatedSerialNumber}
-      </div>
-    </div>
+    <Form form={form} onFinish={onFinish}>
+      <Form.Item name="RAWIN_NO" label="RAWIN NO">
+        <Input value={generatedRAWIN_NO} readOnly />
+      </Form.Item>
+      <Form.Item name="RAWIN_Date" label="RAWIN Date">
+        <Input />
+      </Form.Item>
+      {/* Add more form fields as needed */}
+      {/* <Form.Item name="PO_NO" label="PO NO">
+        <Input />
+      </Form.Item> */}
+      <Form.Item>
+        <Button type="primary" htmlType="submit">
+          Submit
+        </Button>
+      </Form.Item>
+    </Form>
   );
-}
+};
 
-export default SerialNumberGenerator;
+export default YourFormComponent;

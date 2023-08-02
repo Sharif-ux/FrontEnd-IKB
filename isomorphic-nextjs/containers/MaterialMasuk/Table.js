@@ -38,6 +38,7 @@ const TableMaterial = () => {
   const [updateVisible, setUpdateVisible] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [dataUpdate, setDataUpdate] = useState([]);
+  const [getDetail, setGetDetail] = useState([]);
   const handleRowClick = (record) => {
     const selectedRecord = data.find((item) => item.RAWIN_NO === record.RAWIN_NO);
     if (selectedRecord) {
@@ -164,6 +165,24 @@ const TableMaterial = () => {
           console.error(error);
         });
     };
+    const getDetailLaporanMutasi = () => {
+      const rawinNo =  selectedRowKeys[0];
+      const apiUrl = 'http://192.168.1.21:3000/detaillaporanmutasi'; 
+      axios
+      .get(apiUrl, {
+        params: {
+          rawinNo,
+        },
+      })
+      .then((response) => {
+        setGetDetail(response.data);
+        console.log("getDetail",response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+    }
+    console.log("getDetail2",getDetail)
     const handleDataUpdate = async (updatedData) => {
       // // Implement the data update logic here (e.g., using fetch or Axios)
       // Make a PUT request to your backend API to update the data
@@ -185,6 +204,7 @@ const TableMaterial = () => {
   const updateData = () => {
     if (selectedRowKeys.length !== 0){
       getData();
+      getDetailLaporanMutasi();
       handleOpenModal();
     } else {
       message.info('Please choose the row')
@@ -545,7 +565,7 @@ const TableMaterial = () => {
         footer={null}
         width={1200}
         >
-<ModalUpdateComponent initialData={dataUpdate} onUpdate={handleDataUpdate} onClose={handleCloseModal} />
+<ModalUpdateComponent detailmutasi={getDetail} initialData={selectedRow} onUpdate={handleDataUpdate} onClose={handleCloseModal} />
 </Modal>
   <ModalComponent visible={insertVisible} closeModal={closeModalInsert}/>
       </div>

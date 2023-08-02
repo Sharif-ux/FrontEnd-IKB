@@ -48,7 +48,7 @@ const FormDisabledDemo = () => {
   const [negara, setNegara] = useState([]);
   const [gudang, setGudang] = useState([]);
   const [doctype, setDoctype] = useState([]);
-
+  const [generatedRAWIN_NO, setGeneratedRAWIN_NO] = useState('');
 
   function generateRawinNo() {
     const formattedMonth = month < 10 ? `0${month}` : month;
@@ -134,21 +134,71 @@ const FormDisabledDemo = () => {
               console.error('Error fetching data:', error);
             });
         }, []);
+  // const onFinish = async (values) => {
+  //   setLoading(true);
+  //   try {
+  //     const response = await axios.post('http://localhost:3000/submitform', values);
+  //     if (response.status === 200) {
+
+  //       message.success('Data inserted successfully!');
+  //       form.resetFields();
+  //     }
+  //   } catch (error) {
+  //     console.error('Error submitting form:', error);
+  //     message.error('Failed to insert data into the database.');
+  //   }
+  //   setLoading(false);
+  // };
+  // useEffect(() => {
+  //   // Fetch data from your Express.js server
+  //   fetch('http://localhost:3000/submitform')
+  //     .then((response) => response.json())
+  //     .then((data) => {
+  //       // Once you have the data, set the state with the generatedRAWIN_NO
+  //       setGeneratedRAWIN_NO(data.generatedRAWIN_NO);
+  //     })
+  //     .catch((error) => {
+  //       console.error('Error fetching data:', error);
+  //     });
+  // }, []);
+
+  // const onFinish = async (values) => {
+  //   setLoading(true);
+  //   try {
+  //     // Submit the form without the generatedRAWIN_NO
+  //     const response = await axios.post('http://localhost:3000/submitform', values);
+  //     if (response.status === 200) {
+  //       message.success('Data inserted successfully!');
+  //       form.resetFields();
+  //     }
+  //   } catch (error) {
+  //     console.error('Error submitting form:', error);
+  //     message.error('Failed to insert data into the database.');
+  //   }
+  //   setLoading(false);
+  // };
+  useEffect(() => {
+    // Fetch data from your Express.js server
+    fetch('http://localhost:3000/submitform')
+      .then((response) => response.json())
+      .then((data) => {
+        // Once you have the data, set the state with the generatedRAWIN_NO
+        setGeneratedRAWIN_NO(data.generatedRAWIN_NO);
+      })
+      .catch((error) => {
+        console.error('Error fetching data:', error);
+      });
+  }, []); // Empty dependency array to run only once on component mount
+console.log(generatedRAWIN_NO)
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:3000/submitform', values);
+      // Submit the form with the generatedRAWIN_NO
+      const response = await axios.post('http://localhost:3000/submitform', {
+        ...values,
+        RAWIN_NO: generatedRAWIN_NO // Include the generatedRAWIN_NO in the form submission
+      });
       if (response.status === 200) {
-        if (month !== new Date().getMonth() + 1 || year !== new Date().getFullYear()) {
-          setMonth(new Date().getMonth() + 1);
-          setYear(new Date().getFullYear());
-          setCounter(1);
-        } else {
-          setCounter((prevCounter) => prevCounter + 1);
-        }
-
-        updateRawinNo();
-
         message.success('Data inserted successfully!');
         form.resetFields();
       }
@@ -195,7 +245,7 @@ const FormDisabledDemo = () => {
           </Col>
           <Col span={8}>
           <Form.Item name="RAWIN_NO" label="No Refrensi">
-          <Input value={testvalue}/>
+          <Input value={generatedRAWIN_NO} readOnly />
           </Form.Item>  
           </Col> 
           <Col span={8}>  
