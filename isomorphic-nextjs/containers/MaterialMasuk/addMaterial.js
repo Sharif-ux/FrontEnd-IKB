@@ -245,7 +245,7 @@ console.log(generatedRAWIN_NO)
           </Col>
           <Col span={8}>
           <Form.Item name="RAWIN_NO" label="No Refrensi">
-          <Input value={generatedRAWIN_NO} readOnly />
+          <Input value={generatedRAWIN_NO} disabled />
           </Form.Item>  
           </Col> 
           <Col span={8}>  
