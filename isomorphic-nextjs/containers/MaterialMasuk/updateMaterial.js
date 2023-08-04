@@ -21,7 +21,7 @@ import {
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import moment from 'moment'; // Make sure to import moment
-import DetailTable from './detailTable';
+import NewRowTable from './detailTable';
 const { RangePicker } = DatePicker;
 const { TextArea } = Input;
 const { Option } = Select;
@@ -204,6 +204,13 @@ useEffect(() => {
   console.log("initialData",initialData)
   
   const columns = [
+        {
+      title: 'id ',
+      dataIndex: 'id',
+      key: 'id',
+      editable: true,
+      render: (text, record, index) => index + 1, 
+    },
     {
       title: 'No Refrensi',
       dataIndex: 'RAWIN_NO',
@@ -554,7 +561,7 @@ useEffect(() => {
           
         </Form>
         {/* <Table columns={columns} dataSource={detailmutasi}  scroll={{ x: 400 }}/>; */}
-        <DetailTable/>
+        <NewRowTable detailmutasi={detailmutasi}/>
         </div>
     );
   };

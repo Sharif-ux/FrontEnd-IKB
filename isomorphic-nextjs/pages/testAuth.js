@@ -37,6 +37,12 @@ const NewRowTable = () => {
 
   const columns = [
     {
+      title: "id",
+      dataIndex: "id",
+      key: "id",
+      render: (text, record, index) => index + 1, 
+    },
+    {
       title: 'Name',
       dataIndex: 'name',
       key: 'name',
