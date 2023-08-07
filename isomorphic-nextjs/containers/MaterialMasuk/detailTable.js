@@ -1,16 +1,22 @@
 import React, { useState } from 'react';
-import { Table, Button, Input, InputNumber, Form, Popconfirm } from 'antd';
-
-const EditableCell = ({ editing, dataIndex, title, inputType, record, index, children, ...restProps }) => {
+import { Table, Input, InputNumber, Button, Form } from 'antd';
+import axios from 'axios';
+const EditableCell = ({
+  editing,
+  dataIndex,
+  title,
+  inputType,
+  record,
+  form,
+  ...restProps
+}) => {
   const inputNode = inputType === 'number' ? <InputNumber /> : <Input />;
   return (
     <td {...restProps}>
       {editing ? (
         <Form.Item
           name={dataIndex}
-          style={{
-            margin: 0,
-          }}
+          style={{ margin: 0 }}
           rules={[
             {
               required: true,
@@ -21,108 +27,105 @@ const EditableCell = ({ editing, dataIndex, title, inputType, record, index, chi
           {inputNode}
         </Form.Item>
       ) : (
-        children
+        restProps.children
       )}
     </td>
   );
 };
 
-const NewRowTable = ({ detailmutasi }) => {
+const EditableTable = ({ detailmutasi }) => {
   const [form] = Form.useForm();
-  const [data, setData] = useState(detailmutasi);
-  const [editingKey, setEditingKey] = useState('');
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [editingKeys, setEditingKeys] = useState([]);
+  const renderEditableCell = (record, dataIndex) => {
+    const isEditing = editingKeys.includes(record.id);
+    return isEditing ? (
+      <EditableCell
+        editing={true} // Always pass true when rendering the cell in edit mode
+        dataIndex={dataIndex}
+        title={columns.find((col) => col.dataIndex === dataIndex).title} // Get the column title
+        inputType={columns.find((col) => col.dataIndex === dataIndex).inputType || 'text'} // Get the input type
+        record={record}
+        form={form}
+      />
+    ) : (
+      record[dataIndex] // Display the default value from the record
+    );
+  };
+  
+  const isEditing = (record) => editingKeys.includes(record.id);
 
-  const isEditing = (record) => record.key === editingKey;
+  const edit = (record) => {
+    form.setFieldsValue({
+      ...record,
+    });
+    setEditingKeys([...editingKeys, record.id]);
+  };
+  
+  const cancel = (record) => {
+    setEditingKeys(editingKeys.filter((key) => key !== record.id));
+  };
+  
+  const save = async (record) => {
+    try {
+      const updatedData = await form.validateFields();
+  
+      // Send a PUT request to the API endpoint with the updated data
+      await axios.put(`http://localhost:3000/updatedetailmutasi/${record.RAWIN_NO}/${record.id}`, updatedData);
+  
+      const newEditingKeys = editingKeys.filter((key) => key !== record.id);
+      setEditingKeys(newEditingKeys);
+    } catch (errInfo) {
+      console.log('Save failed:', errInfo);
+    }
+  };
+  
+   const handleDelete = async (record) => {
+    try {
+      // Send a DELETE request to the API endpoint to delete the row
+      await axios.delete(`http://localhost:3000/deleterawdetail/${record.id}/${record.RAWIN_NO}`);
 
-  // const columns = [
-  //   {
-  //     title: 'No',
-  //     dataIndex: 'id',
-  //     key: 'id',
-  //     editable: false,
-  //     render: (text, record, index) => index + 1,
-  //   },
-  //   {
-  //     title: 'No Refrensi',
-  //     dataIndex: 'RAWIN_NO',
-  //     key: 'RAWIN_NO',
-  //     editable: true,
-  //   },
-  //   {
-  //     title: 'Kode Barang',
-  //     dataIndex: 'Kd_Brg',
-  //     key: 'Kd_Brg',
-  //     editable: true,
-  //   },
-  //   {
-  //     title: 'Nama Barang',
-  //     dataIndex: 'Nm_Brg',
-  //     key: 'Nm_Brg',
-  //     editable: true,
-  //   },
-  //   // Add other columns here...
-
-  //   // The last two columns should have unique dataIndex and key, even if they are empty
-  //   {
-  //     title: 'Ditagihkan',
-  //     dataIndex: 'Ditagihkan',
-  //     key: 'Ditagihkan',
-  //     editable: true,
-  //   },
-  //   {
-  //     title: 'Action',
-  //     key: 'action',
-  //     render: (_, record) => {
-  //       const editable = isEditing(record);
-  //       return editable ? (
-  //         <span>
-  //           <Button type="primary" onClick={() => save(record.key)} style={{ marginRight: 8 }}>
-  //             Save
-  //           </Button>
-  //           <Button onClick={cancel}>Cancel</Button>
-  //         </span>
-  //       ) : (
-  //         <span>
-  //           <Button type="primary" onClick={() => edit(record.key)} style={{ marginRight: 8 }}>
-  //             Edit
-  //           </Button>
-  //           <Popconfirm title="Sure to delete?" onConfirm={() => handleDelete(record.key)}>
-  //             <Button type="danger">Delete</Button>
-  //           </Popconfirm>
-  //         </span>
-  //       );
-  //     },
-  //   },
-  // ];
- 
+      // Update the state to reflect the deletion
+      // You might need to refresh the data from the server if needed
+      // For example: fetchUpdatedData();
+      detailmutasi()
+      const newEditingKeys = editingKeys.filter((key) => key !== record.id);
+      setEditingKeys(newEditingKeys);
+    } catch (error) {
+      console.log('Delete failed:', error);
+    }
+  };
   const columns = [
     {
   title: 'id ',
   dataIndex: 'id',
   key: 'id',
-  editable: true,
+  // editable: true,
   render: (text, record, index) => index + 1, 
 },
 {
   title: 'No Refrensi',
   dataIndex: 'RAWIN_NO',
   key: 'RAWIN_NO',
+  editable: true,
 },
 {
   title: 'Kode Barang',
   dataIndex: 'Kd_Brg',
   key: 'Kd_Brg',
+  render: (_, record) => renderEditableCell(record, 'Kd_Brg'),
+
 },
 {
   title: 'Nama Barang',
   dataIndex: 'Nm_Brg',
   key: 'Nm_Brg',
+  render: (_, record) => renderEditableCell(record, 'Nm_Brg'),
 },
 {
   title: 'Description',
   dataIndex: '',
   key: '',
+  
 },
 {
   title: 'Terima',
@@ -133,36 +136,44 @@ const NewRowTable = ({ detailmutasi }) => {
   title: 'Qty',
   dataIndex: 'Item_Qty',
   key: 'Item_Qty',
+  render: (_, record) => renderEditableCell(record, 'Item_Qty'),
 },
 {
   title: 'Qty Masuk',
   dataIndex: 'IN_Qty',
   key: 'IN_Qty',
+  render: (_, record) => renderEditableCell(record, 'IN_Qty'),
 },
 {
   title: 'Qty Adjust',
   dataIndex: 'Unit_Code_Origin',
   key: 'Unit_Code_Origin',
+  // editable: true,
 },
 {
   title: 'Satuan',
   dataIndex: 'Unit_Code',
   key: 'Unit_Code',
+  // editable: true,
 },
 {
   title: 'Packing Code',
   dataIndex: 'Packing_Code',
   key: 'Packing_Code',
+  // editable: true,
 },
 {
   title: 'Packing Qty',
   dataIndex: 'Packing_Qty',
   key: 'Packing_Qty',
+  // editable: true,
 },
 {
   title: 'Harga Beli',
   dataIndex: 'Harga_Beli',
   key: 'Harga_Beli',
+  render: (_, record) => renderEditableCell(record, 'Harga_Beli'),
+
 },
 {
   title: 'Kurs',
@@ -173,61 +184,80 @@ const NewRowTable = ({ detailmutasi }) => {
   title: 'Disc %',
   dataIndex: 'Disc_Brg_Percent',
   key: 'Disc_Brg_Percent',
+  render: (_, record) => renderEditableCell(record, 'Disc_Brg_Percent'),
 },
 {
   title: 'Jumlah Disc',
   dataIndex: 'Disc_Brg_Amount',
   key: 'Disc_Brg_Amount',
+  render: (_, record) => renderEditableCell(record, 'Disc_Brg_Amount'),
 },
 {
   title: 'Total',
   dataIndex: 'Sub_Total',
   key: 'Sub_Total',
+  render: (_, record) => renderEditableCell(record, 'Sub_Total'),
 },
 {
   title: 'No. Aju',
   dataIndex: 'NO_AJU',
   key: 'NO_AJU',
+  // editable: true,
 },
 {
   title: 'Jenis Dok. BC',
   dataIndex: 'DOC_Type',
   key: 'DOC_Type',
+  // editable: true,
 },
 {
   title: 'Dok_Year',
   dataIndex: 'DOC_Year',
   key: 'DOC_Year',
+  // editable: true,
+  render: (_, record) => renderEditableCell(record, 'DOC_Year'),
 },
 {
   title: 'Nomor Dok. BC',
   dataIndex: 'DOC_No',
   key: 'DOC_No',
+  // editable: true,
 },
 {
   title: 'Nomor Po',
   dataIndex: 'PO_NO_Manual',
   key: 'PO_NO_Manual',
+  // editable: true,
 },
 {
   title: 'Net Weight',
   dataIndex: 'net_Weight',
   key: 'net_Weight',
+  // editable: true,
+},
+{
+  title: 'Gudang Code',
+  dataIndex: 'Gudang_Code',
+  key: 'Gudang_Code',
+  render: (_, record) => renderEditableCell(record, 'Gudang_Code'),
 },
 {
   title: 'No Invoice',
   dataIndex: 'INV_NO',
   key: 'INV_NO',
+  // editable: true,
 },
 {
   title: 'No. FP',
   dataIndex: 'NO_FP',
   key: 'NO_FP',
+  // editable: true,
 },
 {
   title: 'Tgl. FP',
   dataIndex: 'DT_FP',
   key: 'DT_FP',
+  // editable: true,
 },
 {
   title: 'Ditagihkan',
@@ -235,127 +265,44 @@ const NewRowTable = ({ detailmutasi }) => {
   key: '',
 },
 {
+        title: 'Item Qty',
+        dataIndex: 'Item_Qty',
+        key: 'Item_Qty',
+        // render: (_, record) => renderEditableCell(record, 'Item_Qty'),
+      },
+    {
       title: 'Action',
-      key: 'action',
+      dataIndex: 'action',
       render: (_, record) => {
         const editable = isEditing(record);
         return editable ? (
           <span>
-            <Button type="primary" onClick={() => save(record.key)} style={{ marginRight: 8 }}>
+            <Button type="primary" onClick={() => save(record)}>
               Save
             </Button>
-            <Button onClick={cancel}>Cancel</Button>
+            <Button onClick={() => cancel(record)}>Cancel</Button>
           </span>
         ) : (
-          <span>
-            <Button type="primary" onClick={() => edit(record.key)} style={{ marginRight: 8 }}>
-              Edit
-            </Button>
-            <Popconfirm title="Sure to delete?" onConfirm={() => handleDelete(record.key)}>
-              <Button type="danger">Delete</Button>
-            </Popconfirm>
-          </span>
+          <div>
+          <Button onClick={() => edit(record)}>Edit</Button>
+          <Button type="danger" onClick={() => handleDelete(record)}>Delete</Button>
+          </div>
         );
       },
     },
-];
-  const edit = (key) => {
-    setEditingKey(key);
-  };
-
-  const cancel = () => {
-    setEditingKey('');
-  };
-
-  const save = async (key) => {
-    try {
-      const row = await form.validateFields();
-      const newData = [...data];
-      const index = newData.findIndex((item) => key === item.key);
-
-      if (index > -1) {
-        const item = newData[index];
-        newData.splice(index, 1, { ...item, ...row });
-        setData(newData);
-        setEditingKey('');
-      } else {
-        newData.push(row);
-        setData(newData);
-        setEditingKey('');
-      }
-    } catch (errInfo) {
-      console.log('Validate Failed:', errInfo);
-    }
-  };
-
-  const handleAddRow = () => {
-    const newRow = {
-      key: `new-${data.length}`,
-      RAWIN_NO: '',
-      Kd_Brg: '',
-      Nm_Brg: '',
-      // Initialize other column data as needed...
-      Ditagihkan: '',
-    };
-    setData([...data, newRow]);
-    edit(`new-${data.length}`);
-  };
-
-  const handleDelete = (key) => {
-    const newData = data.filter((item) => item.key !== key);
-    setData(newData);
-  };
-
-  const rowSelection = {
-    type: 'radio',
-    selectedRowKeys,
-    onChange: (selectedKeys) => setSelectedRowKeys(selectedKeys),
-  };
-
-  const mergedColumns = columns.map((col) => {
-    if (!col.editable) {
-      return col;
-    }
-
-    return {
-      ...col,
-      onCell: (record) => ({
-        record,
-        inputType: col.dataIndex === 'IN_Qty' ? 'number' : 'text', // Example: Change input type for 'IN_Qty' column
-        dataIndex: col.dataIndex,
-        title: col.title,
-        editing: isEditing(record),
-      }),
-    };
-  });
+  ];
 
   return (
-    <>
-      <Button onClick={handleAddRow} style={{ marginRight: 8 }}>
-        Add Row
-      </Button>
-      <Button type="primary" onClick={() => edit(`new-${data.length}`)}>
-        Edit
-      </Button>
-      <Form form={form} component={false}>
-        <Table
-          components={{
-            body: {
-              cell: EditableCell,
-            },
-          }}
-          dataSource={data}
-          columns={mergedColumns}
-          rowClassName="editable-row"
-          pagination={{
-            onChange: cancel,
-          }}
-          rowSelection={rowSelection}
-          scroll={{ x: 400 }}
-        />
-      </Form>
-    </>
+    <Form form={form} component={false}>
+      <Table
+        dataSource={detailmutasi}
+        columns={columns}
+        rowKey="id"
+        pagination={false}
+        scroll={{ x: 400 }}
+      />
+    </Form>
   );
 };
 
-export default NewRowTable;
+export default EditableTable;

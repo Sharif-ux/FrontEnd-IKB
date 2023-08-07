@@ -21,7 +21,7 @@ import {
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import moment from 'moment'; // Make sure to import moment
-import NewRowTable from './detailTable';
+import EditableTable from './detailTable';
 const { RangePicker } = DatePicker;
 const { TextArea } = Input;
 const { Option } = Select;
@@ -561,7 +561,7 @@ useEffect(() => {
           
         </Form>
         {/* <Table columns={columns} dataSource={detailmutasi}  scroll={{ x: 400 }}/>; */}
-        <NewRowTable detailmutasi={detailmutasi}/>
+        <EditableTable detailmutasi={detailmutasi}/>
         </div>
     );
   };

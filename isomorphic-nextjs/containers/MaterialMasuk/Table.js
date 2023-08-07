@@ -176,7 +176,7 @@ const TableMaterial = () => {
       })
       .then((response) => {
         setGetDetail(response.data);
-        console.log("getDetail",response.data);
+        console.log("getDetail111",response.data);
       })
       .catch((error) => {
         console.error(error);
@@ -392,6 +392,7 @@ const TableMaterial = () => {
   };
 
   const closeModalInsert = () => {
+    fetchData();
     setInsertVisible(false);
   }
   const handleOpenModal = () => {
@@ -563,7 +564,7 @@ const TableMaterial = () => {
         visible={updateVisible}
         onCancel={handleCloseModal}
         footer={null}
-        width={1200}
+        width={1400}
         >
 <ModalUpdateComponent detailmutasi={getDetail} initialData={selectedRow} onUpdate={handleDataUpdate} onClose={handleCloseModal} />
 </Modal>
