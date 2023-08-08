@@ -34,7 +34,6 @@ const normFile = (e) => {
 const onChange = (value) => {
     console.log('changed', value);
   };
-  const testvalue = 'IN/IKB/21/03/0001'
 const ModalUpdateComponent = ({detailmutasi, initialData, onUpdate, onClose }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -50,6 +49,7 @@ const ModalUpdateComponent = ({detailmutasi, initialData, onUpdate, onClose }) =
   const [gudang, setGudang] = useState([]);
   const [doctype, setDoctype] = useState([]);
   const [formData, setFormData] = useState(initialData);
+  const [visible, setVisible] = useState(true)
   function generateRawinNo() {
     const formattedMonth = month < 10 ? `0${month}` : month;
     const formattedYear = year.toString().substr(2); // Get last two digits of the year
@@ -161,7 +161,20 @@ useEffect(() => {
               console.error('Error fetching data:', error);
             });
         }, []);
-        
+        const addRow = (newRow) => {
+          // Update the detailmutasi data with the new row
+          const updatedDetailmutasi = [...detailmutasi, newRow];
+      
+          // Close the modal
+          setVisible(false);
+      
+          // Call a function to update the parent component's state with the new data
+          // For example, if detailmutasi is a state in the parent component
+          // updateDetailmutasi(updatedDetailmutasi);
+      
+          // Or if you're using Redux, dispatch an action to update the state
+          // dispatch(updateDetailmutasi(updatedDetailmutasi));
+        };
   // const onFinish = async (values) => {
   //     // Implement the logic to update data in the backend using the formData state
   
@@ -201,7 +214,7 @@ useEffect(() => {
       console.error('Form validation error:', error);
     }
   };
-  console.log("initialData",initialData)
+  console.log("initialDataisinya:",initialData)
   
   const columns = [
         {
@@ -561,7 +574,7 @@ useEffect(() => {
           
         </Form>
         {/* <Table columns={columns} dataSource={detailmutasi}  scroll={{ x: 400 }}/>; */}
-        <EditableTable detailmutasi={detailmutasi}/>
+        <EditableTable detailmutasi={detailmutasi}  addRow={addRow} rawino={initialData}/>
         </div>
     );
   };

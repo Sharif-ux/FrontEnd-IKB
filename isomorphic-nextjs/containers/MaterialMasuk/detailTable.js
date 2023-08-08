@@ -33,26 +33,112 @@ const EditableCell = ({
   );
 };
 
-const EditableTable = ({ detailmutasi }) => {
+const EditableTable = ({ detailmutasi, addRow, rawino  }) => {
   const [form] = Form.useForm();
   const [editingKeys, setEditingKeys] = useState([]);
+  const [newRow, setNewRow] = useState(null);
+  const [showAddRowForm, setShowAddRowForm] = useState(false);
+
+
+
+let rawinNo = rawino.RAWIN_NO
+  
+  // const handleAddRow = () => {
+  //   const newRow = {
+  //     id: '',
+  //     RAWIN_NO: '',
+  //     Kd_Brg: '',
+  //     Nm_Brg: '', // Add default value for Nama Barang
+  //     Item_Qty: '', // Add default value for Item Qty
+  //     IN_Qty: '',
+  //     Unit_Code_Origin: '',
+  //     Unit_Code: '',
+  //     Packing_Code: '',
+  //     Packing_Qty: '',
+  //     Harga_Beli: '',
+  //     Disc_Brg_Percent: '',
+  //     Disc_Brg_Amount: '',
+  //     Sub_Total: '',
+  //     NO_AJU: '',
+  //     DOC_Type: '',
+  //     DOC_Year: '',
+  //     DOC_No: '',
+  //     PO_NO_Manual: '',
+  //     net_Weight: '',
+  //     Gudang_Code: '',
+  //     INV_NO: '',
+  //     NO_FP: '',
+  //     DT_FP: '',
+  //       // ... initialize other properties with default values ...
+  //     };
+
+  //   addRow(newRow); // Call the addRow function from props
+  // };
+  const handleAddRowFormSubmit = async () => {
+    try {
+      const newRecordData = await form.validateFields();
+
+      // Send a POST request to the API endpoint to add a new row
+      await axios.post('http://localhost:3000/detailRawiIN', newRecordData);
+
+      // Refresh data from the server or update local state with the new data
+
+      setNewRow(null);
+      setShowAddRowForm(false);
+    } catch (error) {
+      console.log('Add row failed:', error);
+    }
+  };
+  const isEditing = (record) => editingKeys.includes(record.id);
+  const addNewRow = () => {
+    // Initialize the new row data
+    const tempId = -(detailmutasi.length + 1);
+    setNewRow({
+      id: tempId,
+      RAWIN_NO: rawinNo, // Set your default value for RAWIN_NO
+      Kd_Brg: '',
+      Nm_Brg: '', // Add default value for Nama Barang
+      Item_Qty: '', // Add default value for Item Qty
+      IN_Qty: '',
+      Unit_Code_Origin: '',
+      Unit_Code: '',
+      Packing_Code: '',
+      Packing_Qty: '',
+      Harga_Beli: '',
+      Disc_Brg_Percent: '',
+      STYLE_PO: '',
+      Disc_Brg_Amount: '',
+      Sub_Total: '',
+      NO_AJU: '',
+      DOC_Type: '',
+      DOC_Year: '',
+      DOC_No: '',
+      PO_NO_Manual: '',
+      net_Weight: '',
+      Gudang_Code: '', // Add default value for Gudang Code
+      INV_NO: '',
+      NO_FP: '',
+      DT_FP: '',
+    });
+    setShowAddRowForm(true);
+  };
+  
   const renderEditableCell = (record, dataIndex) => {
-    const isEditing = editingKeys.includes(record.id);
-    return isEditing ? (
+    const isEditingRow = isEditing(record) || newRow?.id === record.id;
+    return isEditingRow ? (
       <EditableCell
-        editing={true} // Always pass true when rendering the cell in edit mode
+        editing={isEditingRow}
         dataIndex={dataIndex}
-        title={columns.find((col) => col.dataIndex === dataIndex).title} // Get the column title
-        inputType={columns.find((col) => col.dataIndex === dataIndex).inputType || 'text'} // Get the input type
+        title={columns.find((col) => col.dataIndex === dataIndex).title}
+        inputType={columns.find((col) => col.dataIndex === dataIndex).inputType || 'text'}
         record={record}
         form={form}
       />
     ) : (
-      record[dataIndex] // Display the default value from the record
+      record[dataIndex]
     );
   };
-  
-  const isEditing = (record) => editingKeys.includes(record.id);
+
 
   const edit = (record) => {
     form.setFieldsValue({
@@ -100,13 +186,13 @@ const EditableTable = ({ detailmutasi }) => {
   dataIndex: 'id',
   key: 'id',
   // editable: true,
-  render: (text, record, index) => index + 1, 
+  render: (_, record) => renderEditableCell(record, 'id'),
 },
 {
   title: 'No Refrensi',
   dataIndex: 'RAWIN_NO',
   key: 'RAWIN_NO',
-  editable: true,
+  render: (_, record) => renderEditableCell(record, 'RAWIN_NO'),
 },
 {
   title: 'Kode Barang',
@@ -137,6 +223,12 @@ const EditableTable = ({ detailmutasi }) => {
   dataIndex: 'Item_Qty',
   key: 'Item_Qty',
   render: (_, record) => renderEditableCell(record, 'Item_Qty'),
+},
+{
+  title: 'Style',
+  dataIndex: 'STYLE_PO',
+  key: 'STYLE_PO',
+  // render: (_, record) => renderEditableCell(record, 'STYLE_PO'),
 },
 {
   title: 'Qty Masuk',
@@ -264,12 +356,6 @@ const EditableTable = ({ detailmutasi }) => {
   dataIndex: '',
   key: '',
 },
-{
-        title: 'Item Qty',
-        dataIndex: 'Item_Qty',
-        key: 'Item_Qty',
-        // render: (_, record) => renderEditableCell(record, 'Item_Qty'),
-      },
     {
       title: 'Action',
       dataIndex: 'action',
@@ -277,7 +363,7 @@ const EditableTable = ({ detailmutasi }) => {
         const editable = isEditing(record);
         return editable ? (
           <span>
-            <Button type="primary" onClick={() => save(record)}>
+            <Button type="primary" onClick={() => {save(record) }}>
               Save
             </Button>
             <Button onClick={() => cancel(record)}>Cancel</Button>
@@ -294,15 +380,26 @@ const EditableTable = ({ detailmutasi }) => {
 
   return (
     <Form form={form} component={false}>
+   <Button onClick={addNewRow}>Add Row</Button>
+      {showAddRowForm && (
+        <div>
+          {/* Render your form inputs for adding a new row */}
+          {/* Use form input components like Input, InputNumber, etc. */}
+          <Button onClick={handleAddRowFormSubmit}>Submit</Button>
+          <Button onClick={() => setShowAddRowForm(false)}>Cancel</Button>
+        </div>
+      )}
+    <Form form={form} component={false}>
       <Table
-        dataSource={detailmutasi}
+        dataSource={newRow ? [...detailmutasi, newRow] : detailmutasi}
         columns={columns}
         rowKey="id"
         pagination={false}
         scroll={{ x: 400 }}
       />
     </Form>
-  );
+    </Form>
+      );
 };
 
 export default EditableTable;

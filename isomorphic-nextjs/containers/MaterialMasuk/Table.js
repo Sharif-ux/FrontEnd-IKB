@@ -58,7 +58,7 @@ const TableMaterial = () => {
       handleRowClick(record);
     },
   };
-  console.log(rowSelection)
+  console.log("rowSelection",rowSelection)
   // const handleSearch = (selectedKeys, confirm, dataIndex) => {
   //   confirm();
   //   setSearchText(selectedKeys[0]);
@@ -182,7 +182,6 @@ const TableMaterial = () => {
         console.error(error);
       });
     }
-    console.log("getDetail2",getDetail)
     const handleDataUpdate = async (updatedData) => {
       // // Implement the data update logic here (e.g., using fetch or Axios)
       // Make a PUT request to your backend API to update the data
@@ -200,6 +199,20 @@ const TableMaterial = () => {
 
       }
       handleCloseModal();
+    };
+    const executeStoredProc = async () => {
+      const RAWIN_NO =  selectedRowKeys[0];
+      try {
+        const response = await axios.get('http://localhost:3000/updateIdForRAWIN', {
+          params: {
+            RAWIN_NO,
+          },
+        });
+        // setMessage(response.data.message);
+        console.log('response:', response.data);
+      } catch (error) {
+        console.error('Error:', error);
+      }
     };
   const updateData = () => {
     if (selectedRowKeys.length !== 0){
@@ -392,11 +405,12 @@ const TableMaterial = () => {
   };
 
   const closeModalInsert = () => {
-    fetchData();
     setInsertVisible(false);
+    fetchData();
   }
   const handleOpenModal = () => {
     setUpdateVisible(true);
+    executeStoredProc()
   };
 
   const handleCloseModal = () => {
