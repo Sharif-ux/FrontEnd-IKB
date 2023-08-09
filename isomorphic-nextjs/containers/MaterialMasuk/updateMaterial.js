@@ -22,6 +22,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import moment from 'moment'; // Make sure to import moment
 import EditableTable from './detailTable';
+import { initializeApp } from 'firebase';
 const { RangePicker } = DatePicker;
 const { TextArea } = Input;
 const { Option } = Select;
@@ -34,7 +35,7 @@ const normFile = (e) => {
 const onChange = (value) => {
     console.log('changed', value);
   };
-const ModalUpdateComponent = ({detailmutasi, initialData, onUpdate, onClose }) => {
+const ModalUpdateComponent = ({detailmutasi, initialData, onUpdate, onClose,onTableDataChange }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [month, setMonth] = useState(new Date().getMonth() + 1); // Add 1 because getMonth() returns zero-based index
@@ -49,6 +50,7 @@ const ModalUpdateComponent = ({detailmutasi, initialData, onUpdate, onClose }) =
   const [gudang, setGudang] = useState([]);
   const [doctype, setDoctype] = useState([]);
   const [formData, setFormData] = useState(initialData);
+  
   const [visible, setVisible] = useState(true)
   function generateRawinNo() {
     const formattedMonth = month < 10 ? `0${month}` : month;
@@ -69,6 +71,8 @@ const ModalUpdateComponent = ({detailmutasi, initialData, onUpdate, onClose }) =
   // };
 //styles endpoint
 //styles endpoint
+const Rawin = initialData.RAWIN_NO
+console.log("rawin",Rawin)
 useEffect(() => {
   axios.get('http://localhost:3000/stylesform')
     .then(response => {
@@ -574,7 +578,7 @@ useEffect(() => {
           
         </Form>
         {/* <Table columns={columns} dataSource={detailmutasi}  scroll={{ x: 400 }}/>; */}
-        <EditableTable detailmutasi={detailmutasi}  addRow={addRow} rawino={initialData}/>
+        <EditableTable detailmutasi={detailmutasi} RawIn={Rawin} fetchtable={onTableDataChange}  rawino={Rawin}/>
         </div>
     );
   };

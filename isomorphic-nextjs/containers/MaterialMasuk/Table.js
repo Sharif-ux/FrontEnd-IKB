@@ -166,22 +166,23 @@ const TableMaterial = () => {
         });
     };
     const getDetailLaporanMutasi = () => {
-      const rawinNo =  selectedRowKeys[0];
+      const rawinNo = selectedRowKeys[0];
       const apiUrl = 'http://192.168.1.21:3000/detaillaporanmutasi'; 
       axios
-      .get(apiUrl, {
-        params: {
-          rawinNo,
-        },
-      })
-      .then((response) => {
-        setGetDetail(response.data);
-        console.log("getDetail111",response.data);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-    }
+        .get(apiUrl, {
+          params: {
+            rawinNo,
+          },
+        })
+        .then((response) => {
+          setGetDetail(response.data);
+          console.log("getDetail111", response.data);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    };
+
     const handleDataUpdate = async (updatedData) => {
       // // Implement the data update logic here (e.g., using fetch or Axios)
       // Make a PUT request to your backend API to update the data
@@ -252,6 +253,10 @@ const TableMaterial = () => {
       ) : (
         text
       )
+      const handleTableDataChange = () => {
+        // Fetch updated data and set the getDetail state
+        getDetailLaporanMutasi();
+      };
   const columns = [
     {
       title: 'NO',
@@ -580,7 +585,7 @@ const TableMaterial = () => {
         footer={null}
         width={1400}
         >
-<ModalUpdateComponent detailmutasi={getDetail} initialData={selectedRow} onUpdate={handleDataUpdate} onClose={handleCloseModal} />
+<ModalUpdateComponent detailmutasi={getDetail}  onTableDataChange={handleTableDataChange} selectedRow={selectedRowKeys[0]} initialData={selectedRow} onUpdate={handleDataUpdate} onClose={handleCloseModal} />
 </Modal>
   <ModalComponent visible={insertVisible} closeModal={closeModalInsert}/>
       </div>
