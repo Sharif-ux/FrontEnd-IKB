@@ -585,7 +585,7 @@ const TableMaterial = () => {
         footer={null}
         width={1400}
         >
-<ModalUpdateComponent detailmutasi={getDetail}  onTableDataChange={handleTableDataChange} selectedRow={selectedRowKeys[0]} initialData={selectedRow} onUpdate={handleDataUpdate} onClose={handleCloseModal} />
+<ModalUpdateComponent detailmutasi={getDetail} updateid={executeStoredProc}  onTableDataChange={handleTableDataChange} selectedRow={selectedRowKeys[0]} initialData={selectedRow} onUpdate={handleDataUpdate} onClose={handleCloseModal} />
 </Modal>
   <ModalComponent visible={insertVisible} closeModal={closeModalInsert}/>
       </div>

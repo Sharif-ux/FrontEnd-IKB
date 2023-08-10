@@ -33,7 +33,7 @@ const EditableCell = ({
   );
 };
 
-const EditableTable = ({ detailmutasi, fetchtable, RawIn }) => {
+const EditableTable = ({ detailmutasi, fetchtable, RawIn, updateid }) => {
   const [form] = Form.useForm();
   const [editingKeys, setEditingKeys] = useState([]);
 
@@ -83,10 +83,10 @@ const EditableTable = ({ detailmutasi, fetchtable, RawIn }) => {
   
         // Call the callback function to refresh the table data
         console.log('Calling onTableDataChange...');
-        fetchtable()
-  
         const newEditingKeys = editingKeys.filter((key) => key !== record.id);
         setEditingKeys(newEditingKeys);
+        executeStoredProc()
+        fetchtable()
       } catch (error) {
         console.log('Delete failed:', error);
       }
@@ -112,21 +112,36 @@ const EditableTable = ({ detailmutasi, fetchtable, RawIn }) => {
     const generateRAWIN = detailmutasi.RAWIN_NO
     try {
       const newRowData = {
-        "id": generateId,
-        "RAWIN_NO": RawIn,
-        "DOC_Year": "2020",
-        "DOC_NO": "123123",
+      //   "id": generateId,
+      //   "RAWIN_NO": RawIn,
+      //   "DOC_Year": "2020",
+      //   "DOC_NO": "123123",
+      // //   "STYLE_PO" : "123123",
+      //   "DOC_Type" : "123123",
+      //   "Kd_Brg": "12323",
+      //   "Gudang_Code": "GD001",
+      //   "Item_Qty": 100,
+      //   "NO_AJU": "21121",
+      //   "IN_Qty": 90,
+      //   "Harga_Beli": 50.25,
+      //   "Disc_Brg_Percent": 10,
+      //   "Disc_Brg_Amount": 5.00,
+      //   "Sub_Total": 4500.00
+        id: generateId,
+        RAWIN_NO: RawIn,
+        DOC_Year: " ",
+        DOC_NO: " ",
       //   "STYLE_PO" : "123123",
-        "DOC_Type" : "123123",
-        "Kd_Brg": "12323",
-        "Gudang_Code": "GD001",
-        "Item_Qty": 100,
-        "NO_AJU": "21121",
-        "IN_Qty": 90,
-        "Harga_Beli": 50.25,
-        "Disc_Brg_Percent": 10,
-        "Disc_Brg_Amount": 5.00,
-        "Sub_Total": 4500.00
+        DOC_Type : " ",
+        Kd_Brg: ' ',
+        Gudang_Code: ' ',
+        Item_Qty: 0,
+        NO_AJU: " ",
+        IN_Qty: 0,
+        Harga_Beli: 0,
+        Disc_Brg_Percent: 0,
+        Disc_Brg_Amount: 0,
+        Sub_Total: 0
       }
   
       await axios.post('http://localhost:3000/detailRawiIN', newRowData);

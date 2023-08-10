@@ -261,7 +261,7 @@ console.log(generatedRAWIN_NO)
           </Row>
           <Row gutter={16}>
         <Col span={8}>       
-          <Form.Item name="STYLE" label="Style">
+          <Form.Item name="STYLE_PO" label="Style">
             <Select style={{ width: "100%",}}>
             {styles.map(style => (
         <Option key={style.Style} value={style.Style}>
