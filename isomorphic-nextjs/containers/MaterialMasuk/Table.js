@@ -210,7 +210,7 @@ const TableMaterial = () => {
           },
         });
         // setMessage(response.data.message);
-        console.log('response:', response.data);
+        console.log('berhasil:', response.data);
       } catch (error) {
         console.error('Error:', error);
       }
@@ -361,6 +361,7 @@ const TableMaterial = () => {
     //   ),
     // },
   ];
+  console.log(getDetail)
   useEffect(() => {
     fetchData();
   }, []);
@@ -418,8 +419,8 @@ const TableMaterial = () => {
     executeStoredProc()
   };
 
-  const handleCloseModal = () => {
-    setUpdateVisible(false);
+  const handleCloseModal = (disable) => {
+    setUpdateVisible(disable);
   };
   const exportToCSV = () => {
     const csvExporter = new ExportToCsv({
@@ -585,8 +586,16 @@ const TableMaterial = () => {
         footer={null}
         width={1400}
         >
-<ModalUpdateComponent detailmutasi={getDetail} updateid={executeStoredProc}  onTableDataChange={handleTableDataChange} selectedRow={selectedRowKeys[0]} initialData={selectedRow} onUpdate={handleDataUpdate} onClose={handleCloseModal} />
-</Modal>
+<ModalUpdateComponent
+  detailmutasi={getDetail}
+  updateid={executeStoredProc}
+  onTableDataChange={handleTableDataChange}
+  selectedRow={selectedRowKeys[0]}
+  initialData={selectedRow}
+  onUpdate={handleDataUpdate}
+  onClose={handleCloseModal}
+  disableclosemodal={handleCloseModal}
+/></Modal>
   <ModalComponent visible={insertVisible} closeModal={closeModalInsert}/>
       </div>
       {filteredData.length > 0 ? (

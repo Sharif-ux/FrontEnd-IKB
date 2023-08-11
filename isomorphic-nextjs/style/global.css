@@ -330,3 +330,7 @@ html[dir='rtl'] .dz-hidden-input {
 .ant-table-row-active {
   background-color: red !important; 
 }
+.editing-row {
+  background-color: blue;
+  color: white; /* Adjust text color for better visibility */
+}

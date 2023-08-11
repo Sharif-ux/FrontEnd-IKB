@@ -35,7 +35,7 @@ const normFile = (e) => {
 const onChange = (value) => {
     console.log('changed', value);
   };
-const ModalUpdateComponent = ({detailmutasi, initialData, onUpdate, onClose,onTableDataChange, updateid }) => {
+const ModalUpdateComponent = ({detailmutasi,disableclosemodal, initialData, onUpdate, onClose,onTableDataChange, updateid }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [month, setMonth] = useState(new Date().getMonth() + 1); // Add 1 because getMonth() returns zero-based index
@@ -198,6 +198,7 @@ useEffect(() => {
   //         message.error('Failed to update data.');
   //       });
   // };
+  console.log('berhasil disini juga',updateid)
   const initialValues = {
     ...initialData,
     RAWIN_Date: moment(initialData.RAWIN_Date), // Assuming RAWIN_Date is a date field
@@ -580,7 +581,16 @@ useEffect(() => {
           
         </Form>
         {/* <Table columns={columns} dataSource={detailmutasi}  scroll={{ x: 400 }}/>; */}
-        <EditableTable generateid={updateid} detailmutasi={detailmutasi} RawIn={Rawin} style={style} fetchtable={onTableDataChange}  rawino={Rawin}/>
+        <EditableTable
+  detailmutasi={detailmutasi}
+  fetchtable={onTableDataChange}
+  RawIn={Rawin}
+  style={style}
+  disabledtoclosemodal={disableclosemodal}
+  generateid={updateid}
+  rawino={Rawin}
+/>
+
         </div>
     );
   };

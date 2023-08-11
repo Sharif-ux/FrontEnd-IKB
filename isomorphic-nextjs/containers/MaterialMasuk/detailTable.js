@@ -33,7 +33,7 @@ const EditableCell = ({
   );
 };
 
-const EditableTable = ({ detailmutasi, fetchtable, RawIn, updateid }) => {
+const EditableTable = ({disabledtoclosemodal, detailmutasi, fetchtable, RawIn, updateid }) => {
   const [form] = Form.useForm();
   const [editingKeys, setEditingKeys] = useState([]);
 
@@ -48,7 +48,7 @@ const EditableTable = ({ detailmutasi, fetchtable, RawIn, updateid }) => {
   const cancel = (record) => {
     setEditingKeys(editingKeys.filter((key) => key !== record.id));
   };
-
+console.log('updateid',updateid)
   const save = async (record) => {
     try {
       const updatedData = await form.validateFields();
@@ -62,17 +62,18 @@ const EditableTable = ({ detailmutasi, fetchtable, RawIn, updateid }) => {
     }
   };
   const executeStoredProc = async (record) => {
-    const RAWIN_NO =  detailmutasi.RAWIN_NO
+    const RAWIN_NO =  RawIn
     try {
       const response = await axios.get('http://localhost:3000/updateIdForRAWIN', {
         params: {
           RAWIN_NO,
         },
       });
+      console.log("dalem sp upid",RAWIN_NO)
       // setMessage(response.data.message);
-      console.log('response:', response.data);
+      console.log('disini store proc nya:', response.data);
     } catch (error) {
-      console.error('Error:', error);
+      console.error('gabisa store proc:', error);
     }
   };
   
@@ -84,14 +85,14 @@ const EditableTable = ({ detailmutasi, fetchtable, RawIn, updateid }) => {
         // Call the callback function to refresh the table data
         console.log('Calling onTableDataChange...');
         const newEditingKeys = editingKeys.filter((key) => key !== record.id);
-        setEditingKeys(newEditingKeys);
         executeStoredProc()
+        setEditingKeys(newEditingKeys);
         fetchtable()
       } catch (error) {
         console.log('Delete failed:', error);
       }
     };
-  console.log(RawIn)
+  console.log("test",RawIn)
   const renderEditableCell = (record, dataIndex) => {
     const isEditingRow = isEditing(record) 
     return isEditingRow ? (
@@ -143,10 +144,19 @@ const EditableTable = ({ detailmutasi, fetchtable, RawIn, updateid }) => {
         Disc_Brg_Amount: 0,
         Sub_Total: 0
       }
-  
+
+      const updatedDetailMutasi = [...detailmutasi, newRowData];
+      // Add the new row's ID to the editingKeys
+      const newEditingKeys = [...editingKeys, generateId];
+
+      // Update the state to include the new row in edit mode
+      setEditingKeys(newEditingKeys);
+
+      // Make an HTTP POST request to add the new row to the backend
       await axios.post('http://localhost:3000/detailRawiIN', newRowData);
-  
-      // Fetch updated data after adding a new row
+  //exec sp to upd id 
+      executeStoredProc()
+     // Fetch updated data after adding a new row
       fetchtable();
     } catch (error) {
       console.error('Error adding new row:', error);
@@ -164,7 +174,7 @@ const EditableTable = ({ detailmutasi, fetchtable, RawIn, updateid }) => {
   title: 'No Refrensi',
   dataIndex: 'RAWIN_NO',
   key: 'RAWIN_NO',
-  render: (_, record) => renderEditableCell(record, 'RAWIN_NO'),
+  // render: (_, record) => renderEditableCell(record, 'RAWIN_NO'),
 },
 {
   title: 'Style',
@@ -344,7 +354,7 @@ const EditableTable = ({ detailmutasi, fetchtable, RawIn, updateid }) => {
         ) : (
           <div>
           <Button onClick={() => edit(record)}>Edit</Button>
-          <Button type="danger" onClick={() => {handleDelete(record); executeStoredProc(record)}}>Delete</Button>
+          <Button type="danger" onClick={() => handleDelete(record)}>Delete</Button>
           </div>
         );
       },
