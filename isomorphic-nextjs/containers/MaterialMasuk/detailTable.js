@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Table, Input, InputNumber, Button, Form } from 'antd';
+import { Table, Input, InputNumber, Button, Form, Checkbox  } from 'antd';
 import axios from 'axios';
 const EditableCell = ({
   editing,
@@ -33,12 +33,13 @@ const EditableCell = ({
   );
 };
 
-const EditableTable = ({disabledtoclosemodal, detailmutasi, fetchtable, RawIn, updateid }) => {
+const EditableTable = ({disabledtoclosemodal, detailmutasi, fetchtable, RawIn, updateid, setDetailmutasi }) => {
   const [form] = Form.useForm();
   const [editingKeys, setEditingKeys] = useState([]);
+  const [flagtagih, setFlagTagih] = useState(0); // Add this state
 
   const isEditing = (record) => editingKeys.includes(record.id);
-
+console.log('detailmutasi', detailmutasi)
   const edit = (record) => {
     form.setFieldsValue({
       ...record,
@@ -93,8 +94,32 @@ console.log('updateid',updateid)
       }
     };
   console.log("test",RawIn)
+  const handleCheckboxChange = (record) => {
+    const updatedDetailMutasi = detailmutasi.map((item) =>
+      item.id === record.id
+        ? {
+            ...item,
+            flagtagih: item.flagtagih === 1 ? 0 : 1, // Toggle between 0 and 1
+          }
+        : item
+    );
+  
+    setDetailmutasi(updatedDetailMutasi);
+  };
+  
   const renderEditableCell = (record, dataIndex) => {
-    const isEditingRow = isEditing(record) 
+    const isEditingRow = isEditing(record);
+  
+    if (dataIndex === 'flagtagih') {
+      return (
+        <Checkbox
+          checked={record.flagtagih === 1}
+          disabled={!isEditingRow}
+          onChange={() => handleCheckboxChange(record)}
+        />
+      );
+    }
+  
     return isEditingRow ? (
       <EditableCell
         editing={isEditingRow}
@@ -108,6 +133,7 @@ console.log('updateid',updateid)
       record[dataIndex]
     );
   };
+
   const handleAddRow = async () => {
     const generateId = detailmutasi.length + 1 
     const generateRAWIN = detailmutasi.RAWIN_NO
@@ -142,7 +168,8 @@ console.log('updateid',updateid)
         Harga_Beli: 0,
         Disc_Brg_Percent: 0,
         Disc_Brg_Amount: 0,
-        Sub_Total: 0
+        Sub_Total: 0,
+        flagtagih: flagtagih,
       }
 
       const updatedDetailMutasi = [...detailmutasi, newRowData];
@@ -170,6 +197,7 @@ console.log('updateid',updateid)
   // editable: true,
   render: (text, record, index) => index + 1,
 },
+
 {
   title: 'No Refrensi',
   dataIndex: 'RAWIN_NO',
@@ -336,8 +364,9 @@ console.log('updateid',updateid)
 },
 {
   title: 'Ditagihkan',
-  dataIndex: '',
-  key: '',
+  dataIndex: 'flagtagih',
+  key: 'flagtagih',
+  render: (_, record) => renderEditableCell(record, 'flagtagih'),
 },
     {
       title: 'Action',
@@ -364,7 +393,7 @@ console.log('updateid',updateid)
   return (
     <Form form={form} component={false}>
 <Button type="primary" onClick={() => {handleAddRow();  executeStoredProc();}}>
-        Add Row
+       Tambah Detail
       </Button>
       <Table
         dataSource={ detailmutasi}

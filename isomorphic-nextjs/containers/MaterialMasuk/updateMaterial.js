@@ -35,7 +35,7 @@ const normFile = (e) => {
 const onChange = (value) => {
     console.log('changed', value);
   };
-const ModalUpdateComponent = ({detailmutasi,disableclosemodal, initialData, onUpdate, onClose,onTableDataChange, updateid }) => {
+const ModalUpdateComponent = ({detailmutasi,disableclosemodal, initialData, onUpdate, onClose,onTableDataChange, updateid, setDetailMutasi }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [month, setMonth] = useState(new Date().getMonth() + 1); // Add 1 because getMonth() returns zero-based index
@@ -583,7 +583,9 @@ useEffect(() => {
         {/* <Table columns={columns} dataSource={detailmutasi}  scroll={{ x: 400 }}/>; */}
         <EditableTable
   detailmutasi={detailmutasi}
+  setDetailmutasi={setDetailMutasi}
   fetchtable={onTableDataChange}
+  setDeta
   RawIn={Rawin}
   style={style}
   disabledtoclosemodal={disableclosemodal}

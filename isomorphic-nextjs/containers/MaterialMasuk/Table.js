@@ -419,8 +419,8 @@ const TableMaterial = () => {
     executeStoredProc()
   };
 
-  const handleCloseModal = (disable) => {
-    setUpdateVisible(disable);
+  const handleCloseModal = () => {
+    setUpdateVisible(false);
   };
   const exportToCSV = () => {
     const csvExporter = new ExportToCsv({
@@ -588,6 +588,7 @@ const TableMaterial = () => {
         >
 <ModalUpdateComponent
   detailmutasi={getDetail}
+  setDetailMutasi={setGetDetail}
   updateid={executeStoredProc}
   onTableDataChange={handleTableDataChange}
   selectedRow={selectedRowKeys[0]}
