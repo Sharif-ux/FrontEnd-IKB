@@ -53,7 +53,7 @@ console.log('updateid',updateid)
   const save = async (record) => {
     try {
       const updatedData = await form.validateFields();
-
+ console.log('updatedData', updatedData); // Add this line
       await axios.put(`http://localhost:3000/updatedetailmutasi/${record.RAWIN_NO}/${record.id}`, updatedData);
       fetchtable()
       const newEditingKeys = editingKeys.filter((key) => key !== record.id);
@@ -105,6 +105,7 @@ console.log('updateid',updateid)
     );
   
     setDetailmutasi(updatedDetailMutasi);
+    console.log('updatedDetailMutasi', updatedDetailMutasi)
   };
   
   const renderEditableCell = (record, dataIndex) => {
@@ -113,7 +114,7 @@ console.log('updateid',updateid)
     if (dataIndex === 'flagtagih') {
       return (
         <Checkbox
-          checked={record.flagtagih === 1}
+          checked={record.flagtagih === 1 ? true : false}
           disabled={!isEditingRow}
           onChange={() => handleCheckboxChange(record)}
         />

@@ -558,7 +558,6 @@ const BahanBaku = () => {
       ),
       // ...getColumnSearchProps('pemasukan'),
       render: (text) => parseInt(text).toLocaleString(),
-
     },
     {
       title: 'Pengeluaran',
