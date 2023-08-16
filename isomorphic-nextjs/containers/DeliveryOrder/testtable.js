@@ -53,7 +53,7 @@ const TableForm = () => {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/penerimaanbarang');
+      const response = await axios.get('http://192.168.1.21:3000/penerimaanbarang');
       setData(response.data);
     } catch (error) {
       console.error('Error fetching data:', error);

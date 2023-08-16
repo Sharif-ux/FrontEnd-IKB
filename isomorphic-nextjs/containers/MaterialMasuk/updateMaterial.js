@@ -76,7 +76,7 @@ const style = initialData.STYLE_PO
 console.log('style', style)
 console.log("rawin",Rawin)
 useEffect(() => {
-  axios.get('http://localhost:3000/stylesform')
+  axios.get('http://192.168.1.21:3000/stylesform')
     .then(response => {
       setStyles(response.data);
     })
@@ -86,7 +86,7 @@ useEffect(() => {
 }, []);
 //curr desc endpoint
 useEffect(() => {
-  axios.get('http://localhost:3000/currdescform')
+  axios.get('http://192.168.1.21:3000/currdescform')
     .then(response => {
       setCurr(response.data);
     })
@@ -96,7 +96,7 @@ useEffect(() => {
 }, []);
 //pengirim endpoint
 useEffect(() => {
-  axios.get('http://localhost:3000/shipnameform')
+  axios.get('http://192.168.1.21:3000/shipnameform')
     .then(response => {
       setPengirim(response.data);
     })
@@ -106,7 +106,7 @@ useEffect(() => {
 }, []);
   //kontrak endpoint
 useEffect(() => {
-  axios.get('http://localhost:3000/kontrakform')
+  axios.get('http://192.168.1.21:3000/kontrakform')
     .then(response => {
       setKontrak(response.data);
     })
@@ -117,7 +117,7 @@ useEffect(() => {
 
   //negara endpoint
   useEffect(() => {
-    axios.get('http://localhost:3000/negaraform')
+    axios.get('http://192.168.1.21:3000/negaraform')
       .then(response => {
         setNegara(response.data);
       })
@@ -127,7 +127,7 @@ useEffect(() => {
   }, []);
   //gudang endpoint
   useEffect(() => {
-    axios.get('http://localhost:3000/gudangform')
+    axios.get('http://192.168.1.21:3000/gudangform')
       .then(response => {
         setGudang(response.data);
       })
@@ -138,7 +138,7 @@ useEffect(() => {
 
       //bc endpoint
       useEffect(() => {
-        axios.get('http://localhost:3000/bcform')
+        axios.get('http://192.168.1.21:3000/bcform')
           .then(response => {
             setDoctype(response.data);
           })
@@ -148,7 +148,7 @@ useEffect(() => {
       }, []);
     //gudang endpoint
     // useEffect(() => {
-    //   axios.get('http://localhost:3000/gudangform')
+    //   axios.get('http://192.168.1.21:3000/gudangform')
     //     .then(response => {
     //       setGudang(response.data);
     //     })
@@ -159,7 +159,7 @@ useEffect(() => {
 
         //bc endpoint
         useEffect(() => {
-          axios.get('http://localhost:3000/bcform')
+          axios.get('http://192.168.1.21:3000/bcform')
             .then(response => {
               setDoctype(response.data);
             })

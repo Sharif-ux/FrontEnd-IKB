@@ -421,7 +421,7 @@ const splitDataIntoChunks = (data, pageSize) => {
 };
 const generatePDF = async () => {
   try {
-        const response = await axios.get('http://localhost:3000/pengeluaranbarang');
+        const response = await axios.get('http://192.168.1.21:3000/pengeluaranbarang');
     const tableData = filteredData;
     const pageSize = 10; // Number of items per page
     const totalPages = Math.ceil(tableData.length / pageSize); // Calculate the total number of pages

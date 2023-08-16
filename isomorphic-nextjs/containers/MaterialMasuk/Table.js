@@ -137,7 +137,7 @@ const TableMaterial = () => {
     // },
     const handleDelete = async (RAWIN_NO) => {
       try {
-        const response = await axios.delete(`http://localhost:3000/deleteform/${RAWIN_NO}`);
+        const response = await axios.delete(`http://192.168.1.21:3000/deleteform/${RAWIN_NO}`);
         message.success(response.data.message);
         // After deletion, refetch the updated data
         fetchData();
@@ -187,7 +187,7 @@ const TableMaterial = () => {
       // // Implement the data update logic here (e.g., using fetch or Axios)
       // Make a PUT request to your backend API to update the data
   const RAWIN_NO = selectedRowKeys[0];
-  const response = await fetch(`http://localhost:3000/updateform/${RAWIN_NO}`, {
+  const response = await fetch(`http://192.168.1.21:3000/updateform/${RAWIN_NO}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -204,7 +204,7 @@ const TableMaterial = () => {
     const executeStoredProc = async () => {
       const RAWIN_NO =  selectedRowKeys[0];
       try {
-        const response = await axios.get('http://localhost:3000/updateIdForRAWIN', {
+        const response = await axios.get('http://192.168.1.21:3000/updateIdForRAWIN', {
           params: {
             RAWIN_NO,
           },
@@ -372,7 +372,7 @@ const TableMaterial = () => {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/rawin');
+      const response = await axios.get('http://192.168.1.21:3000/rawin');
       setData(response.data);
     } catch (error) {
       console.error('Error fetching data:', error);

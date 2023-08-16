@@ -64,7 +64,7 @@ const FormDisabledDemo = () => {
   };
 //styles endpoint
   useEffect(() => {
-    axios.get('http://localhost:3000/stylesform')
+    axios.get('http://192.168.1.21:3000/stylesform')
       .then(response => {
         setStyles(response.data);
       })
@@ -74,7 +74,7 @@ const FormDisabledDemo = () => {
   }, []);
 //curr desc endpoint
   useEffect(() => {
-    axios.get('http://localhost:3000/currdescform')
+    axios.get('http://192.168.1.21:3000/currdescform')
       .then(response => {
         setCurr(response.data);
       })
@@ -84,7 +84,7 @@ const FormDisabledDemo = () => {
   }, []);
   //pengirim endpoint
   useEffect(() => {
-    axios.get('http://localhost:3000/shipnameform')
+    axios.get('http://192.168.1.21:3000/shipnameform')
       .then(response => {
         setPengirim(response.data);
       })
@@ -94,7 +94,7 @@ const FormDisabledDemo = () => {
   }, []);
     //kontrak endpoint
   useEffect(() => {
-    axios.get('http://localhost:3000/kontrakform')
+    axios.get('http://192.168.1.21:3000/kontrakform')
       .then(response => {
         setKontrak(response.data);
       })
@@ -105,7 +105,7 @@ const FormDisabledDemo = () => {
 
     //negara endpoint
     useEffect(() => {
-      axios.get('http://localhost:3000/negaraform')
+      axios.get('http://192.168.1.21:3000/negaraform')
         .then(response => {
           setNegara(response.data);
         })
@@ -115,7 +115,7 @@ const FormDisabledDemo = () => {
     }, []);
     //gudang endpoint
     useEffect(() => {
-      axios.get('http://localhost:3000/gudangform')
+      axios.get('http://192.168.1.21:3000/gudangform')
         .then(response => {
           setGudang(response.data);
         })
@@ -126,7 +126,7 @@ const FormDisabledDemo = () => {
 
         //bc endpoint
         useEffect(() => {
-          axios.get('http://localhost:3000/bcform')
+          axios.get('http://192.168.1.21:3000/bcform')
             .then(response => {
               setDoctype(response.data);
             })
@@ -137,7 +137,7 @@ const FormDisabledDemo = () => {
   // const onFinish = async (values) => {
   //   setLoading(true);
   //   try {
-  //     const response = await axios.post('http://localhost:3000/submitform', values);
+  //     const response = await axios.post('http://192.168.1.21:3000/submitform', values);
   //     if (response.status === 200) {
 
   //       message.success('Data inserted successfully!');
@@ -151,7 +151,7 @@ const FormDisabledDemo = () => {
   // };
   // useEffect(() => {
   //   // Fetch data from your Express.js server
-  //   fetch('http://localhost:3000/submitform')
+  //   fetch('http://192.168.1.21:3000/submitform')
   //     .then((response) => response.json())
   //     .then((data) => {
   //       // Once you have the data, set the state with the generatedRAWIN_NO
@@ -166,7 +166,7 @@ const FormDisabledDemo = () => {
   //   setLoading(true);
   //   try {
   //     // Submit the form without the generatedRAWIN_NO
-  //     const response = await axios.post('http://localhost:3000/submitform', values);
+  //     const response = await axios.post('http://192.168.1.21:3000/submitform', values);
   //     if (response.status === 200) {
   //       message.success('Data inserted successfully!');
   //       form.resetFields();
@@ -179,7 +179,7 @@ const FormDisabledDemo = () => {
   // };
   useEffect(() => {
     // Fetch data from your Express.js server
-    fetch('http://localhost:3000/submitform')
+    fetch('http://192.168.1.21:3000/submitform')
       .then((response) => response.json())
       .then((data) => {
         // Once you have the data, set the state with the generatedRAWIN_NO
@@ -194,7 +194,7 @@ console.log(generatedRAWIN_NO)
     setLoading(true);
     try {
       // Submit the form with the generatedRAWIN_NO
-      const response = await axios.post('http://localhost:3000/submitform', {
+      const response = await axios.post('http://192.168.1.21:3000/submitform', {
         ...values,
         RAWIN_NO: generatedRAWIN_NO // Include the generatedRAWIN_NO in the form submission
       });

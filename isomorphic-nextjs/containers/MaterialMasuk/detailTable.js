@@ -54,7 +54,7 @@ console.log('updateid',updateid)
     try {
       const updatedData = await form.validateFields();
  console.log('updatedData', updatedData); // Add this line
-      await axios.put(`http://localhost:3000/updatedetailmutasi/${record.RAWIN_NO}/${record.id}`, updatedData);
+      await axios.put(`http://192.168.1.21:3000/updatedetailmutasi/${record.RAWIN_NO}/${record.id}`, updatedData);
       fetchtable()
       const newEditingKeys = editingKeys.filter((key) => key !== record.id);
       setEditingKeys(newEditingKeys);
@@ -65,7 +65,7 @@ console.log('updateid',updateid)
   const executeStoredProc = async (record) => {
     const RAWIN_NO =  RawIn
     try {
-      const response = await axios.get('http://localhost:3000/updateIdForRAWIN', {
+      const response = await axios.get('http://192.168.1.21:3000/updateIdForRAWIN', {
         params: {
           RAWIN_NO,
         },
@@ -81,7 +81,7 @@ console.log('updateid',updateid)
     const handleDelete = async (record) => {
       try {
         // Send a DELETE request to the API endpoint to delete the row
-        await axios.delete(`http://localhost:3000/deleterawdetail/${record.id}/${record.RAWIN_NO}`);
+        await axios.delete(`http://192.168.1.21:3000/deleterawdetail/${record.id}/${record.RAWIN_NO}`);
   
         // Call the callback function to refresh the table data
         console.log('Calling onTableDataChange...');
@@ -181,7 +181,7 @@ console.log('updateid',updateid)
       setEditingKeys(newEditingKeys);
 
       // Make an HTTP POST request to add the new row to the backend
-      await axios.post('http://localhost:3000/detailRawiIN', newRowData);
+      await axios.post('http://192.168.1.21:3000/detailRawiIN', newRowData);
   //exec sp to upd id 
       executeStoredProc()
      // Fetch updated data after adding a new row

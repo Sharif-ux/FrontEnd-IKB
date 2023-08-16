@@ -43,6 +43,7 @@ const BahanBaku = () => {
   const [dt_Akhir, setDt_Akhir] = useState(null);
   const [dataTrace, setDataTrace] = useState([])
   const [visible, setVisible] = useState(false);
+  const [clickedFilterDate, setClickedFilterDate] = useState(false)
   // const [filteredInfo, setFilteredInfo] = useState({});
   // const [sortedInfo, setSortedInfo] = useState({});
   // const [filterOption, setFilterOption] = useState(null);
@@ -463,14 +464,14 @@ const BahanBaku = () => {
       title: 'Kode Barang',
       dataIndex: 'Kd_Brg',
       key: 'Kd_Brg',
-
+      width: 200,
       ...getColumnSearchProps('Kd_Brg'),
     },
     {
       title: 'Nama Barang',
       dataIndex: 'Nm_Brg',
       key: 'Nm_Brg',
-
+      width: 200,
       ...getColumnSearchProps('Nm_Brg'),
     },
     {
@@ -1206,7 +1207,7 @@ const BahanBaku = () => {
     }
   }}
 />
-<Button type='primary' onClick={callStoredProc} style={{marginLeft: 16,  backgroundColor: "#1f2431", color: "#efefef", borderRadius: "5px"}}>Submit Tanggal</Button>
+<Button type='primary' onClick={() => {callStoredProc(); setClickedFilterDate(true);}} style={{marginLeft: 16,  backgroundColor: "#1f2431", color: "#efefef", borderRadius: "5px"}}>Submit Tanggal</Button>
 
         <Select
           defaultValue="Export Type"
@@ -1272,7 +1273,7 @@ const BahanBaku = () => {
         <Spin size="large" delay={5}/> 
         </div>// Display the loading indicator while loading is true
       ) : (
-      <Table id="table-ref" columns={columns} dataSource={data} scroll={{ x: 400 }} ref={tableRef}  rowKey="Kd_Brg"
+      <Table id="table-ref" columns={columns} dataSource={clickedFilterDate !== null ? data : ''} scroll={{ x: 200 }} ref={tableRef}  rowKey="Kd_Brg"
         rowSelection={rowSelection}    onRow={(record) => ({
           onClick: () => handleRowClick(record),
         })}
