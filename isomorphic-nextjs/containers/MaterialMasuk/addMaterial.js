@@ -49,6 +49,7 @@ const FormDisabledDemo = () => {
   const [gudang, setGudang] = useState([]);
   const [doctype, setDoctype] = useState([]);
   const [generatedRAWIN_NO, setGeneratedRAWIN_NO] = useState('');
+  const [generatedRAWIN, setGeneratedRAWIN] = useState('');
 
   function generateRawinNo() {
     const formattedMonth = month < 10 ? `0${month}` : month;
@@ -177,6 +178,48 @@ const FormDisabledDemo = () => {
   //   }
   //   setLoading(false);
   // };
+  const onRawinDateChange = async (date) => {
+    try {
+      // Format the selected date to 'MM/YY' format
+      const formatString = `IN/IKB/${date.format('MM/YY')}`;
+  
+      // Make an API call to your backend to fetch the generated RAWIN_NO
+      const response = await axios.get('http://localhost:3000/getSerialNumber', {
+        params: {
+          formatString: formatString,
+          dateParam: date.toISOString(), // Send the date in ISO format
+        },
+      });
+  
+      const serialNumbers = response.data;
+      console.log('serialNumbers',serialNumbers)
+      // Assuming the response contains an array of RAWIN_NO values for that date
+      if (serialNumbers.length > 0) {
+        const latestSerialNumber = serialNumbers[0].RAWIN_NO;
+  
+        // Extract the numeric part of the serial number
+        const numericPart = parseInt(latestSerialNumber.split('/').pop(), 10);
+  
+        // Increment the numeric part by 1
+        const incrementedNumericPart = numericPart + 1;
+  
+        // Format the incremented serial number
+        const incrementedSerialNumber = `IN/IKB/${date.format('MM/YY')}/${incrementedNumericPart.toString().padStart(4, '0')}`;
+        
+        setGeneratedRAWIN(incrementedSerialNumber);
+      } else if (serialNumbers.length == 0){
+  
+        // Format the incremented serial number
+        const incrementedSerialNumber = `IN/IKB/${date.format('MM/YY')}/0001`;
+        
+        setGeneratedRAWIN(incrementedSerialNumber);
+      }
+    } catch (error) {
+      console.error('Error fetching serial number:', error);
+      setGeneratedRAWIN('');
+    }
+  };
+  
   useEffect(() => {
     // Fetch data from your Express.js server
     fetch('http://192.168.1.21:3000/submitform')
@@ -184,12 +227,12 @@ const FormDisabledDemo = () => {
       .then((data) => {
         // Once you have the data, set the state with the generatedRAWIN_NO
         setGeneratedRAWIN_NO(data.generatedRAWIN_NO);
+        console.log('data.generatedRAWIN_NO',data.generatedRAWIN_NO)
       })
       .catch((error) => {
         console.error('Error fetching data:', error);
       });
   }, []); // Empty dependency array to run only once on component mount
-console.log(generatedRAWIN_NO)
   const onFinish = async (values) => {
     setLoading(true);
     try {
@@ -240,12 +283,12 @@ console.log(generatedRAWIN_NO)
         <Row gutter={16}>
         <Col span={8}>
             <Form.Item name="RAWIN_Date" label="RAWIN_Date">
-            <DatePicker style={{width: "100%"}}/>
+            <DatePicker onChange={onRawinDateChange} style={{width: "100%"}}/>
           </Form.Item>
           </Col>
           <Col span={8}>
-          <Form.Item name="RAWIN_NO" label="No Refrensi">
-          <Input value={generatedRAWIN_NO} disabled />
+          <Form.Item name="RAWIN_NO" label='No Refrensi'>
+          <Input style={{fontSize: "14px", fontWeight: "bold"}}   value={generatedRAWIN} placeholder={generatedRAWIN} disabled />
           </Form.Item>  
           </Col> 
           <Col span={8}>  
@@ -299,8 +342,8 @@ console.log(generatedRAWIN_NO)
           </Form.Item>
           <Row gutter={16}>
         <Col span={8}>
-          <Form.Item name="Kurs" label="Rate">
-          <InputNumber min={1} max={999999999999} onChange={onChange}  style={{width: "100%"}}/>
+        <Form.Item name="NO_REG" label="No Aju">
+            <Input />
           </Form.Item>
           </Col>
           <Col span={10}>
@@ -332,8 +375,8 @@ console.log(generatedRAWIN_NO)
           </Row>
           <Row gutter={16}>
         <Col span={7}>
-          <Form.Item name="NO_REG" label="No Aju">
-            <Input />
+        <Form.Item name="Kurs" label="Rate">
+          <InputNumber min={1} max={999999999999} onChange={onChange}  style={{width: "100%"}}/>
           </Form.Item>
           </Col>
           <Col span={7}>

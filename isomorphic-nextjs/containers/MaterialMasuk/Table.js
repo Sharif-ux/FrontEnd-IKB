@@ -269,7 +269,7 @@ const TableMaterial = () => {
       title: 'NO. REFF',
       dataIndex: 'RAWIN_NO',
       key: 'RAWIN_NO',
-      ...getColumnSearchProps('PO_NO'),
+      ...getColumnSearchProps('RAWIN_NO'),
 
     },
     {
@@ -285,6 +285,7 @@ const TableMaterial = () => {
       render: (text) => <span>{moment(text).format('YYYY-MM-DD')}</span>,
       ...getColumnDateProps('RAWIN_Date'),
     },
+   
     {
       title: 'Jenis Transaksi',
       dataIndex: 'RAWIN_Type',
@@ -309,12 +310,13 @@ const TableMaterial = () => {
       key: 'DOC_Type',
       ...getColumnSearchProps('DOC_Type'),
     },
+
     {
       title: 'Tanggal Dok.BC',
       dataIndex: 'DOC_Date',
       key: 'DOC_Date',
       render: (text) => <span>{moment(text).format('YYYY-MM-DD')}</span>,
-      ...getColumnDateProps('rawin_date'),
+      ...getColumnDateProps('DOC_Date'),
     },
     {
       title: 'No Dok.BC',
@@ -340,6 +342,7 @@ const TableMaterial = () => {
       key: 'BL_NO',
       ...getColumnSearchProps('BL_NO'),
     },
+ 
     // {
     //   title: 'Action',
     //   dataIndex: 'action',
@@ -422,38 +425,36 @@ const TableMaterial = () => {
   const handleCloseModal = () => {
     setUpdateVisible(false);
   };
-  const exportToCSV = () => {
-    const csvExporter = new ExportToCsv({
-      fieldSeparator: ',',
-      quoteStrings: '"',
-      decimalSeparator: '.',
-      showLabels: true,
-      showTitle: false,
-      useTextFile: false,
-      useBom: true,
-    });
-
-    const exportedData = filteredData.map((item) => ({
-      KONTRAK_NO: item.KONTRAK_NO,
-      Kd_Brg: item.Kd_Brg,
-      Item_Qty: item.Item_Qty,
-      'Tanggal Transaksi': moment(item.RAWIN_Date).format('YYYY-MM-DD'),
-    }));
-
-    csvExporter.generateCsv(exportedData);
-  };
 
   const exportToExcel = () => {
+    let counter = 1; // Initialize the counter for the "No" column
+  
     const exportedData = filteredData.map((item) => ({
-      KONTRAK_NO: item.KONTRAK_NO,
-      Kd_Brg: item.Kd_Brg,
-      Item_Qty: item.Item_Qty,
-      'Tanggal Transaksi': moment(item.RAWIN_Date).format('YYYY-MM-DD'),
+      "No": counter++, // Increment counter and use it as the "No" value
+      "No. Refrensi": item.RAWIN_NO,
+      "Tanggal": item.RAWIN_Date,
+      "Jenis Transaksi": item.RAWIN_Type,
+      "Pengirim": item.Pengirim,
+      "Keterangan": item.RAWIN_Desc,
+      "Jenis Dokumen": item.DOC_Type,
+      "Tanggal Dok.BC": item.DOC_Date,
+      "No Dok.BC": item.DOC_NO,
+      "Keterangan Gudang": item.Gudang_Desc,
+      "No. Invoice": item.INV_NO,
+      "No. BL": item.BL_NO,
+      // 'Tanggal Transaksi': moment(item.TanggalTransaksi).format('YYYY-MM-DD'),
     }));
   
     const worksheet = XLSX.utils.json_to_sheet(exportedData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Data');
+  
+    // Autofit column widths
+    const columnNames = Object.keys(exportedData[0]);
+    const columnWidths = columnNames.map((columnName) => ({
+      wch: columnName.length + 5, // Add some extra width for better readability
+    }));
+    worksheet['!cols'] = columnWidths;
   
     const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
   
@@ -461,73 +462,10 @@ const TableMaterial = () => {
     const downloadUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = downloadUrl;
-    link.download = 'data.xlsx';
+    link.download = `LaporanMutasiBarangJadi.xlsx`;
     link.click();
   };
-
-//   const exportToPDF = () => {
-//     const tableRef = React.useRef(null);
-//     const tableNode = tableRef.current;
   
-//     html2canvas(tableNode).then((canvas) => {
-//       const contentWidth = canvas.width;
-//       const contentHeight = canvas.height;
-//       const pageHeight = (contentWidth / 592.28) * 841.89;
-//       const leftHeight = contentHeight;
-//       let position = 0;
-  
-//       const imgWidth = 595.28;
-//       const imgHeight = (592.28 / contentWidth) * contentHeight;
-  
-//       const pdf = new jsPDF('p', 'pt', 'a4');
-//       const pageData = canvas.toDataURL('image/jpeg', 1.0);
-//       pdf.addImage(pageData, 'JPEG', 0, 0, imgWidth, imgHeight);
-  
-//       leftHeight -= pageHeight;
-//       while (leftHeight > 0) {
-//         position = leftHeight - contentHeight;
-  
-//         html2canvas(tableNode, {
-//           y: position,
-//         }).then((newCanvas) => {
-//           const newPageData = newCanvas.toDataURL('image/jpeg', 1.0);
-//           pdf.addPage();
-//           pdf.addImage(newPageData, 'JPEG', 0, 0, imgWidth, imgHeight);
-//           leftHeight -= pageHeight;
-  
-//           if (leftHeight > 0) {
-//             pdf.setPage(pdf.internal.getNumberOfPages() + 1); // Increment the page number using getPageCount() + 1
-//           }
-//         });
-//       }
-  
-//       pdf.save('data.pdf');
-//     });
-//   };
-// const exportToPDF = () => {
-//     const exportedData = filteredData.map((item) => ({
-//       Code: item.code,
-//       Description: item.description,
-//       Category: item.category,
-//       'Tanggal Transaksi': moment(item.RAWIN_Date).format('YYYY-MM-DD'),
-//     }));
-  
-//     const columns = [
-//       { header: 'Code', dataKey: 'Code' },
-//       { header: 'Description', dataKey: 'Description' },
-//       { header: 'Category', dataKey: 'Category' },
-//       { header: 'Tanggal Transaksi', dataKey: 'Tanggal Transaksi' },
-//     ];
-  
-//     const doc = new jsPDF();
-//     doc.autoTable({
-//       head: [columns.map((column) => column.header)],
-//       body: exportedData,
-//       columns: columns.map((column) => column.dataKey),
-//     });
-  
-//     doc.save('data.pdf');
-//   };
   
   return (
 
@@ -577,7 +515,7 @@ const TableMaterial = () => {
     <RangePicker format={dateFormat}
       renderExtraFooter={() => 'Custom footer'}
       onChange={handleDateChange} />
-    <Button style={{ backgroundColor: "#efefef", color: "#1f2431", borderRadius: "5px",   display: "inline-flex",
+    <Button onClick={exportToExcel} style={{ backgroundColor: "#efefef", color: "#1f2431", borderRadius: "5px",   display: "inline-flex",
   alignItems: "center", gap: "5px"}} icon={<IoIosCopy size={17} />}>Impor Excell</Button>
 {/* <ModalUpdateComponent visible={updateVisible} closeModal={closeModalUpdate}  initialData={dataUpdate}/> */}
 <Modal         title="Update Form"

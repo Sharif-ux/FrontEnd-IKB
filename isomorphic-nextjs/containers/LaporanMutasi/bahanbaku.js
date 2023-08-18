@@ -464,7 +464,10 @@ const BahanBaku = () => {
       title: 'Kode Barang',
       dataIndex: 'Kd_Brg',
       key: 'Kd_Brg',
-      width: 200,
+      render: (text) => {
+        
+        <h1 style={{ overflow: "hidden", whiteSpace: "nowrap"}}>{text}</h1>
+      },
       ...getColumnSearchProps('Kd_Brg'),
     },
     {
@@ -1273,7 +1276,7 @@ const BahanBaku = () => {
         <Spin size="large" delay={5}/> 
         </div>// Display the loading indicator while loading is true
       ) : (
-      <Table id="table-ref" columns={columns} dataSource={clickedFilterDate !== null ? data : ''} scroll={{ x: 200 }} ref={tableRef}  rowKey="Kd_Brg"
+      <Table id="table-ref" columns={columns} dataSource={clickedFilterDate !== null ? data : ''} scroll={{ x: 100  }} ref={tableRef}  rowKey="Kd_Brg"
         rowSelection={rowSelection}    onRow={(record) => ({
           onClick: () => handleRowClick(record),
         })}
