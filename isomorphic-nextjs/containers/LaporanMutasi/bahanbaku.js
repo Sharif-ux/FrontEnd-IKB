@@ -5,9 +5,11 @@ import { Input, Space, Spin  } from 'antd';
 import Highlighter from 'react-highlight-words';
 import moment from 'moment';
 import axios from 'axios';
-import Greater from "../../assets/images/greater.svg"
-import Less from "../../assets/images/less.svg"
-import Equal from "../../assets/images/equal.svg"
+import GreaterOrEqual from "../../assets/images/greaterorequal.png"
+import LessOrEqual from "../../assets/images/lessorequal.png"
+import Greater from "../../assets/images/greater.png"
+import Less from "../../assets/images/less.png"
+import Equal from "../../assets/images/equal.png"
 import { saveAs } from 'file-saver';
 import nextCookie from 'next-cookies';
 import cookie from 'js-cookie';
@@ -53,6 +55,7 @@ const BahanBaku = () => {
   const [filterVisible, setFilterVisible] = useState(false);
   const [filterValues, setFilterValues] = useState(null);
   const [disabledInput, setDisabledInput] = useState(true);
+  const [operator, setOperator] = useState('=');
   const searchInput = useRef(null);
   const tableRef = useRef(null);
   // const handleFilterClick = () => {
@@ -84,59 +87,131 @@ const BahanBaku = () => {
   //   setSortedInfo(sorter);
   // };
   
-  const getFilterDataInput = (dataIndex) => ({
+    // const getFilterDataInput = (dataIndex) => ({
+    //   filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+    //     <div style={{ padding: 8 }}>
+    //       <Select
+    //         style={{ width: 120, marginBottom: 8, display: 'block' }}
+    //         value={selectedKeys[0]}
+    //         onChange={(value) => setSelectedKeys(value ? [value] : [])}
+    //         onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+    //       >
+    //         <Option value="less"><img src={Less} width="10" height="10"/></Option>
+    //         <Option value="equal"><img src={Equal} width="10" height="10"/></Option>
+    //         <Option value="greater"><img src={Greater} width="10" height="10"/></Option>
+    //       </Select>
+    //       <Input
+    //         placeholder={`Search ${dataIndex}`}
+    //         value={selectedKeys[1]}
+    //         onChange={(e) => setSelectedKeys([selectedKeys[0], e.target.value ? e.target.value : undefined])}
+    //         onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+    //         style={{ width: 188, marginBottom: 8, display: 'block' }}
+    //       />
+    //       <Space>
+    //         <button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
+    //           Search
+    //         </button>
+    //         <button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>
+    //           Reset
+    //         </button>
+    //       </Space>
+    //     </div>
+    //   ),
+    //   filterIcon: (filtered) => <FilterOutlined style={{ color: filtered ? '#1890ff' : undefined }} />,
+    //   onFilter: (value, record) => {
+    //     const [operator, filterValue] = value;
+    //     const dataIndexValue = record[dataIndex];
+    //       if (operator === 'less') {
+    //         return dataIndexValue <= parseInt(filterValue);
+    //       }else if(operator === 'equal'){
+    //         return dataIndexValue === parseInt(filterValue)
+    //       }
+    //       else if (operator === 'greater') {
+    //         return dataIndexValue >= parseInt(filterValue);
+    //       }
+    //       console.log("Hasil dataIndexValue", dataIndexValue)
+    //       console.log("Hasil Value", value)
+    //     return false;
+    //   },
+    // });
+  const getColumnNumberProps = (dataIndex, title) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
       <div style={{ padding: 8 }}>
-        <Select
-          style={{ width: 120, marginBottom: 8, display: 'block' }}
-          value={selectedKeys[0]}
-          onChange={(value) => setSelectedKeys(value ? [value] : [])}
-          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
-        >
-          <Option value="less"><img src={Less} width="10" height="10"/></Option>
-          <Option value="equal"><img src={Equal} width="10" height="10"/></Option>
-          <Option value="greater"><img src={Greater} width="10" height="10"/></Option>
-        </Select>
         <Input
-          placeholder={`Search ${dataIndex}`}
-          value={selectedKeys[1]}
-          onChange={(e) => setSelectedKeys([selectedKeys[0], e.target.value ? e.target.value : undefined])}
+          ref={searchInput}
+          placeholder={`Search ${title}`}
+          value={selectedKeys[0]}
+          onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
           onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
           style={{ width: 188, marginBottom: 8, display: 'block' }}
         />
         <Space>
-          <button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
+          <Select
+            defaultValue={operator}
+            onChange={value => setOperator(value)}
+            style={{ width: 120 }}
+          >
+            <Option value="="><img src={Equal} width={10} height={10}/></Option>
+            <Option value="<"><img src={Less} width={10} height={10}/></Option>
+            <Option value="<="><img src={LessOrEqual} width={10} height={10}/></Option>
+            <Option value=">"><img src={Greater} width={10} height={10}/></Option>
+            <Option value=">="><img src={GreaterOrEqual} width={10} height={10}/></Option>
+          </Select>
+          <Button
+            type="primary"
+            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+            icon={<SearchOutlined />}
+            size="small"
+            style={{ width: 90 }}
+          >
             Search
-          </button>
-          <button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>
+          </Button>
+          <Button onClick={() => handleReset(clearFilters)} size="small" style={{ width: 90 }}>
             Reset
-          </button>
+          </Button>
         </Space>
       </div>
     ),
-    filterIcon: (filtered) => <FilterOutlined style={{ color: filtered ? '#1890ff' : undefined }} />,
+    filterIcon: filtered => <FilterOutlined style={{ color: filtered ? '#1890ff' : undefined }} />,
     onFilter: (value, record) => {
-      const [operator, filterValue] = value;
-      const dataIndexValue = record[dataIndex];
-        if (operator === 'less') {
-          return dataIndexValue <= parseInt(filterValue);
-        }else if(operator === 'equal'){
-          return dataIndexValue === parseInt(filterValue)
-        }
-         else if (operator === 'greater') {
-          return dataIndexValue >= parseInt(filterValue);
-        }
-        console.log("Hasil dataIndexValue", dataIndexValue)
-        console.log("Hasil Value", value)
-      return false;
-    },
-  });
+      const numericValue = parseFloat(value);
+      const numericAge = parseFloat(record[dataIndex]);
 
-  const getColumnSearchProps = (dataIndex) => ({
+      switch (operator) {
+        case '=':
+          return numericAge === numericValue;
+        case '<':
+          return numericAge < numericValue;
+        case '<=':
+          return numericAge <= numericValue;
+        case '>':
+          return numericAge > numericValue;
+        case '>=':
+          return numericAge >= numericValue;
+        default:
+          return true;
+      }
+    },
+    onFilterDropdownVisibleChange: visible => {
+      if (visible) {
+        setTimeout(() => searchInput.current.select());
+      }
+    },
+    render: text =>
+      searchedColumn === dataIndex ? (
+        <span>
+          {text.toString()}
+        </span>
+      ) : (
+        text
+      ),
+
+  });
+  const getColumnSearchProps = (dataIndex, title) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
       <div style={{ padding: 8 }}>
         <Input
-          placeholder={`Search ${dataIndex}`}
+          placeholder={`Search ${title}`}
           value={selectedKeys[0]}
           onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
           onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
@@ -464,142 +539,139 @@ const BahanBaku = () => {
       title: 'Kode Barang',
       dataIndex: 'Kd_Brg',
       key: 'Kd_Brg',
-      render: (text) => {
-        
-        <h1 style={{ overflow: "hidden", whiteSpace: "nowrap"}}>{text}</h1>
-      },
-      ...getColumnSearchProps('Kd_Brg'),
+      ...getColumnSearchProps('Kd_Brg', 'Kode Barang'),
     },
     {
       title: 'Nama Barang',
       dataIndex: 'Nm_Brg',
       key: 'Nm_Brg',
       width: 200,
-      ...getColumnSearchProps('Nm_Brg'),
+      ...getColumnSearchProps('Nm_Brg', 'Nama Barang'),
     },
     {
       title: 'Satuan',
       dataIndex: 'Unit_Desc',
       key: 'Unit_Desc',
-
-      ...getColumnSearchProps('Unit_Desc'),
+      ...getColumnSearchProps('Unit_Desc', 'Satuan'),
     },
     {
       title: 'Saldo Awal',
       dataIndex: 'Saldo_Awal',
       key: 'Saldo_Awal',     
       align: "right", 
-      filters: filters,
-      onFilter:(value, record) => handleFilter(value, record, 'Saldo_Awal'),
-      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, dataIndex, clearFilters }) => (
-        <div style={{ padding: 8 }}>
-          <Select
-            style={{ width: 60 }}
-            value={selectedKeys[0]}
-            onChange={(value) => setSelectedKeys([value])}
-            onBlur={confirm}
-          >
-            {filters.map((filter) => (
-              <Option key={filter.value} value={filter.value}>
-                {filter.text}
-              </Option>
-            ))}
-          </Select>
-          <CustomFilter
-            value={userInputNumber}
-            onChange={(value) => setUserInputNumber(value)}
-          />
-          <Space style={{margin: "10px"}}>
-          <Button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
-            Search
-          </Button>
-            <Button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>Reset</Button>
-          </Space>
-        </div>
-      ),
-      filterIcon: (filtered) => (
-        <FilterOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
-      ),
-      // ...getColumnSearchProps('Saldo_Awal')
-      render: (text) => parseInt(text).toLocaleString(),
-
+      // filters: filters,
+      // onFilter:(value, record) => handleFilter(value, record, 'Saldo_Awal'),
+      // filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, dataIndex, clearFilters }) => (
+      //   <div style={{ padding: 8 }}>
+      //     <Select
+      //       style={{ width: 60 }}
+      //       value={selectedKeys[0]}
+      //       onChange={(value) => setSelectedKeys([value])}
+      //       onBlur={confirm}
+      //     >
+      //       {filters.map((filter) => (
+      //         <Option key={filter.value} value={filter.value}>
+      //           {filter.text}
+      //         </Option>
+      //       ))}
+      //     </Select>
+      //     <CustomFilter
+      //       value={userInputNumber}
+      //       onChange={(value) => setUserInputNumber(value)}
+      //     />
+      //     <Space style={{margin: "10px"}}>
+      //     <Button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
+      //       Search
+      //     </Button>
+      //       <Button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>Reset</Button>
+      //     </Space>
+      //   </div>
+      // ),
+      // filterIcon: (filtered) => (
+      //   <FilterOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+      // ),
+      // // ...getColumnSearchProps('Saldo_Awal')
+      // render: (text) => parseInt(text).toLocaleString(),
+      ...getColumnNumberProps('Saldo_Awal', 'Saldo Awal')
     },
     {
       title: 'Pemasukan',
       dataIndex: 'pemasukan',
       key: 'pemasukan',
       align: "right", 
-      filters: filters,
-      onFilter:(value, record) => handleFilter(value, record, 'pemasukan'),
-      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, dataIndex, clearFilters }) => (
-        <div style={{ padding: 8 }}>
-          <Select
-            style={{ width: 60 }}
-            value={selectedKeys[0]}
-            onChange={(value) => setSelectedKeys([value])}
-            onBlur={confirm}
-          >
-            {filters.map((filter) => (
-              <Option key={filter.value} value={filter.value}>
-                {filter.text}
-              </Option>
-            ))}
-          </Select>
-          <CustomFilter
-            value={userInputNumber}
-            onChange={(value) => setUserInputNumber(value)}
-          />
-          <Space style={{margin: "10px"}}>
-          <Button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
-            Search
-          </Button>
-            <Button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>Reset</Button>
-          </Space>
-        </div>
-      ),
-      filterIcon: (filtered) => (
-        <FilterOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
-      ),
-      // ...getColumnSearchProps('pemasukan'),
-      render: (text) => parseInt(text).toLocaleString(),
+      // filters: filters,
+      // onFilter:(value, record) => handleFilter(value, record, 'pemasukan'),
+      // filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, dataIndex, clearFilters }) => (
+      //   <div style={{ padding: 8 }}>
+      //     <Select
+      //       style={{ width: 60 }}
+      //       value={selectedKeys[0]}
+      //       onChange={(value) => setSelectedKeys([value])}
+      //       onBlur={confirm}
+      //     >
+      //       {filters.map((filter) => (
+      //         <Option key={filter.value} value={filter.value}>
+      //           {filter.text}
+      //         </Option>
+      //       ))}
+      //     </Select>
+      //     <CustomFilter
+      //       value={userInputNumber}
+      //       onChange={(value) => setUserInputNumber(value)}
+      //     />
+      //     <Space style={{margin: "10px"}}>
+      //     <Button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
+      //       Search
+      //     </Button>
+      //       <Button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>Reset</Button>
+      //     </Space>
+      //   </div>
+      // ),
+      // filterIcon: (filtered) => (
+      //   <FilterOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+      // ),
+      // render: (text) => parseInt(text).toLocaleString(),
+      ...getColumnNumberProps('pemasukan', 'Pemasukan')
+
     },
     {
       title: 'Pengeluaran',
       dataIndex: 'pengeluaran',
       key: 'pengeluaran',
       align: "right", 
-      filters: filters,
-      onFilter:(value, record) => handleFilter(value, record, 'pengeluaran'),
-      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, dataIndex, clearFilters }) => (
-        <div style={{ padding: 8 }}>
-          <Select
-            style={{ width: 60 }}
-            value={selectedKeys[0]}
-            onChange={(value) => setSelectedKeys([value])}
-            onBlur={confirm}
-          >
-            {filters.map((filter) => (
-              <Option key={filter.value} value={filter.value}>
-                {filter.text}
-              </Option>
-            ))}
-          </Select>
-          <CustomFilter
-            value={userInputNumber}
-            onChange={(value) => setUserInputNumber(value)}
-          />
-          <Space style={{margin: "10px"}}>
-          <Button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
-            Search
-          </Button>
-            <Button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>Reset</Button>
-          </Space>
-        </div>
-      ),
-      filterIcon: (filtered) => (
-        <FilterOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
-      ),
-      render: (text) => parseInt(text).toLocaleString(),
+      ...getColumnNumberProps('pengeluaran', 'Pengeluaran')
+      // filters: filters,
+      // onFilter:(value, record) => handleFilter(value, record, 'pengeluaran'),
+      // filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, dataIndex, clearFilters }) => (
+      //   <div style={{ padding: 8 }}>
+      //     <Select
+      //       style={{ width: 60 }}
+      //       value={selectedKeys[0]}
+      //       onChange={(value) => setSelectedKeys([value])}
+      //       onBlur={confirm}
+      //     >
+      //       {filters.map((filter) => (
+      //         <Option key={filter.value} value={filter.value}>
+      //           {filter.text}
+      //         </Option>
+      //       ))}
+      //     </Select>
+      //     <CustomFilter
+      //       value={userInputNumber}
+      //       onChange={(value) => setUserInputNumber(value)}
+      //     />
+      //     <Space style={{margin: "10px"}}>
+      //     <Button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
+      //       Search
+      //     </Button>
+      //       <Button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>Reset</Button>
+      //     </Space>
+      //   </div>
+      // ),
+      // filterIcon: (filtered) => (
+      //   <FilterOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+      // ),
+      // render: (text) => parseInt(text).toLocaleString(),
 
     },
     //   onFilter: (value, record) => {
@@ -652,122 +724,93 @@ const BahanBaku = () => {
     //   ),
     //   onFilterDropdownVisibleChange: handleFilterVisibleChange,
     // },
+    
     {
       title: 'Penyesuaian',
       dataIndex: 'Adjust_Brg',
       key: 'Adjust_Brg',
       align: "right", 
-      filters: filters,
-      onFilter:(value, record) => handleFilter(value, record, 'Adjust_Brg'),
-      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, dataIndex, clearFilters }) => (
-        <div style={{ padding: 8 }}>
-          <Select
-            style={{ width: 60 }}
-            value={selectedKeys[0]}
-            onChange={(value) => setSelectedKeys([value])}
-            onBlur={confirm}
-          >
-            {filters.map((filter) => (
-              <Option key={filter.value} value={filter.value}>
-                {filter.text}
-              </Option>
-            ))}
-          </Select>
-          <CustomFilter
-            value={userInputNumber}
-            onChange={(value) => setUserInputNumber(value)}
-          />
-          <Space style={{margin: "10px"}}>
-          <Button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
-            Search
-          </Button>
-            <Button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>Reset</Button>
-          </Space>
-        </div>
-      ),
-      filterIcon: (filtered) => (
-        <FilterOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
-      ),
-      render: (text) => parseInt(text).toLocaleString(),
+      // filters: filters,
+      // onFilter:(value, record) => handleFilter(value, record, 'Adjust_Brg'),
+      // filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, dataIndex, clearFilters }) => (
+      //   <div style={{ padding: 8 }}>
+      //     <Select
+      //       style={{ width: 60 }}
+      //       value={selectedKeys[0]}
+      //       onChange={(value) => setSelectedKeys([value])}
+      //       onBlur={confirm}
+      //     >
+      //       {filters.map((filter) => (
+      //         <Option key={filter.value} value={filter.value}>
+      //           {filter.text}
+      //         </Option>
+      //       ))}
+      //     </Select>
+      //     <CustomFilter
+      //       value={userInputNumber}
+      //       onChange={(value) => setUserInputNumber(value)}
+      //     />
+      //     <Space style={{margin: "10px"}}>
+      //     <Button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
+      //       Search
+      //     </Button>
+      //       <Button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>Reset</Button>
+      //     </Space>
+      //   </div>
+      // ),
+      // filterIcon: (filtered) => (
+      //   <FilterOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+      // ),
+      // render: (text) => parseInt(text).toLocaleString(),
 
-      // ...getColumnSearchProps('Adjust_Brg'),
+      ...getColumnNumberProps('Adjust_Brg', 'Penyesuaian')
+
       },
     {
       title: 'Qty Fisik',
       dataIndex: 'Qty_Fisik',
       key: 'Qty_Fisik',
       align: "right", 
-      filters: filters,
-      onFilter:(value, record) => handleFilter(value, record, 'Qty_Fisik'),
-      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, dataIndex, clearFilters }) => (
-        <div style={{ padding: 8 }}>
-          <Select
-            style={{ width: 60 }}
-            value={selectedKeys[0]}
-            onChange={(value) => setSelectedKeys([value])}
-            onBlur={confirm}
-          >
-            {filters.map((filter) => (
-              <Option key={filter.value} value={filter.value}>
-                {filter.text}
-              </Option>
-            ))}
-          </Select>
-          <CustomFilter
-            value={userInputNumber}
-            onChange={(value) => setUserInputNumber(value)}
-          />
-          <Space style={{margin: "10px"}}>
-          <Button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
-            Search
-          </Button>
-            <Button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>Reset</Button>
-          </Space>
-        </div>
-      ),
-      filterIcon: (filtered) => (
-        <FilterOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
-      ),
-      // ...getColumnSearchProps('Qty_Fisik'),
-      render: (text) => parseInt(text).toLocaleString(),
-
+      // filters: filters,
+      // onFilter:(value, record) => handleFilter(value, record, 'Qty_Fisik'),
+      // filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, dataIndex, clearFilters }) => (
+      //   <div style={{ padding: 8 }}>
+      //     <Select
+      //       style={{ width: 60 }}
+      //       value={selectedKeys[0]}
+      //       onChange={(value) => setSelectedKeys([value])}
+      //       onBlur={confirm}
+      //     >
+      //       {filters.map((filter) => (
+      //         <Option key={filter.value} value={filter.value}>
+      //           {filter.text}
+      //         </Option>
+      //       ))}
+      //     </Select>
+      //     <CustomFilter
+      //       value={userInputNumber}
+      //       onChange={(value) => setUserInputNumber(value)}
+      //     />
+      //     <Space style={{margin: "10px"}}>
+      //     <Button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
+      //       Search
+      //     </Button>
+      //       <Button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>Reset</Button>
+      //     </Space>
+      //   </div>
+      // ),
+      // filterIcon: (filtered) => (
+      //   <FilterOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+      // ),
+      // render: (text) => parseInt(text).toLocaleString(),
+      ...getColumnNumberProps('Qty_Fisik', 'Qty Fisik')
     },
     {
       title: 'Saldo Akhir',
       dataIndex: 'Qty_System',
       key: 'Qty_System',
       align: "right", 
-      filters: filters,
-      onFilter:(value, record) => handleFilter(value, record, 'Qty_System'),
-      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, dataIndex, clearFilters }) => (
-        <div style={{ padding: 8 }}>
-          <Select
-            style={{ width: 60 }}
-            value={selectedKeys[0]}
-            onChange={(value) => setSelectedKeys([value])}
-            onBlur={confirm}
-          >
-            {filters.map((filter) => (
-              <Option key={filter.value} value={filter.value}>
-                {filter.text}
-              </Option>
-            ))}
-          </Select>
-          <CustomFilter
-            value={userInputNumber}
-            onChange={(value) => setUserInputNumber(value)}
-          />
-          <Space style={{margin: "10px"}}>
-          <Button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
-            Search
-          </Button>
-            <Button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>Reset</Button>
-          </Space>
-        </div>
-      ),
-      filterIcon: (filtered) => (
-        <FilterOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
-      ),
+
       // filters: [
       //   {
       //     text: 'Greater',
@@ -786,7 +829,7 @@ const BahanBaku = () => {
       // onFilter: (value, record) => {
       //   switch (value) {
       //     case 'greater':
-      //       return record.Qty_System > parseInt();
+      //       return record.Qty_System > 0;
       //     case 'less':
       //       return record.Qty_System < 0;
       //     case 'equal':
@@ -795,50 +838,46 @@ const BahanBaku = () => {
       //       return true; // Return true for all other cases
       //   }
       // }
-      // ...getFilterDataInput('Qty_System')
-      render: (text) => parseInt(text).toLocaleString(),
-
+      ...getColumnNumberProps('Qty_System', 'Saldo Akhir')
     },
     {
       title: 'Selisih',
       dataIndex: 'selisih',
       key: 'selisih',
       align: "right", 
-      filters: filters,
-      onFilter:(value, record) => handleFilter(value, record, 'selisih'),
-      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, dataIndex, clearFilters }) => (
-        <div style={{ padding: 8 }}>
-          <Select
-            style={{ width: 60 }}
-            value={selectedKeys[0]}
-            onChange={(value) => setSelectedKeys([value])}
-            onBlur={confirm}
-          >
-            {filters.map((filter) => (
-              <Option key={filter.value} value={filter.value}>
-                {filter.text}
-              </Option>
-            ))}
-          </Select>
-          <CustomFilter
-            value={userInputNumber}
-            onChange={(value) => setUserInputNumber(value)}
-          />
-          <Space style={{margin: "10px"}}>
-          <Button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
-            Search
-          </Button>
-            <Button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>Reset</Button>
-          </Space>
-        </div>
-      ),
-      filterIcon: (filtered) => (
-        <FilterOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
-      ),
-      // ...getColumnSearchProps('selisih'),
-      render: (text) => parseInt(text).toLocaleString(),
-
-  
+      // filters: filters,
+      // onFilter:(value, record) => handleFilter(value, record, 'selisih'),
+      // filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, dataIndex, clearFilters }) => (
+      //   <div style={{ padding: 8 }}>
+      //     <Select
+      //       style={{ width: 60 }}
+      //       value={selectedKeys[0]}
+      //       onChange={(value) => setSelectedKeys([value])}
+      //       onBlur={confirm}
+      //     >
+      //       {filters.map((filter) => (
+      //         <Option key={filter.value} value={filter.value}>
+      //           {filter.text}
+      //         </Option>
+      //       ))}
+      //     </Select>
+      //     <CustomFilter
+      //       value={userInputNumber}
+      //       onChange={(value) => setUserInputNumber(value)}
+      //     />
+      //     <Space style={{margin: "10px"}}>
+      //     <Button onClick={() => handleSearch(selectedKeys, confirm, dataIndex)} style={{ width: 90 }}>
+      //       Search
+      //     </Button>
+      //       <Button onClick={() => handleReset(clearFilters)} style={{ width: 90 }}>Reset</Button>
+      //     </Space>
+      //   </div>
+      // ),
+      // filterIcon: (filtered) => (
+      //   <FilterOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+      // ),
+      // render: (text) => parseInt(text).toLocaleString(),
+      ...getColumnNumberProps('selisih', 'Selisih')
     },
     // {
     //   title: 'Tanggal Transaksi',
