@@ -50,6 +50,7 @@ const FormDisabledDemo = () => {
   const [doctype, setDoctype] = useState([]);
   const [generatedRAWIN_NO, setGeneratedRAWIN_NO] = useState('');
   const [generatedRAWIN, setGeneratedRAWIN] = useState('');
+  const [rawinType, setRawinType] = useState('');
 
   function generateRawinNo() {
     const formattedMonth = month < 10 ? `0${month}` : month;
@@ -293,7 +294,7 @@ const FormDisabledDemo = () => {
           </Col> 
           <Col span={8}>  
           <Form.Item name="RAWIN_Type" label="Jenis Transaksi" >
-            <Select  style={{ width: "100%",}}>
+            <Select  style={{ width: "100%",}}  onChange={(value) => setRawinType(value)}>
               <Select.Option value="normal">Normal</Select.Option>
               <Select.Option value="cmtin">Subcon/CMT IN</Select.Option>
               <Select.Option value="cmtout">Subcon/CMT OUT</Select.Option>
@@ -327,7 +328,7 @@ const FormDisabledDemo = () => {
           </Col>
           <Col span={8}> 
           <Form.Item name="Currency_Code" label="Jenis Uang">
-            <Select style={{ width: "100%",}}>
+            <Select style={{ width: "100%",}} disabled={rawinType == 'wip' ? true : false}>
             {curr.map(curr => (
         <Option key={curr.Uang_Code} value={curr.Uang_Code}>
           {curr.Uang_Desc}
@@ -350,7 +351,7 @@ const FormDisabledDemo = () => {
             <Row gutter='1'>
               <Col sm={12} md={12} lg={12}>
           <Form.Item name="DOC_Type" label="BC / Tanggal">
-          <Select>
+          <Select disabled={rawinType == 'wip' ? true : false}>
               <Select.Option value="bc">BC 1.0</Select.Option>
               {doctype.map(doctype => (
         <Option key={doctype.Doc_Type} value={doctype.Doc_Type}>
@@ -362,21 +363,21 @@ const FormDisabledDemo = () => {
             </Col>
             <Col sm={12} md={12} lg={12}>
             <Form.Item name="DOC_Date">
-            <DatePicker />
+            <DatePicker disabled={rawinType == 'wip' ? true : false} />
           </Form.Item>
           </Col>
           </Row>
           </Col>
           <Col span={6}>
           <Form.Item name="DOC_NO" label="No Dokumen">
-            <Input />
+            <Input disabled={rawinType == 'wip' ? true : false} />
           </Form.Item>
           </Col>
           </Row>
           <Row gutter={16}>
         <Col span={7}>
         <Form.Item name="Kurs" label="Rate">
-          <InputNumber min={1} max={999999999999} onChange={onChange}  style={{width: "100%"}}/>
+          <InputNumber min={1} max={999999999999} onChange={onChange}  style={{width: "100%"}} disabled={rawinType == 'wip' ? true : false}/>
           </Form.Item>
           </Col>
           <Col span={7}>
@@ -392,7 +393,7 @@ const FormDisabledDemo = () => {
           </Col>
           <Col span={10}>
           <Form.Item name="Kontrak" label="No Kontrak">
-            <Select>
+            <Select disabled={rawinType == 'normal' || rawinType == 'wip' ? true : false} >
             {kontrak.map(kontrak => (
         <Option key={kontrak.Kontrak} value={kontrak.Kontrak}>
        {kontrak.Kontrak}
@@ -406,7 +407,7 @@ const FormDisabledDemo = () => {
         <Col span={8}>
           <Form.Item name='PO_NO' label="PO. Number">
             <Select>
-              <Select.Option value="academy">PO Number</Select.Option>
+              {/* <Select.Option value="academy">PO Number</Select.Option> */}
             </Select>
           </Form.Item>
           </Col>
